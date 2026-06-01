@@ -94,3 +94,67 @@ export function listSnapshots(assetId: string) {
         )
         .all(assetId) as SnapshotRecord[];
 }
+
+
+export async function restoreSnapshot(snapshotId: string) {
+    const db = getDb();
+
+    const snapshot = db.prepare(
+        `
+            SELECT id,
+                   asset_id,
+                   snapshot_path,
+                   message,
+                   created_at
+            FROM snapshots
+            WHERE id = ? `
+    ).get(snapshotId) as SnapshotRecord | undefined;
+
+    if (!snapshot) {
+        throw new Error(`Snapshot not found: ${snapshotId}`);
+    }
+    const asset = db
+        .prepare(
+            `
+                SELECT id,
+                       path
+                FROM assets
+                WHERE id = ?
+            `
+        )
+        .get(snapshot.asset_id) as { id: string; path: string } | undefined;
+
+    if (!asset) {
+        throw new Error(`Asset not found: ${snapshot.asset_id}`);
+    }
+    const currentDir = path.join(asset.path, "current");
+
+    const snapshotExists = await fs.pathExists(snapshot.snapshot_path);
+    if (!snapshotExists) {
+        throw new Error(`Snapshot path not found: ${snapshot.snapshot_path}`);
+    }
+
+    await fs.emptyDir(currentDir);
+    await fs.copy(snapshot.snapshot_path, currentDir, {
+        overwrite: true,
+    });
+
+    const now = new Date().toISOString();
+
+    db.prepare(
+        `
+            UPDATE assets
+            SET updated_at = @updated_at
+            WHERE id = @id
+        `
+    ).run({
+        id: asset.id,
+        updated_at: now,
+    });
+
+    return {
+        restored: true,
+        asset_id: snapshot.asset_id,
+        snapshot_id: snapshot.id,
+    };
+}

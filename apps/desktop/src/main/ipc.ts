@@ -1,5 +1,5 @@
 import {createAsset, getAsset, listAssets, updateAsset} from "../core/asset/assetService";
-import {listSnapshots} from "../core/snapshot/snapshotService";
+import {listSnapshots, restoreSnapshot} from "../core/snapshot/snapshotService";
 import {ipcMain} from 'electron'
 
 export function registerIpc() {
@@ -22,5 +22,9 @@ export function registerIpc() {
 
     ipcMain.handle("snapshots:list", async (_event, assetId: string) => {
         return listSnapshots(assetId);
+    });
+
+    ipcMain.handle("snapshots:restore", async (_event, snapshotId: string) => {
+        return restoreSnapshot(snapshotId);
     });
 }

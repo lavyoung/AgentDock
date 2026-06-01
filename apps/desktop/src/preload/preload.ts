@@ -13,5 +13,7 @@ contextBridge.exposeInMainWorld("agentdock", {
     },
     snapshots: {
         list: (assetId: string) => ipcRenderer.invoke("snapshots:list", assetId),
+        restore: (snapshotId: string) =>
+            ipcRenderer.invoke("snapshots:restore", snapshotId),
     },
 });

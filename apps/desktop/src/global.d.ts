@@ -14,6 +14,7 @@ declare global {
             };
             snapshots: {
                 list: (assetId: string) => Promise<any[]>;
+                restore: (snapshotId: string) => Promise<any>;
             };
         };
     }

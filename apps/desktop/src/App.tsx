@@ -89,6 +89,23 @@ function App() {
         }
     }
 
+    async function restoreSelectedSnapshot(snapshotId: string) {
+        if (!selectedAsset) return;
+
+        const confirmed = window.confirm("确定要恢复到这个快照吗？当前内容会被覆盖。");
+        if (!confirmed) return;
+
+        try {
+            await window.agentdock.snapshots.restore(snapshotId);
+
+            await openAsset(selectedAsset.id);
+            await refreshAssets();
+        } catch (error) {
+            console.error("snapshots:restore failed", error);
+            alert(`snapshots:restore failed: ${String(error)}`);
+        }
+    }
+
     async function createDemoSkill() {
         try {
             const timestamp = Date.now();
@@ -263,9 +280,17 @@ function App() {
                                                 <div style={{ fontSize: 12, opacity: 0.7 }}>
                                                     {snapshot.snapshot_path}
                                                 </div>
+
+                                                <button
+                                                    style={{ marginTop: 6 }}
+                                                    onClick={() => restoreSelectedSnapshot(snapshot.id)}
+                                                >
+                                                    Restore
+                                                </button>
                                             </li>
                                         ))}
                                     </ul>
+
                                 )}
                             </section>
                         </div>
