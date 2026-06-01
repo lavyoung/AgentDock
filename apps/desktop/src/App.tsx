@@ -1,10 +1,22 @@
-import {useEffect, useState} from "react";
+import {useEffect, useEffectEvent, useState} from "react";
 
 import type {AssetDetail, AssetRecord} from "./core/types/asset";
 import type {SnapshotRecord} from "./core/types/snapshot";
 import {agentdockClient} from "./renderer/client/agentdockClient";
+import type {Locale} from "./renderer/i18n/messages";
+import {useI18n} from "./renderer/i18n/useI18n";
+
+type ErrorMessageKey =
+    | "errorAssetsList"
+    | "errorAssetsGet"
+    | "errorAssetsUpdate"
+    | "errorAssetsCreateSkill"
+    | "errorAssetsCreateAgents"
+    | "errorSnapshotsList"
+    | "errorSnapshotsRestore";
 
 function App() {
+    const {formatDateTime, locale, setLocale, t} = useI18n();
     const [assets, setAssets] = useState<AssetRecord[]>([]);
     const [selectedAsset, setSelectedAsset] = useState<AssetDetail | null>(null);
     const [snapshots, setSnapshots] = useState<SnapshotRecord[]>([]);
@@ -12,16 +24,38 @@ function App() {
     const [editorDescription, setEditorDescription] = useState("");
     const [editorContent, setEditorContent] = useState("");
 
-    function showError(scope: string, error: unknown): void {
-        console.error(`${scope} failed`, error);
-        window.alert(`${scope} failed: ${String(error)}`);
+    function getErrorMessage(scopeKey: ErrorMessageKey, error: unknown): string {
+        const action = t(scopeKey);
+        const suffix = t("errorPrefix");
+
+        if (locale === "zh-CN") {
+            return `${action}${suffix}: ${String(error)}`;
+        }
+
+        return `${action} ${suffix}: ${String(error)}`;
     }
+
+    function showError(scopeKey: ErrorMessageKey, error: unknown): void {
+        const message = getErrorMessage(scopeKey, error);
+        console.error(message, error);
+        window.alert(message);
+    }
+
+    function getSnapshotMessage(message: string): string {
+        if (message === "asset.update.before" || message === "Before asset update") {
+            return t("snapshotMessageBeforeAssetUpdate");
+        }
+
+        return message;
+    }
+
+    const showErrorEvent = useEffectEvent(showError);
 
     async function refreshAssets(): Promise<void> {
         try {
             setAssets(await agentdockClient.assets.list());
         } catch (error) {
-            showError("assets:list", error);
+            showError("errorAssetsList", error);
         }
     }
 
@@ -29,7 +63,7 @@ function App() {
         try {
             setSnapshots(await agentdockClient.snapshots.list(assetId));
         } catch (error) {
-            showError("snapshots:list", error);
+            showError("errorSnapshotsList", error);
         }
     }
 
@@ -53,7 +87,7 @@ function App() {
 
             await refreshSnapshots(id);
         } catch (error) {
-            showError("assets:get", error);
+            showError("errorAssetsGet", error);
         }
     }
 
@@ -76,7 +110,7 @@ function App() {
             await refreshAssets();
             await refreshSnapshots(selectedAsset.id);
         } catch (error) {
-            showError("assets:update", error);
+            showError("errorAssetsUpdate", error);
         }
     }
 
@@ -85,7 +119,7 @@ function App() {
             return;
         }
 
-        if (!window.confirm("Restore this snapshot and overwrite the current asset?")) {
+        if (!window.confirm(t("confirmRestore"))) {
             return;
         }
 
@@ -94,7 +128,7 @@ function App() {
             await openAsset(selectedAsset.id);
             await refreshAssets();
         } catch (error) {
-            showError("snapshots:restore", error);
+            showError("errorSnapshotsRestore", error);
         }
     }
 
@@ -105,25 +139,14 @@ function App() {
             await agentdockClient.assets.create({
                 type: "skill",
                 name: `frontend-review-${timestamp}`,
-                title: "Frontend Review",
-                description: "Prototype skill asset for frontend code review.",
-                content: `# Frontend Review
-
-## Usage
-
-Use this skill when reviewing React and TypeScript projects.
-
-## Focus
-
-- Component structure
-- Type safety
-- Maintainability
-`,
+                title: t("demoSkillTitle"),
+                description: t("demoSkillDescription"),
+                content: t("demoSkillContent"),
             });
 
             await refreshAssets();
         } catch (error) {
-            showError("assets:create skill", error);
+            showError("errorAssetsCreateSkill", error);
         }
     }
 
@@ -134,25 +157,14 @@ Use this skill when reviewing React and TypeScript projects.
             await agentdockClient.assets.create({
                 type: "agents-md",
                 name: `frontend-agents-${timestamp}`,
-                title: "Frontend AGENTS.md",
-                description: "Prototype AGENTS.md asset for frontend projects.",
-                content: `# AGENTS.md
-
-## Project Rules
-
-Respect the project structure, naming rules, and code style.
-
-## Development Notes
-
-- Understand the current implementation before editing
-- Keep changes focused
-- Avoid unrelated dependencies
-`,
+                title: t("demoAgentsTitle"),
+                description: t("demoAgentsDescription"),
+                content: t("demoAgentsContent"),
             });
 
             await refreshAssets();
         } catch (error) {
-            showError("assets:create agents-md", error);
+            showError("errorAssetsCreateAgents", error);
         }
     }
 
@@ -168,7 +180,7 @@ Respect the project structure, naming rules, and code style.
                 }
             } catch (error) {
                 if (isActive) {
-                    showError("assets:list", error);
+                    showErrorEvent("errorAssetsList", error);
                 }
             }
         }
@@ -180,20 +192,55 @@ Respect the project structure, naming rules, and code style.
         };
     }, []);
 
+    function renderLocaleButton(nextLocale: Locale, label: string): JSX.Element {
+        const isActive = locale === nextLocale;
+
+        return (
+            <button
+                key={nextLocale}
+                onClick={() => setLocale(nextLocale)}
+                style={{
+                    padding: "6px 10px",
+                    borderRadius: 999,
+                    border: isActive ? "1px solid #08060d" : "1px solid #cfcad6",
+                    background: isActive ? "#08060d" : "transparent",
+                    color: isActive ? "#ffffff" : "inherit",
+                }}
+            >
+                {label}
+            </button>
+        );
+    }
+
     return (
         <main style={{padding: 24}}>
-            <h1>AgentDock Prototype</h1>
+            <div
+                style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: 16,
+                    flexWrap: "wrap",
+                }}
+            >
+                <div>
+                    <h1>{t("appTitle")}</h1>
+                    <p>{t("currentScope")}</p>
+                </div>
 
-            <p>
-                Current scope: asset registry, local editing, and snapshot restore.
-            </p>
+                <div style={{display: "flex", alignItems: "center", gap: 8}}>
+                    <span>{t("localeLabel")}:</span>
+                    {renderLocaleButton("en", t("localeEnglish"))}
+                    {renderLocaleButton("zh-CN", t("localeChinese"))}
+                </div>
+            </div>
 
-            <div style={{display: "flex", gap: 8, margin: "24px 0"}}>
-                <button onClick={() => void createDemoSkill()}>New Demo Skill</button>
+            <div style={{display: "flex", gap: 8, margin: "24px 0", flexWrap: "wrap"}}>
+                <button onClick={() => void createDemoSkill()}>{t("newDemoSkill")}</button>
                 <button onClick={() => void createDemoAgentsMd()}>
-                    New Demo AGENTS.md
+                    {t("newDemoAgents")}
                 </button>
-                <button onClick={() => void refreshAssets()}>Refresh</button>
+                <button onClick={() => void refreshAssets()}>{t("refresh")}</button>
             </div>
 
             <div
@@ -204,10 +251,10 @@ Respect the project structure, naming rules, and code style.
                 }}
             >
                 <section>
-                    <h2>Assets</h2>
+                    <h2>{t("assets")}</h2>
 
                     {assets.length === 0 ? (
-                        <p>No assets yet.</p>
+                        <p>{t("noAssetsYet")}</p>
                     ) : (
                         <ul style={{paddingLeft: 16}}>
                             {assets.map((asset) => (
@@ -215,10 +262,18 @@ Respect the project structure, naming rules, and code style.
                                     <button onClick={() => void openAsset(asset.id)}>
                                         {asset.title}
                                     </button>
-                                    <div>Type: {asset.type}</div>
-                                    <div>Name: {asset.name}</div>
-                                    <div>Version: {asset.version}</div>
-                                    <div>Status: {asset.status}</div>
+                                    <div>
+                                        {t("typeLabel")}: {asset.type}
+                                    </div>
+                                    <div>
+                                        {t("nameLabel")}: {asset.name}
+                                    </div>
+                                    <div>
+                                        {t("versionLabel")}: {asset.version}
+                                    </div>
+                                    <div>
+                                        {t("statusLabel")}: {asset.status}
+                                    </div>
                                 </li>
                             ))}
                         </ul>
@@ -226,14 +281,14 @@ Respect the project structure, naming rules, and code style.
                 </section>
 
                 <section>
-                    <h2>Editor</h2>
+                    <h2>{t("editor")}</h2>
 
                     {!selectedAsset ? (
-                        <p>Select an asset to edit.</p>
+                        <p>{t("selectAsset")}</p>
                     ) : (
                         <div style={{display: "flex", flexDirection: "column", gap: 12}}>
                             <div>
-                                <label htmlFor="asset-title">Title</label>
+                                <label htmlFor="asset-title">{t("titleLabel")}</label>
                                 <input
                                     id="asset-title"
                                     value={editorTitle}
@@ -243,7 +298,9 @@ Respect the project structure, naming rules, and code style.
                             </div>
 
                             <div>
-                                <label htmlFor="asset-description">Description</label>
+                                <label htmlFor="asset-description">
+                                    {t("descriptionLabel")}
+                                </label>
                                 <input
                                     id="asset-description"
                                     value={editorDescription}
@@ -255,7 +312,7 @@ Respect the project structure, naming rules, and code style.
                             </div>
 
                             <div>
-                                <label htmlFor="asset-content">Content</label>
+                                <label htmlFor="asset-content">{t("contentLabel")}</label>
                                 <textarea
                                     id="asset-content"
                                     value={editorContent}
@@ -271,31 +328,30 @@ Respect the project structure, naming rules, and code style.
                             </div>
 
                             <div>
-                                <button onClick={() => void saveAsset()}>Save</button>
+                                <button onClick={() => void saveAsset()}>{t("save")}</button>
                             </div>
 
                             <p style={{fontSize: 12, opacity: 0.7}}>
-                                File path: {selectedAsset.path}
+                                {t("filePathLabel")}: {selectedAsset.path}
                             </p>
 
                             <hr />
 
                             <section>
-                                <h3>Snapshots</h3>
+                                <h3>{t("snapshots")}</h3>
 
                                 {snapshots.length === 0 ? (
-                                    <p>No snapshots yet. Saving an asset will create one.</p>
+                                    <p>{t("noSnapshotsYet")}</p>
                                 ) : (
                                     <ul style={{paddingLeft: 16}}>
                                         {snapshots.map((snapshot) => (
-                                            <li
-                                                key={snapshot.id}
-                                                style={{marginBottom: 10}}
-                                            >
+                                            <li key={snapshot.id} style={{marginBottom: 10}}>
                                                 <div>
-                                                    <strong>{snapshot.created_at}</strong>
+                                                    <strong>
+                                                        {formatDateTime(snapshot.created_at)}
+                                                    </strong>
                                                 </div>
-                                                <div>{snapshot.message}</div>
+                                                <div>{getSnapshotMessage(snapshot.message)}</div>
                                                 <div
                                                     style={{
                                                         fontSize: 12,
@@ -311,7 +367,7 @@ Respect the project structure, naming rules, and code style.
                                                         void restoreSelectedSnapshot(snapshot.id)
                                                     }
                                                 >
-                                                    Restore
+                                                    {t("restore")}
                                                 </button>
                                             </li>
                                         ))}

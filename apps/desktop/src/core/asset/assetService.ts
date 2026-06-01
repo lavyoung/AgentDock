@@ -115,7 +115,7 @@ export class AssetService {
         await this.snapshotService.createSnapshot(
             asset.id,
             asset.path,
-            "Before asset update"
+            "asset.update.before"
         );
         await this.fileSystem.writeText(
             this.path.join(currentDir, "asset.yaml"),
