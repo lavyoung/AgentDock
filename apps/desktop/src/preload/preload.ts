@@ -6,6 +6,9 @@ contextBridge.exposeInMainWorld("agentdock", {
     },
     assets: {
         list: () => ipcRenderer.invoke("assets:list"),
+        get: (id: string) => ipcRenderer.invoke("assets:get", id),
         create: (input: unknown) => ipcRenderer.invoke("assets:create", input),
+        update: (id: string, input: unknown) =>
+            ipcRenderer.invoke("assets:update", id, input),
     },
 });

@@ -8,7 +8,9 @@ declare global {
             };
             assets: {
                 list: () => Promise<any[]>;
+                get: (id: string) => Promise<any>;
                 create: (input: unknown) => Promise<any>;
+                update: (id: string, input: unknown) => Promise<any>;
             };
         };
     }

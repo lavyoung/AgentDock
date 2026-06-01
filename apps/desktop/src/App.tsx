@@ -2,32 +2,63 @@ import {useEffect, useState} from "react";
 import "./App.css";
 
 type Asset = {
-  id: string;
-  type: string;
-  name: string;
-  title: string;
-  version: string;
-  status: string;
-  path: string;
+    id: string;
+    type: string;
+    name: string;
+    title: string;
+    description: string;
+    version: string;
+    status: string;
+    path: string;
+};
+
+type AssetDetail = Asset & {
+    content: string;
 };
 
 function App() {
-  const [assets, setAssets] = useState<Asset[]>([]);
+    const [assets, setAssets] = useState<Asset[]>([]);
+    const [selectedAsset, setSelectedAsset] = useState<AssetDetail | null>(null);
+    const [editorTitle, setEditorTitle] = useState("");
+    const [editorDescription, setEditorDescription] = useState("");
+    const [editorContent, setEditorContent] = useState("");
 
-  async function refreshAssets() {
-    const result = await window.agentdock.assets.list();
-    setAssets(result);
-  }
+    async function refreshAssets() {
+        const result = await window.agentdock.assets.list();
+        setAssets(result);
+    }
 
-  async function createDemoSkill() {
-    const timestamp = Date.now();
+    async function openAsset(id: string) {
+        const detail = await window.agentdock.assets.get(id);
 
-    await window.agentdock.assets.create({
-      type: "skill",
-      name: `frontend-review-${timestamp}`,
-      title: "前端代码审查",
-      description: "用于审查前端项目规范和实现细节",
-      content: `# 前端代码审查
+        setSelectedAsset(detail);
+        setEditorTitle(detail.title ?? "");
+        setEditorDescription(detail.description ?? "");
+        setEditorContent(detail.content ?? "");
+    }
+
+    async function saveAsset() {
+        if (!selectedAsset) return;
+
+        const updated = await window.agentdock.assets.update(selectedAsset.id, {
+            title: editorTitle,
+            description: editorDescription,
+            content: editorContent,
+        });
+
+        setSelectedAsset(updated);
+        await refreshAssets();
+    }
+
+    async function createDemoSkill() {
+        const timestamp = Date.now();
+
+        await window.agentdock.assets.create({
+            type: "skill",
+            name: `frontend-review-${timestamp}`,
+            title: "前端代码审查",
+            description: "用于审查前端项目规范和实现细节",
+            content: `# 前端代码审查
 
 ## 使用场景
 
@@ -40,20 +71,20 @@ function App() {
 - 可维护性
 - 可访问性
 `,
-    });
+        });
 
-    await refreshAssets();
-  }
+        await refreshAssets();
+    }
 
-  async function createDemoAgentsMd() {
-    const timestamp = Date.now();
+    async function createDemoAgentsMd() {
+        const timestamp = Date.now();
 
-    await window.agentdock.assets.create({
-      type: "agents-md",
-      name: `frontend-agents-${timestamp}`,
-      title: "前端项目 AGENTS.md",
-      description: "用于前端项目的 Agent 协作规则",
-      content: `# AGENTS.md
+        await window.agentdock.assets.create({
+            type: "agents-md",
+            name: `frontend-agents-${timestamp}`,
+            title: "前端项目 AGENTS.md",
+            description: "用于前端项目的 Agent 协作规则",
+            content: `# AGENTS.md
 
 ## 项目规则
 
@@ -65,47 +96,105 @@ function App() {
 - 保持改动范围清晰
 - 不引入无关依赖
 `,
-    });
+        });
 
-    await refreshAssets();
-  }
+        await refreshAssets();
+    }
 
-  useEffect(() => {
-    refreshAssets();
-  }, []);
+    useEffect(() => {
+        refreshAssets();
+    }, []);
 
-  return (
-      <main style={{ padding: 24 }}>
-        <h1>AgentDock Prototype</h1>
+    return (
+        <main style={{ padding: 24 }}>
+            <h1>AgentDock Prototype</h1>
 
-        <p>本阶段用于验证 Asset 管理、本地 Registry 和同步流程。</p>
+            <p>当前阶段：Asset 管理、本地 Registry、编辑与保存。</p>
 
-        <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
-          <button onClick={createDemoSkill}>New Demo Skill</button>
-          <button onClick={createDemoAgentsMd}>New Demo AGENTS.md</button>
-          <button onClick={refreshAssets}>Refresh</button>
-        </div>
+            <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
+                <button onClick={createDemoSkill}>New Demo Skill</button>
+                <button onClick={createDemoAgentsMd}>New Demo AGENTS.md</button>
+                <button onClick={refreshAssets}>Refresh</button>
+            </div>
 
-        <h2>Assets</h2>
+            <div style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: 24 }}>
+                <section>
+                    <h2>Assets</h2>
 
-        {assets.length === 0 ? (
-            <p>暂无 Asset。</p>
-        ) : (
-            <ul>
-              {assets.map((asset) => (
-                  <li key={asset.id} style={{ marginBottom: 12 }}>
-                    <strong>{asset.title}</strong>
-                    <div>类型：{asset.type}</div>
-                    <div>名称：{asset.name}</div>
-                    <div>版本：{asset.version}</div>
-                    <div>状态：{asset.status}</div>
-                    <div style={{ fontSize: 12, opacity: 0.7 }}>{asset.path}</div>
-                  </li>
-              ))}
-            </ul>
-        )}
-      </main>
-  );
+                    {assets.length === 0 ? (
+                        <p>暂无 Asset。</p>
+                    ) : (
+                        <ul style={{ paddingLeft: 16 }}>
+                            {assets.map((asset) => (
+                                <li key={asset.id} style={{ marginBottom: 12 }}>
+                                    <button onClick={() => openAsset(asset.id)}>
+                                        {asset.title}
+                                    </button>
+                                    <div>类型：{asset.type}</div>
+                                    <div>名称：{asset.name}</div>
+                                    <div>版本：{asset.version}</div>
+                                    <div>状态：{asset.status}</div>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </section>
+
+                <section>
+                    <h2>Editor</h2>
+
+                    {!selectedAsset ? (
+                        <p>请选择一个 Asset。</p>
+                    ) : (
+                        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                            <div>
+                                <label>标题</label>
+                                <input
+                                    value={editorTitle}
+                                    onChange={(event) => setEditorTitle(event.target.value)}
+                                    style={{ display: "block", width: "100%", padding: 8 }}
+                                />
+                            </div>
+
+                            <div>
+                                <label>描述</label>
+                                <input
+                                    value={editorDescription}
+                                    onChange={(event) =>
+                                        setEditorDescription(event.target.value)
+                                    }
+                                    style={{ display: "block", width: "100%", padding: 8 }}
+                                />
+                            </div>
+
+                            <div>
+                                <label>内容</label>
+                                <textarea
+                                    value={editorContent}
+                                    onChange={(event) => setEditorContent(event.target.value)}
+                                    rows={18}
+                                    style={{
+                                        display: "block",
+                                        width: "100%",
+                                        padding: 8,
+                                        fontFamily: "monospace",
+                                    }}
+                                />
+                            </div>
+
+                            <div>
+                                <button onClick={saveAsset}>Save</button>
+                            </div>
+
+                            <p style={{ fontSize: 12, opacity: 0.7 }}>
+                                文件路径：{selectedAsset.path}
+                            </p>
+                        </div>
+                    )}
+                </section>
+            </div>
+        </main>
+    );
 }
 
 export default App;
