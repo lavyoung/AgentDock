@@ -2,8 +2,10 @@ import Database from "better-sqlite3";
 
 import type {AssetRepository} from "../../core/asset/assetRepository";
 import type {SnapshotRepository} from "../../core/snapshot/snapshotRepository";
+import type {TargetRepository} from "../../core/target/targetRepository";
 import type {AssetRecord} from "../../core/types/asset";
 import type {SnapshotRecord} from "../../core/types/snapshot";
+import type {TargetRecord} from "../../core/types/target";
 import {getDbPath} from "./paths";
 
 let db: Database.Database | null = null;
@@ -246,10 +248,166 @@ class SqliteSnapshotRepository implements SnapshotRepository {
     }
 }
 
+class SqliteTargetRepository implements TargetRepository {
+    private readonly database: Database.Database;
+
+    constructor(database: Database.Database) {
+        this.database = database;
+    }
+
+    list(): TargetRecord[] {
+        const rows = this.database
+            .prepare(
+                `
+                    SELECT id,
+                           name,
+                           path,
+                           enabled,
+                           deploy_mode,
+                           created_at,
+                           updated_at
+                    FROM targets
+                    ORDER BY updated_at DESC
+                `
+            )
+            .all() as Array<{
+            id: string;
+            name: string;
+            path: string;
+            enabled: number;
+            deploy_mode: TargetRecord["deployMode"];
+            created_at: string;
+            updated_at: string;
+        }>;
+
+        return rows.map((row) => ({
+            id: row.id,
+            name: row.name,
+            path: row.path,
+            enabled: row.enabled === 1,
+            deployMode: row.deploy_mode,
+            created_at: row.created_at,
+            updated_at: row.updated_at,
+        }));
+    }
+
+    findById(id: string): TargetRecord | null {
+        const row = this.database
+            .prepare(
+                `
+                    SELECT id,
+                           name,
+                           path,
+                           enabled,
+                           deploy_mode,
+                           created_at,
+                           updated_at
+                    FROM targets
+                    WHERE id = ?
+                `
+            )
+            .get(id) as
+            | {
+                  id: string;
+                  name: string;
+                  path: string;
+                  enabled: number;
+                  deploy_mode: TargetRecord["deployMode"];
+                  created_at: string;
+                  updated_at: string;
+              }
+            | undefined;
+
+        if (!row) {
+            return null;
+        }
+
+        return {
+            id: row.id,
+            name: row.name,
+            path: row.path,
+            enabled: row.enabled === 1,
+            deployMode: row.deploy_mode,
+            created_at: row.created_at,
+            updated_at: row.updated_at,
+        };
+    }
+
+    create(target: TargetRecord): void {
+        this.database
+            .prepare(
+                `
+                    INSERT INTO targets (id,
+                                         name,
+                                         path,
+                                         enabled,
+                                         deploy_mode,
+                                         created_at,
+                                         updated_at)
+                    VALUES (@id,
+                            @name,
+                            @path,
+                            @enabled,
+                            @deploy_mode,
+                            @created_at,
+                            @updated_at)
+                `
+            )
+            .run({
+                id: target.id,
+                name: target.name,
+                path: target.path,
+                enabled: target.enabled ? 1 : 0,
+                deploy_mode: target.deployMode,
+                created_at: target.created_at,
+                updated_at: target.updated_at,
+            });
+    }
+
+    update(target: TargetRecord): void {
+        this.database
+            .prepare(
+                `
+                    UPDATE targets
+                    SET name        = @name,
+                        path        = @path,
+                        enabled     = @enabled,
+                        deploy_mode = @deploy_mode,
+                        updated_at  = @updated_at
+                    WHERE id = @id
+                `
+            )
+            .run({
+                id: target.id,
+                name: target.name,
+                path: target.path,
+                enabled: target.enabled ? 1 : 0,
+                deploy_mode: target.deployMode,
+                updated_at: target.updated_at,
+            });
+    }
+
+    delete(id: string): void {
+        this.database
+            .prepare(
+                `
+                    DELETE
+                    FROM targets
+                    WHERE id = ?
+                `
+            )
+            .run(id);
+    }
+}
+
 export function createAssetRepository(): AssetRepository {
     return new SqliteAssetRepository(getDatabase());
 }
 
 export function createSnapshotRepository(): SnapshotRepository {
     return new SqliteSnapshotRepository(getDatabase());
+}
+
+export function createTargetRepository(): TargetRepository {
+    return new SqliteTargetRepository(getDatabase());
 }

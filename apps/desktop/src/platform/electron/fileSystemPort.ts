@@ -32,4 +32,7 @@ export const nodePathPort: PathPort = {
     join(...parts) {
         return path.join(...parts);
     },
+    isAbsolute(targetPath) {
+        return path.isAbsolute(targetPath);
+    },
 };

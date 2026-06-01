@@ -226,7 +226,30 @@ AgentDock/
   package.json
   README.md
 ```
+## 📂 目录说明
 
+AgentDock 当前采用 Monorepo 结构，方便后续扩展桌面端、CLI、核心包和适配器。
+
+```text
+AgentDock/
+  apps/                 # 可运行应用
+    desktop/            # 当前桌面端 Prototype
+
+  packages/             # 后续可复用包，当前先预留
+    core/               # 未来放核心业务逻辑
+    schema/             # 未来放类型和配置 Schema
+    shared/             # 未来放通用工具
+    adapters/           # 未来放 Claude / Codex / Cursor / Gemini 等适配器
+
+  docs/                 # 项目文档
+    architecture/       # 架构说明
+    mvp/                # 第一阶段计划
+    product/            # 产品需求和路线图
+
+  AGENTS.md             # 给 AI 编程助手看的项目级约束
+  README.md             # 给开发者看的项目说明
+  package.json          # 根目录脚本入口
+  pnpm-workspace.yaml   # pnpm workspace 配置
 ---
 
 ## 🗃 本地数据目录规划

@@ -2,6 +2,7 @@ import {useEffect, useEffectEvent, useState} from "react";
 
 import type {AssetDetail, AssetRecord, AssetStatus, AssetType,} from "./core/types/asset";
 import type {SnapshotRecord} from "./core/types/snapshot";
+import type {TargetDeployMode, TargetRecord,} from "./core/types/target";
 import {agentdockClient} from "./renderer/client/agentdockClient";
 import type {Locale} from "./renderer/i18n/messages";
 import {useI18n} from "./renderer/i18n/useI18n";
@@ -13,7 +14,12 @@ type ErrorMessageKey =
     | "errorAssetsCreateSkill"
     | "errorAssetsCreateAgents"
     | "errorSnapshotsList"
-    | "errorSnapshotsRestore";
+    | "errorSnapshotsRestore"
+    | "errorTargetsList"
+    | "errorTargetsGet"
+    | "errorTargetsCreate"
+    | "errorTargetsUpdate"
+    | "errorTargetsDelete";
 
 function App() {
     const {formatDateTime, locale, setLocale, t} = useI18n();
@@ -23,6 +29,12 @@ function App() {
     const [editorTitle, setEditorTitle] = useState("");
     const [editorDescription, setEditorDescription] = useState("");
     const [editorContent, setEditorContent] = useState("");
+    const [targets, setTargets] = useState<TargetRecord[]>([]);
+    const [selectedTarget, setSelectedTarget] = useState<TargetRecord | null>(null);
+    const [targetName, setTargetName] = useState("");
+    const [targetPath, setTargetPath] = useState("");
+    const [targetDeployMode, setTargetDeployMode] = useState<TargetDeployMode>("copy");
+    const [targetEnabled, setTargetEnabled] = useState(true);
 
     function getErrorMessage(scopeKey: ErrorMessageKey, error: unknown): string {
         const action = t(scopeKey);
@@ -67,6 +79,35 @@ function App() {
         }
     }
 
+    function getDeployModeLabel(mode: TargetDeployMode): string {
+        switch (mode) {
+            case "copy":
+                return t("deployModeCopy");
+            case "merge":
+                return t("deployModeMerge");
+        }
+    }
+
+    function getEnabledLabel(enabled: boolean): string {
+        return enabled ? t("enabledYes") : t("enabledNo");
+    }
+
+    function resetTargetForm(): void {
+        setSelectedTarget(null);
+        setTargetName("");
+        setTargetPath("");
+        setTargetDeployMode("copy");
+        setTargetEnabled(true);
+    }
+
+    function fillTargetForm(target: TargetRecord): void {
+        setSelectedTarget(target);
+        setTargetName(target.name);
+        setTargetPath(target.path);
+        setTargetDeployMode(target.deployMode);
+        setTargetEnabled(target.enabled);
+    }
+
     const showErrorEvent = useEffectEvent(showError);
 
     async function refreshAssets(): Promise<void> {
@@ -77,12 +118,25 @@ function App() {
         }
     }
 
+    async function refreshTargets(): Promise<void> {
+        try {
+            setTargets(await agentdockClient.targets.list());
+        } catch (error) {
+            showError("errorTargetsList", error);
+        }
+    }
+
     async function refreshSnapshots(assetId: string): Promise<void> {
         try {
             setSnapshots(await agentdockClient.snapshots.list(assetId));
         } catch (error) {
             showError("errorSnapshotsList", error);
         }
+    }
+
+    async function refreshAll(): Promise<void> {
+        await refreshAssets();
+        await refreshTargets();
     }
 
     async function openAsset(id: string): Promise<void> {
@@ -109,6 +163,21 @@ function App() {
         }
     }
 
+    async function openTarget(id: string): Promise<void> {
+        try {
+            const target = await agentdockClient.targets.get(id);
+
+            if (!target) {
+                resetTargetForm();
+                return;
+            }
+
+            fillTargetForm(target);
+        } catch (error) {
+            showError("errorTargetsGet", error);
+        }
+    }
+
     async function saveAsset(): Promise<void> {
         if (!selectedAsset) {
             return;
@@ -129,6 +198,55 @@ function App() {
             await refreshSnapshots(selectedAsset.id);
         } catch (error) {
             showError("errorAssetsUpdate", error);
+        }
+    }
+
+    async function saveTarget(): Promise<void> {
+        try {
+            if (!selectedTarget) {
+                const created = await agentdockClient.targets.create({
+                    name: targetName,
+                    path: targetPath,
+                    deployMode: targetDeployMode,
+                });
+
+                fillTargetForm(created);
+                await refreshTargets();
+                return;
+            }
+
+            const updated = await agentdockClient.targets.update(selectedTarget.id, {
+                name: targetName,
+                path: targetPath,
+                enabled: targetEnabled,
+                deployMode: targetDeployMode,
+            });
+
+            fillTargetForm(updated);
+            await refreshTargets();
+        } catch (error) {
+            showError(
+                selectedTarget ? "errorTargetsUpdate" : "errorTargetsCreate",
+                error
+            );
+        }
+    }
+
+    async function deleteTarget(): Promise<void> {
+        if (!selectedTarget) {
+            return;
+        }
+
+        if (!window.confirm(t("confirmDeleteTarget"))) {
+            return;
+        }
+
+        try {
+            await agentdockClient.targets.delete(selectedTarget.id);
+            resetTargetForm();
+            await refreshTargets();
+        } catch (error) {
+            showError("errorTargetsDelete", error);
         }
     }
 
@@ -189,12 +307,16 @@ function App() {
     useEffect(() => {
         let isActive = true;
 
-        async function loadAssets(): Promise<void> {
+        async function loadInitialData(): Promise<void> {
             try {
-                const result = await agentdockClient.assets.list();
+                const [assetResult, targetResult] = await Promise.all([
+                    agentdockClient.assets.list(),
+                    agentdockClient.targets.list(),
+                ]);
 
                 if (isActive) {
-                    setAssets(result);
+                    setAssets(assetResult);
+                    setTargets(targetResult);
                 }
             } catch (error) {
                 if (isActive) {
@@ -203,7 +325,7 @@ function App() {
             }
         }
 
-        void loadAssets();
+        void loadInitialData();
 
         return () => {
             isActive = false;
@@ -258,7 +380,7 @@ function App() {
                 <button onClick={() => void createDemoAgentsMd()}>
                     {t("newDemoAgents")}
                 </button>
-                <button onClick={() => void refreshAssets()}>{t("refresh")}</button>
+                <button onClick={() => void refreshAll()}>{t("refresh")}</button>
             </div>
 
             <div
@@ -394,6 +516,131 @@ function App() {
                             </section>
                         </div>
                     )}
+                </section>
+            </div>
+
+            <hr style={{margin: "32px 0"}} />
+
+            <div
+                style={{
+                    display: "grid",
+                    gridTemplateColumns: "360px 1fr",
+                    gap: 24,
+                }}
+            >
+                <section>
+                    <div
+                        style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            gap: 12,
+                        }}
+                    >
+                        <h2>{t("targetList")}</h2>
+                        <button onClick={resetTargetForm}>{t("newTarget")}</button>
+                    </div>
+
+                    {targets.length === 0 ? (
+                        <p>{t("noTargetsYet")}</p>
+                    ) : (
+                        <ul style={{paddingLeft: 16}}>
+                            {targets.map((target) => (
+                                <li key={target.id} style={{marginBottom: 12}}>
+                                    <button onClick={() => void openTarget(target.id)}>
+                                        {target.name}
+                                    </button>
+                                    <div>
+                                        {t("targetPathLabel")}: {target.path}
+                                    </div>
+                                    <div>
+                                        {t("targetDeployModeLabel")}:{" "}
+                                        {getDeployModeLabel(target.deployMode)}
+                                    </div>
+                                    <div>
+                                        {t("targetEnabledLabel")}:{" "}
+                                        {getEnabledLabel(target.enabled)}
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </section>
+
+                <section>
+                    <h2>
+                        {selectedTarget ? t("targetEditor") : t("createTarget")}
+                    </h2>
+
+                    <div style={{display: "flex", flexDirection: "column", gap: 12}}>
+                        <div>
+                            <label htmlFor="target-name">{t("targetNameLabel")}</label>
+                            <input
+                                id="target-name"
+                                value={targetName}
+                                onChange={(event) => setTargetName(event.target.value)}
+                                style={{display: "block", width: "100%", padding: 8}}
+                            />
+                        </div>
+
+                        <div>
+                            <label htmlFor="target-path">{t("targetPathLabel")}</label>
+                            <input
+                                id="target-path"
+                                value={targetPath}
+                                onChange={(event) => setTargetPath(event.target.value)}
+                                style={{display: "block", width: "100%", padding: 8}}
+                            />
+                            <p style={{fontSize: 12, opacity: 0.7}}>{t("targetPathHint")}</p>
+                        </div>
+
+                        <div>
+                            <label htmlFor="target-mode">{t("targetDeployModeLabel")}</label>
+                            <select
+                                id="target-mode"
+                                value={targetDeployMode}
+                                onChange={(event) =>
+                                    setTargetDeployMode(
+                                        event.target.value as TargetDeployMode
+                                    )
+                                }
+                                style={{display: "block", width: "100%", padding: 8}}
+                            >
+                                <option value="copy">{t("deployModeCopy")}</option>
+                                <option value="merge">{t("deployModeMerge")}</option>
+                            </select>
+                        </div>
+
+                        <label
+                            htmlFor="target-enabled"
+                            style={{display: "flex", alignItems: "center", gap: 8}}
+                        >
+                            <input
+                                id="target-enabled"
+                                type="checkbox"
+                                checked={targetEnabled}
+                                disabled={!selectedTarget}
+                                onChange={(event) =>
+                                    setTargetEnabled(event.target.checked)
+                                }
+                            />
+                            <span>{t("targetEnabledLabel")}</span>
+                        </label>
+
+                        <div style={{display: "flex", gap: 8, flexWrap: "wrap"}}>
+                            <button onClick={() => void saveTarget()}>
+                                {selectedTarget ? t("targetFormSave") : t("targetFormCreate")}
+                            </button>
+                            <button onClick={resetTargetForm}>{t("targetFormReset")}</button>
+                            {selectedTarget ? (
+                                <button onClick={() => void deleteTarget()}>
+                                    {t("deleteTarget")}
+                                </button>
+                            ) : null}
+                        </div>
+
+                        {!selectedTarget ? <p>{t("selectTarget")}</p> : null}
+                    </div>
                 </section>
             </div>
         </main>

@@ -15,6 +15,13 @@ const agentdockApi: AgentdockApi = {
         list: (assetId) => ipcRenderer.invoke("snapshots:list", assetId),
         restore: (snapshotId) => ipcRenderer.invoke("snapshots:restore", snapshotId),
     },
+    targets: {
+        list: () => ipcRenderer.invoke("targets:list"),
+        get: (id) => ipcRenderer.invoke("targets:get", id),
+        create: (input) => ipcRenderer.invoke("targets:create", input),
+        update: (id, input) => ipcRenderer.invoke("targets:update", id, input),
+        delete: (id) => ipcRenderer.invoke("targets:delete", id),
+    },
 };
 
 contextBridge.exposeInMainWorld("agentdock", agentdockApi);

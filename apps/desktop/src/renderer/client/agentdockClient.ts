@@ -32,4 +32,21 @@ export const agentdockClient: AgentdockApi = {
             return getApi().snapshots.restore(snapshotId);
         },
     },
+    targets: {
+        list() {
+            return getApi().targets.list();
+        },
+        get(id) {
+            return getApi().targets.get(id);
+        },
+        create(input) {
+            return getApi().targets.create(input);
+        },
+        update(id, input) {
+            return getApi().targets.update(id, input);
+        },
+        delete(id) {
+            return getApi().targets.delete(id);
+        },
+    },
 };

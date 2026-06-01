@@ -8,6 +8,23 @@ type MessageCatalog = {
     localeChinese: string;
     newDemoSkill: string;
     newDemoAgents: string;
+    targets: string;
+    targetList: string;
+    targetEditor: string;
+    createTarget: string;
+    deleteTarget: string;
+    newTarget: string;
+    noTargetsYet: string;
+    selectTarget: string;
+    targetNameLabel: string;
+    targetPathLabel: string;
+    targetDeployModeLabel: string;
+    targetEnabledLabel: string;
+    targetPathHint: string;
+    targetFormCreate: string;
+    targetFormSave: string;
+    targetFormReset: string;
+    confirmDeleteTarget: string;
     refresh: string;
     assets: string;
     editor: string;
@@ -21,6 +38,10 @@ type MessageCatalog = {
     assetTypeSkill: string;
     assetTypeAgentsMd: string;
     assetStatusActive: string;
+    deployModeCopy: string;
+    deployModeMerge: string;
+    enabledYes: string;
+    enabledNo: string;
     titleLabel: string;
     descriptionLabel: string;
     contentLabel: string;
@@ -38,6 +59,11 @@ type MessageCatalog = {
     errorAssetsCreateAgents: string;
     errorSnapshotsList: string;
     errorSnapshotsRestore: string;
+    errorTargetsList: string;
+    errorTargetsGet: string;
+    errorTargetsCreate: string;
+    errorTargetsUpdate: string;
+    errorTargetsDelete: string;
     demoSkillTitle: string;
     demoSkillDescription: string;
     demoSkillContent: string;
@@ -55,6 +81,23 @@ export const messages: Record<Locale, MessageCatalog> = {
         localeChinese: "Chinese",
         newDemoSkill: "New Demo Skill",
         newDemoAgents: "New Demo AGENTS.md",
+        targets: "Targets",
+        targetList: "Target List",
+        targetEditor: "Target Editor",
+        createTarget: "Create Target",
+        deleteTarget: "Delete Target",
+        newTarget: "New Target",
+        noTargetsYet: "No targets yet.",
+        selectTarget: "Select a target to edit, or create a new one.",
+        targetNameLabel: "Target Name",
+        targetPathLabel: "Target Path",
+        targetDeployModeLabel: "Deploy Mode",
+        targetEnabledLabel: "Enabled",
+        targetPathHint: "Use an existing absolute directory path.",
+        targetFormCreate: "Create",
+        targetFormSave: "Save Target",
+        targetFormReset: "Reset",
+        confirmDeleteTarget: "Delete this target?",
         refresh: "Refresh",
         assets: "Assets",
         editor: "Editor",
@@ -68,6 +111,10 @@ export const messages: Record<Locale, MessageCatalog> = {
         assetTypeSkill: "Skill",
         assetTypeAgentsMd: "AGENTS.md",
         assetStatusActive: "Active",
+        deployModeCopy: "Copy",
+        deployModeMerge: "Merge",
+        enabledYes: "Yes",
+        enabledNo: "No",
         titleLabel: "Title",
         descriptionLabel: "Description",
         contentLabel: "Content",
@@ -85,6 +132,11 @@ export const messages: Record<Locale, MessageCatalog> = {
         errorAssetsCreateAgents: "Create demo AGENTS.md",
         errorSnapshotsList: "Load snapshots",
         errorSnapshotsRestore: "Restore snapshot",
+        errorTargetsList: "Load targets",
+        errorTargetsGet: "Open target",
+        errorTargetsCreate: "Create target",
+        errorTargetsUpdate: "Save target",
+        errorTargetsDelete: "Delete target",
         demoSkillTitle: "Frontend Review",
         demoSkillDescription: "Prototype skill asset for frontend code review.",
         demoSkillContent: `# Frontend Review
@@ -122,6 +174,23 @@ Respect the project structure, naming rules, and code style.
         localeChinese: "中文",
         newDemoSkill: "新建示例 Skill",
         newDemoAgents: "新建示例 AGENTS.md",
+        targets: "目标目录",
+        targetList: "目标列表",
+        targetEditor: "目标编辑",
+        createTarget: "创建目标",
+        deleteTarget: "删除目标",
+        newTarget: "新目标",
+        noTargetsYet: "暂无目标目录。",
+        selectTarget: "请选择一个目标进行编辑，或创建一个新目标。",
+        targetNameLabel: "目标名称",
+        targetPathLabel: "目标路径",
+        targetDeployModeLabel: "部署模式",
+        targetEnabledLabel: "启用",
+        targetPathHint: "请填写一个已存在的绝对目录路径。",
+        targetFormCreate: "创建",
+        targetFormSave: "保存目标",
+        targetFormReset: "重置",
+        confirmDeleteTarget: "确认删除这个目标吗？",
         refresh: "刷新",
         assets: "资产",
         editor: "编辑器",
@@ -135,6 +204,10 @@ Respect the project structure, naming rules, and code style.
         assetTypeSkill: "Skill",
         assetTypeAgentsMd: "AGENTS.md",
         assetStatusActive: "启用中",
+        deployModeCopy: "复制",
+        deployModeMerge: "合并",
+        enabledYes: "是",
+        enabledNo: "否",
         titleLabel: "标题",
         descriptionLabel: "描述",
         contentLabel: "内容",
@@ -152,6 +225,11 @@ Respect the project structure, naming rules, and code style.
         errorAssetsCreateAgents: "创建示例 AGENTS.md",
         errorSnapshotsList: "加载快照列表",
         errorSnapshotsRestore: "恢复快照",
+        errorTargetsList: "加载目标列表",
+        errorTargetsGet: "打开目标",
+        errorTargetsCreate: "创建目标",
+        errorTargetsUpdate: "保存目标",
+        errorTargetsDelete: "删除目标",
         demoSkillTitle: "前端评审",
         demoSkillDescription: "用于前端代码评审的示例 Skill 资产。",
         demoSkillContent: `# 前端评审
