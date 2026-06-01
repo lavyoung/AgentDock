@@ -18,6 +18,9 @@ type MessageCatalog = {
     nameLabel: string;
     versionLabel: string;
     statusLabel: string;
+    assetTypeSkill: string;
+    assetTypeAgentsMd: string;
+    assetStatusActive: string;
     titleLabel: string;
     descriptionLabel: string;
     contentLabel: string;
@@ -62,6 +65,9 @@ export const messages: Record<Locale, MessageCatalog> = {
         nameLabel: "Name",
         versionLabel: "Version",
         statusLabel: "Status",
+        assetTypeSkill: "Skill",
+        assetTypeAgentsMd: "AGENTS.md",
+        assetStatusActive: "Active",
         titleLabel: "Title",
         descriptionLabel: "Description",
         contentLabel: "Content",
@@ -126,6 +132,9 @@ Respect the project structure, naming rules, and code style.
         nameLabel: "名称",
         versionLabel: "版本",
         statusLabel: "状态",
+        assetTypeSkill: "Skill",
+        assetTypeAgentsMd: "AGENTS.md",
+        assetStatusActive: "启用中",
         titleLabel: "标题",
         descriptionLabel: "描述",
         contentLabel: "内容",

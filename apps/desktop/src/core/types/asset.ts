@@ -1,4 +1,5 @@
 export type AssetType = "skill" | "agents-md";
+export type AssetStatus = "active";
 
 export type AssetRecord = {
     id: string;
@@ -7,7 +8,7 @@ export type AssetRecord = {
     title: string;
     description: string;
     version: string;
-    status: string;
+    status: AssetStatus;
     path: string;
     created_at: string;
     updated_at: string;

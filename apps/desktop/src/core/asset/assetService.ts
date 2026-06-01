@@ -3,7 +3,7 @@ import yaml from "yaml";
 
 import type {FileSystemPort} from "../ports/fileSystemPort";
 import type {PathPort} from "../ports/pathPort";
-import type {AssetDetail, AssetRecord, CreateAssetInput, UpdateAssetInput,} from "../types/asset";
+import type {AssetDetail, AssetRecord, AssetStatus, CreateAssetInput, UpdateAssetInput,} from "../types/asset";
 import {getAssetMainFileName} from "../types/asset";
 import type {SnapshotService} from "../snapshot/snapshotService";
 import type {AssetRepository} from "./assetRepository";
@@ -39,7 +39,7 @@ export class AssetService {
         const id = nanoid();
         const now = new Date().toISOString();
         const version = "0.1.0";
-        const status = "active";
+        const status: AssetStatus = "active";
         const safeName = input.name.trim();
         const assetDir = this.path.join(this.registryAssetsDir, safeName);
         const currentDir = this.path.join(assetDir, "current");

@@ -1,6 +1,6 @@
 import {useEffect, useEffectEvent, useState} from "react";
 
-import type {AssetDetail, AssetRecord} from "./core/types/asset";
+import type {AssetDetail, AssetRecord, AssetStatus, AssetType,} from "./core/types/asset";
 import type {SnapshotRecord} from "./core/types/snapshot";
 import {agentdockClient} from "./renderer/client/agentdockClient";
 import type {Locale} from "./renderer/i18n/messages";
@@ -47,6 +47,24 @@ function App() {
         }
 
         return message;
+    }
+
+    function getAssetTypeLabel(type: AssetType): string {
+        switch (type) {
+            case "skill":
+                return t("assetTypeSkill");
+            case "agents-md":
+                return t("assetTypeAgentsMd");
+        }
+    }
+
+    function getAssetStatusLabel(status: AssetStatus | string): string {
+        switch (status) {
+            case "active":
+                return t("assetStatusActive");
+            default:
+                return status;
+        }
     }
 
     const showErrorEvent = useEffectEvent(showError);
@@ -263,7 +281,7 @@ function App() {
                                         {asset.title}
                                     </button>
                                     <div>
-                                        {t("typeLabel")}: {asset.type}
+                                        {t("typeLabel")}: {getAssetTypeLabel(asset.type)}
                                     </div>
                                     <div>
                                         {t("nameLabel")}: {asset.name}
@@ -272,7 +290,7 @@ function App() {
                                         {t("versionLabel")}: {asset.version}
                                     </div>
                                     <div>
-                                        {t("statusLabel")}: {asset.status}
+                                        {t("statusLabel")}: {getAssetStatusLabel(asset.status)}
                                     </div>
                                 </li>
                             ))}
