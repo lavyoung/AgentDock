@@ -3,6 +3,7 @@ import path from "node:path";
 
 import {ensureAgentDockDirs} from "../core/storage/paths";
 import {migrate} from "../core/db/database";
+import {registerIpc} from "./ipc";
 
 const isDev = process.env.NODE_ENV === "development";
 
@@ -28,6 +29,7 @@ function createWindow() {
 app.whenReady().then(async () => {
     await ensureAgentDockDirs();
     migrate();
+    registerIpc();
     createWindow();
 });
 
