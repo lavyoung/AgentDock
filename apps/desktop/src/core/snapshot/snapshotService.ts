@@ -1,0 +1,96 @@
+import path from "node:path";
+import crypto from "node:crypto";
+import fs from "fs-extra";
+
+import {getDb} from "../db/database";
+
+export type SnapshotRecord = {
+    id: string;
+    asset_id: string;
+    snapshot_path: string;
+    message: string;
+    created_at: string;
+};
+
+function getSnapshotFolderName(date: Date) {
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const dd = String(date.getDate()).padStart(2, "0");
+    const hh = String(date.getHours()).padStart(2, "0");
+    const mi = String(date.getMinutes()).padStart(2, "0");
+    const ss = String(date.getSeconds()).padStart(2, "0");
+
+    return `${yyyy}${mm}${dd}-${hh}${mi}${ss}`;
+}
+
+export async function createSnapshot(assetId: string, assetPath: string, message: string) {
+    const db = getDb();
+
+    const id = crypto.randomUUID();
+    const now = new Date();
+    const createdAt = now.toISOString();
+
+    const currentDir = path.join(assetPath, "current");
+    const snapshotsDir = path.join(assetPath, "snapshots");
+    const snapshotDir = path.join(snapshotsDir, getSnapshotFolderName(now));
+
+    await fs.ensureDir(snapshotsDir);
+
+    const currentExists = await fs.pathExists(currentDir);
+    if (!currentExists) {
+        throw new Error(`Current directory not found: ${currentDir}`);
+    }
+
+    await fs.copy(currentDir, snapshotDir, {
+        overwrite: false,
+        errorOnExist: true,
+    });
+
+    db.prepare(
+        `
+            INSERT INTO snapshots (id,
+                                   asset_id,
+                                   snapshot_path,
+                                   message,
+                                   created_at)
+            VALUES (@id,
+                    @asset_id,
+                    @snapshot_path,
+                    @message,
+                    @created_at)
+        `
+    ).run({
+        id,
+        asset_id: assetId,
+        snapshot_path: snapshotDir,
+        message,
+        created_at: createdAt,
+    });
+
+    return {
+        id,
+        asset_id: assetId,
+        snapshot_path: snapshotDir,
+        message,
+        created_at: createdAt,
+    };
+}
+
+export function listSnapshots(assetId: string) {
+    const db = getDb();
+
+    return db
+        .prepare(
+            `
+                SELECT id,
+                       asset_id,
+                       snapshot_path,
+                       message,
+                       created_at
+                FROM snapshots
+                WHERE asset_id = ?
+                ORDER BY created_at DESC
+            `
+        )
+        .all(assetId) as SnapshotRecord[];
+}

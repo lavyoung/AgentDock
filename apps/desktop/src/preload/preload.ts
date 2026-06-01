@@ -11,4 +11,7 @@ contextBridge.exposeInMainWorld("agentdock", {
         update: (id: string, input: unknown) =>
             ipcRenderer.invoke("assets:update", id, input),
     },
+    snapshots: {
+        list: (assetId: string) => ipcRenderer.invoke("snapshots:list", assetId),
+    },
 });

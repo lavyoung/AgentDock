@@ -3,6 +3,7 @@ import crypto from "node:crypto";
 import fs from "fs-extra";
 import yaml from "yaml";
 
+import {createSnapshot} from "../snapshot/snapshotService";
 import {getDb} from "../db/database";
 import {getAgentDockDataDir} from "../storage/paths";
 
@@ -226,6 +227,7 @@ export async function updateAsset(id: string, input: UpdateAssetInput) {
     const currentDir = path.join(asset.path, "current");
     const mainFileName = getMainFileName(asset.type);
 
+    await createSnapshot(asset.id, asset.path, "Before asset update");
     const metadata = {
         id: asset.id,
         type: asset.type,

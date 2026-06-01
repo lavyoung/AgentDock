@@ -12,6 +12,9 @@ declare global {
                 create: (input: unknown) => Promise<any>;
                 update: (id: string, input: unknown) => Promise<any>;
             };
+            snapshots: {
+                list: (assetId: string) => Promise<any[]>;
+            };
         };
     }
 }
