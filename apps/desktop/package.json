@@ -2,10 +2,11 @@
   "name": "@agentdock/desktop",
   "private": true,
   "version": "0.0.0",
-  "type": "module",
+  "main": "dist-electron/main/main.js",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
+    "dev": "concurrently -k \"vite\" \"tsc -p tsconfig.electron.json --watch\" \"wait-on http://localhost:5173 dist-electron/main/main.js dist-electron/preload/preload.js && cross-env NODE_ENV=development electron .\"",
+    "build": "tsc -p tsconfig.electron.json && vite build",
+    "rebuild": "electron-rebuild -f -w better-sqlite3",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -27,15 +28,17 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@electron/rebuild": "^4.0.4",
     "@eslint/js": "^10.0.1",
     "@types/better-sqlite3": "^7.6.13",
+    "@types/fs-extra": "^11.0.4",
     "@types/node": "^24.12.3",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
     "concurrently": "^10.0.0",
     "cross-env": "^10.1.0",
-    "electron": "^42.3.0",
+    "electron": "^37.0.0",
     "electron-builder": "^26.8.1",
     "eslint": "^10.3.0",
     "eslint-plugin-react-hooks": "^7.1.1",
