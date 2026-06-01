@@ -21,3 +21,23 @@ rad.json
 *.flf
 #Test results file
 TestResults.xml
+.idea/
+node_modules
+dist
+dist-electron
+build
+out
+
+.DS_Store
+*.log
+
+.env
+.env.local
+
+.agentdock
+*.db
+*.sqlite
+*.sqlite3
+
+apps/desktop/dist
+apps/desktop/dist-electron
