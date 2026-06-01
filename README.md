@@ -236,10 +236,10 @@ AgentDock/
     desktop/            # 当前桌面端 Prototype
 
   packages/             # 后续可复用包，当前先预留
-    core/               # 未来放核心业务逻辑
-    schema/             # 未来放类型和配置 Schema
-    shared/             # 未来放通用工具
-    adapters/           # 未来放 Claude / Codex / Cursor / Gemini 等适配器
+    core/               # 放核心业务逻辑
+    schema/             # 放类型和配置 Schema
+    shared/             # 放通用工具
+    adapters/           # 放 Claude / Codex / Cursor / Gemini 等适配器
 
   docs/                 # 项目文档
     architecture/       # 架构说明
