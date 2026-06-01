@@ -1,18 +1,19 @@
-import path from "node:path";
-import crypto from "node:crypto";
-import fs from "fs-extra";
+import {nanoid} from "nanoid";
 
-import {getDb} from "../db/database";
+import type {AssetRepository} from "../asset/assetRepository";
+import type {FileSystemPort} from "../ports/fileSystemPort";
+import type {PathPort} from "../ports/pathPort";
+import type {SnapshotRecord} from "../types/snapshot";
+import type {SnapshotRepository} from "./snapshotRepository";
 
-export type SnapshotRecord = {
-    id: string;
-    asset_id: string;
-    snapshot_path: string;
-    message: string;
-    created_at: string;
+type SnapshotServiceDependencies = {
+    assetRepository: AssetRepository;
+    snapshotRepository: SnapshotRepository;
+    fileSystem: FileSystemPort;
+    path: PathPort;
 };
 
-function getSnapshotFolderName(date: Date) {
+function getSnapshotFolderName(date: Date): string {
     const yyyy = date.getFullYear();
     const mm = String(date.getMonth() + 1).padStart(2, "0");
     const dd = String(date.getDate()).padStart(2, "0");
@@ -23,138 +24,93 @@ function getSnapshotFolderName(date: Date) {
     return `${yyyy}${mm}${dd}-${hh}${mi}${ss}`;
 }
 
-export async function createSnapshot(assetId: string, assetPath: string, message: string) {
-    const db = getDb();
+export class SnapshotService {
+    private readonly assetRepository: AssetRepository;
+    private readonly snapshotRepository: SnapshotRepository;
+    private readonly fileSystem: FileSystemPort;
+    private readonly path: PathPort;
 
-    const id = crypto.randomUUID();
-    const now = new Date();
-    const createdAt = now.toISOString();
-
-    const currentDir = path.join(assetPath, "current");
-    const snapshotsDir = path.join(assetPath, "snapshots");
-    const snapshotDir = path.join(snapshotsDir, getSnapshotFolderName(now));
-
-    await fs.ensureDir(snapshotsDir);
-
-    const currentExists = await fs.pathExists(currentDir);
-    if (!currentExists) {
-        throw new Error(`Current directory not found: ${currentDir}`);
+    constructor(dependencies: SnapshotServiceDependencies) {
+        this.assetRepository = dependencies.assetRepository;
+        this.snapshotRepository = dependencies.snapshotRepository;
+        this.fileSystem = dependencies.fileSystem;
+        this.path = dependencies.path;
     }
 
-    await fs.copy(currentDir, snapshotDir, {
-        overwrite: false,
-        errorOnExist: true,
-    });
+    async createSnapshot(
+        assetId: string,
+        assetPath: string,
+        message: string
+    ): Promise<SnapshotRecord> {
+        const now = new Date();
+        const snapshotRecord: SnapshotRecord = {
+            id: nanoid(),
+            asset_id: assetId,
+            snapshot_path: this.path.join(
+                assetPath,
+                "snapshots",
+                getSnapshotFolderName(now)
+            ),
+            message,
+            created_at: now.toISOString(),
+        };
+        const currentDir = this.path.join(assetPath, "current");
+        const snapshotsDir = this.path.join(assetPath, "snapshots");
 
-    db.prepare(
-        `
-            INSERT INTO snapshots (id,
-                                   asset_id,
-                                   snapshot_path,
-                                   message,
-                                   created_at)
-            VALUES (@id,
-                    @asset_id,
-                    @snapshot_path,
-                    @message,
-                    @created_at)
-        `
-    ).run({
-        id,
-        asset_id: assetId,
-        snapshot_path: snapshotDir,
-        message,
-        created_at: createdAt,
-    });
+        await this.fileSystem.ensureDir(snapshotsDir);
 
-    return {
-        id,
-        asset_id: assetId,
-        snapshot_path: snapshotDir,
-        message,
-        created_at: createdAt,
-    };
-}
+        if (!(await this.fileSystem.exists(currentDir))) {
+            throw new Error(`Current directory not found: ${currentDir}`);
+        }
 
-export function listSnapshots(assetId: string) {
-    const db = getDb();
+        if (await this.fileSystem.exists(snapshotRecord.snapshot_path)) {
+            throw new Error(
+                `Snapshot directory already exists: ${snapshotRecord.snapshot_path}`
+            );
+        }
 
-    return db
-        .prepare(
-            `
-                SELECT id,
-                       asset_id,
-                       snapshot_path,
-                       message,
-                       created_at
-                FROM snapshots
-                WHERE asset_id = ?
-                ORDER BY created_at DESC
-            `
-        )
-        .all(assetId) as SnapshotRecord[];
-}
+        await this.fileSystem.copyDir(currentDir, snapshotRecord.snapshot_path);
+        this.snapshotRepository.create(snapshotRecord);
 
-
-export async function restoreSnapshot(snapshotId: string) {
-    const db = getDb();
-
-    const snapshot = db.prepare(
-        `
-            SELECT id,
-                   asset_id,
-                   snapshot_path,
-                   message,
-                   created_at
-            FROM snapshots
-            WHERE id = ? `
-    ).get(snapshotId) as SnapshotRecord | undefined;
-
-    if (!snapshot) {
-        throw new Error(`Snapshot not found: ${snapshotId}`);
-    }
-    const asset = db
-        .prepare(
-            `
-                SELECT id,
-                       path
-                FROM assets
-                WHERE id = ?
-            `
-        )
-        .get(snapshot.asset_id) as { id: string; path: string } | undefined;
-
-    if (!asset) {
-        throw new Error(`Asset not found: ${snapshot.asset_id}`);
-    }
-    const currentDir = path.join(asset.path, "current");
-
-    const snapshotExists = await fs.pathExists(snapshot.snapshot_path);
-    if (!snapshotExists) {
-        throw new Error(`Snapshot path not found: ${snapshot.snapshot_path}`);
+        return snapshotRecord;
     }
 
-    await fs.emptyDir(currentDir);
-    await fs.copy(snapshot.snapshot_path, currentDir, {
-        overwrite: true,
-    });
+    listSnapshots(assetId: string): SnapshotRecord[] {
+        return this.snapshotRepository.listByAssetId(assetId);
+    }
 
-    const now = new Date().toISOString();
+    async restoreSnapshot(snapshotId: string): Promise<{
+        restored: true;
+        asset_id: string;
+        snapshot_id: string;
+    }> {
+        const snapshot = this.snapshotRepository.findById(snapshotId);
 
-    db.prepare(
-        `
-            UPDATE assets
-            SET updated_at = @updated_at
-            WHERE id = @id
-        `
-    ).run({
-        id: asset.id,
-        updated_at: now,
-    });
+        if (!snapshot) {
+            throw new Error(`Snapshot not found: ${snapshotId}`);
+        }
 
-    return {
-        restored: true,
-        asset_id: snapshot.asset_id,
-        snapshot_id: snapshot.id,
-    };
+        const asset = this.assetRepository.findById(snapshot.asset_id);
+
+        if (!asset) {
+            throw new Error(`Asset not found: ${snapshot.asset_id}`);
+        }
+
+        if (!(await this.fileSystem.exists(snapshot.snapshot_path))) {
+            throw new Error(`Snapshot path not found: ${snapshot.snapshot_path}`);
+        }
+
+        const currentDir = this.path.join(asset.path, "current");
+
+        await this.fileSystem.emptyDir(currentDir);
+        await this.fileSystem.copyDir(snapshot.snapshot_path, currentDir);
+
+        this.assetRepository.touch(asset.id, new Date().toISOString());
+
+        return {
+            restored: true,
+            asset_id: snapshot.asset_id,
+            snapshot_id: snapshot.id,
+        };
+    }
 }

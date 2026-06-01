@@ -10,7 +10,7 @@
   <img src="https://img.shields.io/badge/future-Tauri%20%2B%20Rust-orange" />
   <img src="https://img.shields.io/badge/frontend-React%20%2B%20TypeScript-61DAFB" />
   <img src="https://img.shields.io/badge/storage-SQLite-003B57" />
-  <img src="https://img.shields.io/badge/license-TBD-orange" />
+  <img src="https://img.shields.io/badge/license-MIT-brightgreen" />
 </p>
 
 ---
@@ -41,14 +41,19 @@ AgentDock 计划支持：
 
 第一阶段使用 **Electron**，主要是为了快速验证产品闭环和本地文件同步能力。
 
-Electron 不是最终目标架构。当前阶段主要验证：
+Electron 不是最终目标架构。当前代码已实现：
 
 * Asset 管理流程
 * 本地 Registry 结构
+* Skill / AGENTS.md Asset 编辑与保存
+* 本地快照创建与恢复
+
+当前阶段下一步实现：
+
 * Target 目录管理
-* 同步矩阵交互
+* Sync Matrix 交互
+* 同步预览与手动同步
 * AGENTS.md 托管区块合并
-* 基础文件同步行为
 
 长期目标架构：
 
@@ -405,23 +410,21 @@ pnpm build
 
 ## 🧪 演示流程
 
-Prototype 阶段建议演示以下流程：
+当前 Prototype 可演示以下流程：
 
 1. 创建一个 Skill Asset。
 2. 创建一个 AGENTS.md Asset。
-3. 添加一个本地 Target 目录。
-4. 在同步矩阵中启用 Asset 到 Target 的同步。
-5. 预览生成文件。
-6. 执行同步。
-7. 到目标目录检查生成结果。
+3. 在 Local Registry 中打开并编辑 Asset。
+4. 保存并自动生成本地快照。
+5. 恢复历史快照并验证内容回滚。
 
-Skill 输出示例：
+后续同步功能完成后的 Skill 输出示例：
 
 ```text
 <target-path>/.agentdock/skills/<asset-id>/SKILL.md
 ```
 
-AGENTS.md 输出示例：
+后续同步功能完成后的 AGENTS.md 输出示例：
 
 ```text
 <target-path>/AGENTS.md

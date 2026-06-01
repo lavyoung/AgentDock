@@ -1,9 +1,9 @@
 import {app, BrowserWindow} from "electron";
 import path from "node:path";
 
-import {ensureAgentDockDirs} from "../core/storage/paths";
-import {migrate} from "../core/db/database";
 import {registerIpc} from "./ipc";
+import {migrateDatabase} from "../platform/electron/database";
+import {ensureAgentDockDirs} from "../platform/electron/paths";
 
 const isDev = process.env.NODE_ENV === "development";
 
@@ -22,13 +22,13 @@ function createWindow() {
         win.loadURL("http://localhost:5173");
         win.webContents.openDevTools();
     } else {
-        win.loadFile(path.join(__dirname, "../renderer/index.html"));
+        win.loadFile(path.join(__dirname, "../../dist/index.html"));
     }
 }
 
 app.whenReady().then(async () => {
     await ensureAgentDockDirs();
-    migrate();
+    migrateDatabase();
     registerIpc();
     createWindow();
 });

@@ -1,271 +1,140 @@
-import path from "node:path";
-import crypto from "node:crypto";
-import fs from "fs-extra";
+import {nanoid} from "nanoid";
 import yaml from "yaml";
 
-import {createSnapshot} from "../snapshot/snapshotService";
-import {getDb} from "../db/database";
-import {getAgentDockDataDir} from "../storage/paths";
+import type {FileSystemPort} from "../ports/fileSystemPort";
+import type {PathPort} from "../ports/pathPort";
+import type {AssetDetail, AssetRecord, CreateAssetInput, UpdateAssetInput,} from "../types/asset";
+import {getAssetMainFileName} from "../types/asset";
+import type {SnapshotService} from "../snapshot/snapshotService";
+import type {AssetRepository} from "./assetRepository";
 
-export type AssetType = "skill" | "agents-md";
-
-export type CreateAssetInput = {
-    type: AssetType;
-    name: string;
-    title?: string;
-    description?: string;
-    content: string;
+type AssetServiceDependencies = {
+    assetRepository: AssetRepository;
+    fileSystem: FileSystemPort;
+    path: PathPort;
+    registryAssetsDir: string;
+    snapshotService: SnapshotService;
 };
 
-export function listAssets() {
-    const db = getDb();
+export class AssetService {
+    private readonly assetRepository: AssetRepository;
+    private readonly fileSystem: FileSystemPort;
+    private readonly path: PathPort;
+    private readonly registryAssetsDir: string;
+    private readonly snapshotService: SnapshotService;
 
-    return db
-        .prepare(
-            `
-                SELECT id,
-                       type,
-                       name,
-                       title,
-                       description,
-                       version,
-                       status,
-                       path,
-                       created_at,
-                       updated_at
-                FROM assets
-                ORDER BY updated_at DESC
-            `
-        )
-        .all();
-}
-
-export async function createAsset(input: CreateAssetInput) {
-    const db = getDb();
-
-    const id = crypto.randomUUID();
-    const now = new Date().toISOString();
-    const version = "0.1.0";
-    const status = "active";
-
-    const safeName = input.name.trim();
-    const assetDir = path.join(
-        getAgentDockDataDir(),
-        "registry",
-        "assets",
-        safeName
-    );
-
-    const currentDir = path.join(assetDir, "current");
-
-    await fs.ensureDir(currentDir);
-
-    const metadata = {
-        id,
-        type: input.type,
-        name: safeName,
-        title: input.title || safeName,
-        description: input.description || "",
-        version,
-        status,
-    };
-
-    await fs.writeFile(
-        path.join(currentDir, "asset.yaml"),
-        yaml.stringify(metadata),
-        "utf-8"
-    );
-
-    const mainFileName = input.type === "skill" ? "SKILL.md" : "AGENTS.md";
-
-    await fs.writeFile(
-        path.join(currentDir, mainFileName),
-        input.content,
-        "utf-8"
-    );
-
-    db.prepare(
-        `
-            INSERT INTO assets (id,
-                                type,
-                                name,
-                                title,
-                                description,
-                                version,
-                                status,
-                                path,
-                                created_at,
-                                updated_at)
-            VALUES (@id,
-                    @type,
-                    @name,
-                    @title,
-                    @description,
-                    @version,
-                    @status,
-                    @path,
-                    @created_at,
-                    @updated_at)
-        `
-    ).run({
-        id,
-        type: input.type,
-        name: safeName,
-        title: input.title || safeName,
-        description: input.description || "",
-        version,
-        status,
-        path: assetDir,
-        created_at: now,
-        updated_at: now,
-    });
-
-    return {
-        ...metadata,
-        path: assetDir,
-        created_at: now,
-        updated_at: now,
-    };
-}
-
-export type AssetRecord = {
-    id: string;
-    type: AssetType;
-    name: string;
-    title: string;
-    description: string;
-    version: string;
-    status: string;
-    path: string;
-    created_at: string;
-    updated_at: string;
-};
-
-export type AssetDetail = AssetRecord & {
-    content: string;
-};
-
-export type UpdateAssetInput = {
-    title?: string;
-    description?: string;
-    content?: string;
-};
-
-function getMainFileName(type: AssetType) {
-    return type === "skill" ? "SKILL.md" : "AGENTS.md";
-}
-
-export async function getAsset(id: string): Promise<AssetDetail | null> {
-    const db = getDb();
-
-    const asset = db
-        .prepare(
-            `
-                SELECT id,
-                       type,
-                       name,
-                       title,
-                       description,
-                       version,
-                       status,
-                       path,
-                       created_at,
-                       updated_at
-                FROM assets
-                WHERE id = ?
-            `
-        )
-        .get(id) as AssetRecord | undefined;
-
-    if (!asset) {
-        return null;
+    constructor(dependencies: AssetServiceDependencies) {
+        this.assetRepository = dependencies.assetRepository;
+        this.fileSystem = dependencies.fileSystem;
+        this.path = dependencies.path;
+        this.registryAssetsDir = dependencies.registryAssetsDir;
+        this.snapshotService = dependencies.snapshotService;
     }
 
-    const mainFileName = getMainFileName(asset.type);
-    const contentPath = path.join(asset.path, "current", mainFileName);
-
-    const content = await fs.readFile(contentPath, "utf-8");
-
-    return {
-        ...asset,
-        content,
-    };
-}
-
-export async function updateAsset(id: string, input: UpdateAssetInput) {
-    const db = getDb();
-
-    const asset = db
-        .prepare(
-            `
-                SELECT id,
-                       type,
-                       name,
-                       title,
-                       description,
-                       version,
-                       status,
-                       path,
-                       created_at,
-                       updated_at
-                FROM assets
-                WHERE id = ?
-            `
-        )
-        .get(id) as AssetRecord | undefined;
-
-    if (!asset) {
-        throw new Error(`Asset not found: ${id}`);
+    listAssets(): AssetRecord[] {
+        return this.assetRepository.list();
     }
 
-    const now = new Date().toISOString();
+    async createAsset(input: CreateAssetInput): Promise<AssetRecord> {
+        const id = nanoid();
+        const now = new Date().toISOString();
+        const version = "0.1.0";
+        const status = "active";
+        const safeName = input.name.trim();
+        const assetDir = this.path.join(this.registryAssetsDir, safeName);
+        const currentDir = this.path.join(assetDir, "current");
+        const metadata = {
+            id,
+            type: input.type,
+            name: safeName,
+            title: input.title ?? safeName,
+            description: input.description ?? "",
+            version,
+            status,
+        };
+        const assetRecord: AssetRecord = {
+            ...metadata,
+            path: assetDir,
+            created_at: now,
+            updated_at: now,
+        };
 
-    const nextTitle = input.title ?? asset.title;
-    const nextDescription = input.description ?? asset.description;
-    const nextContent = input.content;
-
-    const currentDir = path.join(asset.path, "current");
-    const mainFileName = getMainFileName(asset.type);
-
-    await createSnapshot(asset.id, asset.path, "Before asset update");
-    const metadata = {
-        id: asset.id,
-        type: asset.type,
-        name: asset.name,
-        title: nextTitle,
-        description: nextDescription,
-        version: asset.version,
-        status: asset.status,
-    };
-
-    await fs.writeFile(
-        path.join(currentDir, "asset.yaml"),
-        yaml.stringify(metadata),
-        "utf-8"
-    );
-
-    if (typeof nextContent === "string") {
-        await fs.writeFile(
-            path.join(currentDir, mainFileName),
-            nextContent,
-            "utf-8"
+        await this.fileSystem.ensureDir(currentDir);
+        await this.fileSystem.writeText(
+            this.path.join(currentDir, "asset.yaml"),
+            yaml.stringify(metadata)
         );
+        await this.fileSystem.writeText(
+            this.path.join(currentDir, getAssetMainFileName(input.type)),
+            input.content
+        );
+
+        this.assetRepository.create(assetRecord);
+
+        return assetRecord;
     }
 
-    db.prepare(
-        `
-            UPDATE assets
-            SET title       = @title,
-                description = @description,
-                updated_at  = @updated_at
-            WHERE id = @id
-        `
-    ).run({
-        id,
-        title: nextTitle,
-        description: nextDescription,
-        updated_at: now,
-    });
+    async getAsset(id: string): Promise<AssetDetail | null> {
+        const asset = this.assetRepository.findById(id);
 
-    return getAsset(id);
+        if (!asset) {
+            return null;
+        }
+
+        const content = await this.fileSystem.readText(
+            this.path.join(asset.path, "current", getAssetMainFileName(asset.type))
+        );
+
+        return {
+            ...asset,
+            content,
+        };
+    }
+
+    async updateAsset(id: string, input: UpdateAssetInput): Promise<AssetDetail | null> {
+        const asset = this.assetRepository.findById(id);
+
+        if (!asset) {
+            throw new Error(`Asset not found: ${id}`);
+        }
+
+        const now = new Date().toISOString();
+        const nextTitle = input.title ?? asset.title;
+        const nextDescription = input.description ?? asset.description;
+        const currentDir = this.path.join(asset.path, "current");
+        const metadata = {
+            id: asset.id,
+            type: asset.type,
+            name: asset.name,
+            title: nextTitle,
+            description: nextDescription,
+            version: asset.version,
+            status: asset.status,
+        };
+
+        await this.snapshotService.createSnapshot(
+            asset.id,
+            asset.path,
+            "Before asset update"
+        );
+        await this.fileSystem.writeText(
+            this.path.join(currentDir, "asset.yaml"),
+            yaml.stringify(metadata)
+        );
+
+        if (typeof input.content === "string") {
+            await this.fileSystem.writeText(
+                this.path.join(currentDir, getAssetMainFileName(asset.type)),
+                input.content
+            );
+        }
+
+        this.assetRepository.updateDetails(id, {
+            title: nextTitle,
+            description: nextDescription,
+            updated_at: now,
+        });
+
+        return this.getAsset(id);
+    }
 }

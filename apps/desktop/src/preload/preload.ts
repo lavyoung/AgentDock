@@ -1,19 +1,20 @@
 import {contextBridge, ipcRenderer} from "electron";
+import type {AgentdockApi} from "../shared/agentdockApi";
 
-contextBridge.exposeInMainWorld("agentdock", {
+const agentdockApi: AgentdockApi = {
     app: {
         name: "AgentDock",
     },
     assets: {
         list: () => ipcRenderer.invoke("assets:list"),
-        get: (id: string) => ipcRenderer.invoke("assets:get", id),
-        create: (input: unknown) => ipcRenderer.invoke("assets:create", input),
-        update: (id: string, input: unknown) =>
-            ipcRenderer.invoke("assets:update", id, input),
+        get: (id) => ipcRenderer.invoke("assets:get", id),
+        create: (input) => ipcRenderer.invoke("assets:create", input),
+        update: (id, input) => ipcRenderer.invoke("assets:update", id, input),
     },
     snapshots: {
-        list: (assetId: string) => ipcRenderer.invoke("snapshots:list", assetId),
-        restore: (snapshotId: string) =>
-            ipcRenderer.invoke("snapshots:restore", snapshotId),
+        list: (assetId) => ipcRenderer.invoke("snapshots:list", assetId),
+        restore: (snapshotId) => ipcRenderer.invoke("snapshots:restore", snapshotId),
     },
-});
+};
+
+contextBridge.exposeInMainWorld("agentdock", agentdockApi);

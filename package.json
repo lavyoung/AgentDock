@@ -1,7 +1,7 @@
 {
   "name": "AgentDock",
   "version": "1.0.0",
-  "description": "",
+  "description": "Local-first agent asset registry prototype for managing skills and AGENTS.md assets.",
   "main": "index.js",
   "scripts": {
     "dev": "pnpm --filter @agentdock/desktop dev",
@@ -9,7 +9,7 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "devEngines": {
     "packageManager": {
       "name": "pnpm",
