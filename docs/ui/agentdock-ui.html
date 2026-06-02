@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgentDock</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <!-- FOUC prevention: apply theme before first paint -->
+  <script>
+    (function() {
+      try {
+        var mode = localStorage.getItem('agentdock-theme') || 'dark';
+        var html = document.documentElement;
+        html.classList.remove('theme-light', 'theme-dark');
+        if (mode === 'light') html.classList.add('theme-light');
+        else if (mode === 'dark') html.classList.add('theme-dark');
+        else {
+          var isLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+          html.classList.add(isLight ? 'theme-light' : 'theme-dark');
+        }
+        // Language FOUC: set <html lang> + apply persisted lang before first paint
+        var lang = localStorage.getItem('agentdock-lang') || 'zh';
+        html.setAttribute('lang', lang === 'en' ? 'en' : 'zh-CN');
+      } catch (e) {}
+    })();
+  </script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'PingFang SC', 'Microsoft YaHei', 'system-ui', 'sans-serif']
+          },
+          colors: {
+            ink: {
+              950: 'var(--bg-input)',
+              900: 'var(--bg-panel)',
+              850: 'var(--bg-card)',
+              800: 'var(--bg-hover)',
+              700: 'var(--bg-elevated)',
+            },
+            line: {
+              DEFAULT: 'var(--bd)',
+              soft: 'var(--bd-soft)'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* === Theme tokens (dark default) === */
+    :root {
+      --bg-base: #0a0a0b;
+      --bg-input: #0e0e10;
+      --bg-panel: #101012;
+      --bg-card: #15151a;
+      --bg-hover: #1a1a1f;
+      --bg-elevated: #1a1a1f;
+      --bg-section: rgba(255,255,255,.025);
+      --bg-subsection: rgba(0,0,0,.18);
+      --bg-soft: rgba(255,255,255,.02);
+
+      --fg-primary: #fafafa;
+      --fg-secondary: #e4e4e7;
+      --fg-tertiary: #d4d4d8;
+      --fg-muted: #a1a1aa;
+      --fg-faint: #71717a;
+      --fg-disabled: #52525b;
+
+      --bd: #26262d;
+      --bd-soft: #1d1d24;
+
+      --toggle-off: #3f3f46;
+      --toggle-knob: #ffffff;
+      --scrollbar-thumb: #2a2a30;
+      --scrollbar-thumb-hover: #3a3a42;
+    }
+
+    /* === Light theme === */
+    :root.theme-light {
+      --bg-base: #f4f4f5;
+      --bg-input: #ffffff;
+      --bg-panel: #ffffff;
+      --bg-card: #ffffff;
+      --bg-hover: #f9fafb;
+      --bg-elevated: #ffffff;
+      --bg-section: #f4f4f5;
+      --bg-subsection: #f9fafb;
+      --bg-soft: rgba(0,0,0,.025);
+
+      --fg-primary: #18181b;
+      --fg-secondary: #27272a;
+      --fg-tertiary: #3f3f46;
+      --fg-muted: #52525b;
+      --fg-faint: #71717a;
+      --fg-disabled: #a1a1aa;
+
+      --bd: #e4e4e7;
+      --bd-soft: #f0f0f2;
+
+      --toggle-off: #d4d4d8;
+      --scrollbar-thumb: #d4d4d8;
+      --scrollbar-thumb-hover: #a1a1aa;
+    }
+
+    /* === Base === */
+    html, body { background: var(--bg-base); }
+    body { font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif; color: var(--fg-secondary); }
+
+    /* === Override Tailwind zinc/white text colors to use theme tokens === */
+    .text-white { color: var(--fg-primary) !important; }
+    .text-zinc-100 { color: var(--fg-primary) !important; }
+    .text-zinc-200 { color: var(--fg-primary) !important; }
+    .text-zinc-300 { color: var(--fg-secondary) !important; }
+    .text-zinc-400 { color: var(--fg-muted) !important; }
+    .text-zinc-500 { color: var(--fg-faint) !important; }
+    .text-zinc-600 { color: var(--fg-disabled) !important; }
+    .placeholder-zinc-500::placeholder { color: var(--fg-faint) !important; }
+    .hover\:text-white:hover { color: var(--fg-primary) !important; }
+    .hover\:text-zinc-100:hover { color: var(--fg-primary) !important; }
+    .hover\:text-zinc-200:hover { color: var(--fg-primary) !important; }
+    .hover\:text-zinc-300:hover { color: var(--fg-secondary) !important; }
+
+    /* === Section header bg in light mode (compensate for white-on-white) === */
+    :root.theme-light .bg-ink-850\/40 { background-color: var(--bg-section) !important; }
+    :root.theme-light .bg-ink-950\/40 { background-color: var(--bg-subsection) !important; }
+
+    /* === Light mode accent adjustments for contrast on white === */
+    :root.theme-light .text-emerald-400 { color: #15803d !important; }
+    :root.theme-light .text-emerald-300 { color: #166534 !important; }
+    :root.theme-light .text-yellow-400 { color: #ca8a04 !important; }
+    :root.theme-light .hover\:bg-emerald-500\/10:hover { background-color: rgba(22,163,74,.08) !important; }
+
+    /* === Scrollbar === */
+    .scrollbar-thin::-webkit-scrollbar { width: 8px; height: 8px; }
+    .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 4px; }
+    .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
+
+    /* === Toggle === */
+    .toggle { width: 40px; height: 22px; border-radius: 9999px; position: relative; transition: background-color .18s; flex-shrink: 0; background-color: var(--toggle-off); }
+    .toggle span { position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; background: var(--toggle-knob); border-radius: 9999px; transition: transform .18s; box-shadow: 0 1px 3px rgba(0,0,0,.3); }
+    .toggle[data-state="on"] { background-color: #22c55e; }
+    .toggle[data-state="off"] { background-color: var(--toggle-off); }
+    :root.theme-light .toggle[data-state="on"] { background-color: #16a34a; }
+    .toggle[data-state="on"] span { transform: translateX(18px); }
+
+    /* === Nav item === */
+    .nav-item { position: relative; }
+    .nav-item.active { background: rgba(34,197,94,.10); color: var(--fg-primary); }
+    :root.theme-light .nav-item.active { background: rgba(22,163,74,.08); }
+    .nav-item.active .nav-icon { color: #22c55e; }
+    :root.theme-light .nav-item.active .nav-icon { color: #16a34a; }
+    .nav-item.active::before { content: ''; position: absolute; left: 0; top: 8px; bottom: 8px; width: 3px; background: #22c55e; border-radius: 0 3px 3px 0; }
+    :root.theme-light .nav-item.active::before { background: #16a34a; }
+
+    /* === Tabs === */
+    .tab-btn { background: transparent; color: var(--fg-muted); }
+    .tab-btn.active { background: var(--fg-primary); color: var(--bg-base); }
+
+    /* === Skill card === */
+    .skill-card { transition: border-color .15s, transform .15s, box-shadow .15s; }
+    .skill-card:hover { border-color: var(--fg-disabled); }
+    :root.theme-light .skill-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.06); }
+
+    /* === Badge === */
+    .badge { font-size: 11px; padding: 2px 8px; border-radius: 6px; font-weight: 500; }
+    .badge-green { background: rgba(34,197,94,.12); color: #4ade80; border: 1px solid rgba(34,197,94,.25); }
+    :root.theme-light .badge-green { background: rgba(22,163,74,.10); color: #15803d; border-color: rgba(22,163,74,.25); }
+    .badge-gray { background: rgba(161,161,170,.10); color: var(--fg-muted); border: 1px solid var(--bd); }
+    .badge-red { background: rgba(239,68,68,.10); color: #f87171; border: 1px solid rgba(239,68,68,.22); }
+    .badge-blue { background: rgba(59,130,246,.10); color: #60a5fa; border: 1px solid rgba(59,130,246,.22); }
+    :root.theme-light .badge-blue { background: rgba(37,99,235,.08); color: #2563eb; border-color: rgba(37,99,235,.22); }
+
+    .icon-tile { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+    .agent-row { transition: background .15s; }
+    .agent-row:hover { background: var(--bg-soft); }
+
+    .empty-radio { width: 16px; height: 16px; border-radius: 9999px; border: 1.5px solid var(--fg-faint); display: inline-block; box-sizing: border-box; }
+    .active-radio { width: 16px; height: 16px; border-radius: 9999px; border: 4px solid #22c55e; background: transparent; display: inline-block; box-sizing: border-box; }
+    :root.theme-light .active-radio { border-color: #16a34a; }
+
+    /* === Theme switcher === */
+    .theme-option {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      padding: 12px 8px; border-radius: 8px;
+      border: 1px solid var(--bd); cursor: pointer;
+      transition: all .15s; background: var(--bg-card);
+    }
+    .theme-option:hover { border-color: var(--fg-faint); }
+    .theme-option.active { border-color: #22c55e; background: rgba(34,197,94,.06); }
+    :root.theme-light .theme-option.active { border-color: #16a34a; background: rgba(22,163,74,.06); }
+    .theme-option .theme-icon { color: var(--fg-muted); }
+    .theme-option.active .theme-icon { color: #22c55e; }
+    :root.theme-light .theme-option.active .theme-icon { color: #16a34a; }
+    .theme-option .theme-label { font-size: 12px; color: var(--fg-muted); }
+    .theme-option.active .theme-label { color: var(--fg-primary); font-weight: 500; }
+
+    /* === Language switcher === */
+    .lang-option {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 10px 8px; border-radius: 8px;
+      border: 1px solid var(--bd); cursor: pointer;
+      transition: all .15s; background: var(--bg-card);
+    }
+    .lang-option:hover { border-color: var(--fg-faint); }
+    .lang-option.active { border-color: #22c55e; background: rgba(34,197,94,.06); }
+    :root.theme-light .lang-option.active { border-color: #16a34a; background: rgba(22,163,74,.06); }
+    .lang-option .lang-char { font-size: 14px; font-weight: 600; color: var(--fg-muted); width: 18px; text-align: center; }
+    .lang-option.active .lang-char { color: #22c55e; }
+    :root.theme-light .lang-option.active .lang-char { color: #16a34a; }
+    .lang-option .lang-label { font-size: 13px; color: var(--fg-muted); }
+    .lang-option.active .lang-label { color: var(--fg-primary); font-weight: 500; }
+
+    /* === Category label (sidebar section heading) === */
+    .category-label {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 4px 8px; margin-top: 16px;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--fg-faint);
+    }
+    .category-label:first-child, .category-label.first { margin-top: 0; }
+    .more-btn {
+      width: 22px; height: 22px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 4px;
+      color: var(--fg-faint);
+      transition: all .15s; cursor: pointer;
+      background: transparent; border: none; padding: 0;
+    }
+    .more-btn:hover { background: var(--bg-hover); color: var(--fg-secondary); }
+
+    /* === Popover === */
+    .popover {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0; right: 0;
+      margin: 0 8px;
+      z-index: 100;
+      background: var(--bg-elevated);
+      border: 1px solid var(--bd);
+      border-radius: 8px;
+      padding: 4px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.4);
+      display: none;
+    }
+    .popover.open { display: block; }
+    :root.theme-light .popover { box-shadow: 0 8px 24px rgba(0,0,0,.12); }
+    .popover-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 10px; border-radius: 5px;
+      font-size: 13px; color: var(--fg-secondary);
+      cursor: pointer; background: transparent; border: none; width: 100%;
+      text-align: left;
+    }
+    .popover-item:hover { background: var(--bg-hover); color: var(--fg-primary); }
+    .popover-item i { color: var(--fg-muted); }
+    .popover-item:hover i { color: var(--fg-primary); }
+
+    /* === Nav sub-item (under category label) === */
+    .nav-sub-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 7px 12px; border-radius: 6px;
+      font-size: 13px; color: var(--fg-muted);
+      cursor: pointer; position: relative;
+      transition: color .15s, background .15s;
+    }
+    .nav-sub-item:hover { color: var(--fg-primary); background: var(--bg-hover); }
+    .nav-sub-item.active { background: rgba(34,197,94,.10); color: var(--fg-primary); }
+    :root.theme-light .nav-sub-item.active { background: rgba(22,163,74,.08); }
+    .nav-sub-item.active::before { content: ''; position: absolute; left: 0; top: 6px; bottom: 6px; width: 3px; background: #22c55e; border-radius: 0 3px 3px 0; }
+    :root.theme-light .nav-sub-item.active::before { background: #16a34a; }
+
+    /* === Overview stat card === */
+    .overview-stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--bd);
+      border-radius: 12px;
+      padding: 18px 20px;
+    }
+    .overview-stat-value {
+      font-size: 28px; font-weight: 600; color: var(--fg-primary);
+      letter-spacing: -0.02em; line-height: 1.1;
+    }
+    .overview-stat-label {
+      font-size: 12px; color: var(--fg-muted); margin-bottom: 6px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .overview-agent-row {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr 1fr 110px;
+      align-items: center;
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--bd-soft);
+      transition: background .15s;
+    }
+    .overview-agent-row:hover { background: var(--bg-soft); }
+    .overview-agent-row:last-child { border-bottom: none; }
+    .overview-agent-row.header { background: var(--bg-section); font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--fg-faint); padding-top: 10px; padding-bottom: 10px; }
+    .mini-radio { width: 14px; height: 14px; border-radius: 9999px; display: inline-block; box-sizing: border-box; }
+    .mini-radio.empty { border: 1.5px solid var(--fg-faint); }
+    .mini-radio.active { border: 3px solid #22c55e; }
+    :root.theme-light .mini-radio.active { border-color: #16a34a; }
+  </style>
+</head>
+<body class="text-zinc-200 min-h-screen">
+
+  <div class="flex min-h-screen">
+
+    <!-- ============ Sidebar ============ -->
+    <aside class="w-[224px] flex-shrink-0 bg-ink-900 border-r border-line-soft flex flex-col">
+      <!-- Logo -->
+      <div class="h-16 flex items-center gap-2.5 px-5 border-b border-line-soft">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+          <i data-lucide="aperture" class="w-5 h-5 text-white"></i>
+        </div>
+        <span class="font-semibold text-white tracking-tight">AgentDock</span>
+      </div>
+
+      <!-- Nav -->
+      <nav class="flex-1 py-4 px-3 space-y-0.5 text-sm">
+        <a data-nav="overview" class="nav-item flex items-center gap-3 px-3 py-2 rounded-md text-zinc-400 hover:text-zinc-100 cursor-pointer">
+          <i data-lucide="layout-dashboard" class="w-4 h-4 nav-icon"></i>
+          <span data-i18n="nav.overview">总览</span>
+        </a>
+        <a data-nav="skills" class="nav-item active flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer">
+          <i data-lucide="package" class="w-4 h-4 nav-icon"></i>
+          <span class="flex-1" data-i18n="nav.skills">技</span>
+          <span class="text-[11px] bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 px-1.5 py-0.5 rounded">33</span>
+        </a>
+        <a data-nav="install" class="nav-item flex items-center gap-3 px-3 py-2 rounded-md text-zinc-400 hover:text-zinc-100 cursor-pointer">
+          <i data-lucide="download" class="w-4 h-4 nav-icon"></i>
+          <span data-i18n="nav.install">安装技</span>
+        </a>
+
+        <!-- Scenarios category -->
+        <div class="relative">
+          <div class="category-label first">
+            <span data-i18n="cat.scenarios">场景</span>
+            <button class="more-btn" data-popover-trigger="popover-scenarios" title="更多">
+              <i data-lucide="more-horizontal" class="w-4 h-4"></i>
+            </button>
+          </div>
+          <a data-nav="default-scenario" class="nav-sub-item active">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+            <span data-i18n="nav.defaultScenario">默认场景</span>
+          </a>
+          <div id="popover-scenarios" class="popover">
+            <button class="popover-item" data-action="new-scenario">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span data-i18n="action.newScenario">新增场景</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Workspace category -->
+        <div class="relative">
+          <div class="category-label">
+            <span data-i18n="cat.workspaces">工作区</span>
+            <button class="more-btn" data-popover-trigger="popover-workspace" title="更多">
+              <i data-lucide="more-horizontal" class="w-4 h-4"></i>
+            </button>
+          </div>
+          <a data-nav="projects" class="nav-sub-item">
+            <i data-lucide="link-2" class="w-3.5 h-3.5"></i>
+            <span data-i18n="nav.linkedProjects">关联项目</span>
+          </a>
+          <div id="popover-workspace" class="popover">
+            <button class="popover-item" data-action="new-project">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span data-i18n="action.newProject">新增项目</span>
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <div class="p-3 border-t border-line-soft">
+        <a data-nav="settings" class="nav-item flex items-center gap-3 px-3 py-2 rounded-md text-zinc-400 hover:text-zinc-100 cursor-pointer">
+          <i data-lucide="settings" class="w-4 h-4 nav-icon"></i>
+          <span data-i18n="nav.settings">系统设置</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- ============ Main ============ -->
+    <main class="flex-1 min-w-0">
+
+      <!-- ===== View: Skills ===== -->
+      <section data-view="skills" class="view">
+        <div class="h-16 px-8 flex items-center justify-between border-b border-line-soft">
+          <div class="flex items-center gap-3">
+            <h1 class="text-xl font-semibold text-white" data-i18n="skills.title">技能</h1>
+            <span class="text-zinc-500 text-base">33</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button class="h-9 px-3.5 rounded-md border border-line bg-ink-850 text-zinc-300 text-sm hover:bg-ink-800 flex items-center gap-1.5">
+              <i data-lucide="cloud-upload" class="w-4 h-4"></i><span data-i18n="skills.backup">开始备份</span>
+            </button>
+            <button class="h-9 px-3.5 rounded-md border border-line bg-ink-850 text-zinc-300 text-sm hover:bg-ink-800 flex items-center gap-1.5">
+              <i data-lucide="clipboard-list" class="w-4 h-4"></i><span data-i18n="skills.checkAll">检查全部</span>
+            </button>
+            <button class="h-9 px-3.5 rounded-md border border-emerald-500/40 text-emerald-400 text-sm hover:bg-emerald-500/10 flex items-center gap-1.5">
+              <i data-lucide="refresh-ccw" class="w-4 h-4"></i><span data-i18n="skills.updateAll">全部更新</span> (0)
+            </button>
+            <button class="w-9 h-9 rounded-md border border-line bg-ink-850 text-zinc-300 hover:bg-ink-800 flex items-center justify-center">
+              <i data-lucide="layout-grid" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="p-8 space-y-6">
+          <!-- Search + Tabs -->
+          <div class="flex items-center gap-4">
+            <div class="flex-1 relative">
+              <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500"></i>
+              <input type="text" data-i18n-placeholder="skills.searchPlaceholder" placeholder="搜索技能名称、描述、标签…" class="w-full h-10 pl-10 pr-4 bg-ink-900 border border-line rounded-md text-sm placeholder-zinc-500 focus:outline-none focus:border-zinc-600" />
+            </div>
+            <div class="flex bg-ink-900 border border-line rounded-md p-1 text-sm">
+              <button class="tab-btn active px-4 h-8 rounded" data-tab="all" data-i18n="common.tab.all">全部</button>
+              <button class="tab-btn px-4 h-8 rounded" data-tab="enabled" data-i18n="common.tab.enabled">已启用</button>
+              <button class="tab-btn px-4 h-8 rounded" data-tab="disabled" data-i18n="common.tab.disabled">未启用</button>
+            </div>
+          </div>
+
+          <!-- Grid -->
+          <div id="skills-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            <!-- Card 1 -->
+            <div class="skill-card bg-ink-900 border border-line rounded-xl p-5 flex flex-col gap-4" data-enabled="true">
+              <div class="flex items-start justify-between">
+                <div class="icon-tile bg-blue-500/15 border border-blue-500/20">
+                  <svg class="w-6 h-6 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 0-4 4v.5A4 4 0 0 0 5 10v1a4 4 0 0 0 1 2.83V18a4 4 0 0 0 4 4h4a4 4 0 0 0 4-4v-4.17A4 4 0 0 0 19 11v-1a4 4 0 0 0-3-3.5V6a4 4 0 0 0-4-4z"/><circle cx="12" cy="12" r="2"/></svg>
+                </div>
+                <span class="badge badge-blue">AI</span>
+              </div>
+              <div>
+                <h3 class="text-white font-medium">Auto-GPT Assistant</h3>
+                <p class="text-zinc-500 text-sm mt-1.5 leading-relaxed line-clamp-2">基于 GPT-4 的自主任务执行引擎，支持自动化工作流与长短期记忆管理</p>
+              </div>
+              <div class="flex items-center justify-between mt-auto pt-3 border-t border-line-soft">
+                <div class="text-zinc-500 text-xs flex items-center gap-3">
+                  <span class="flex items-center gap-1"><i data-lucide="hard-drive" class="w-3 h-3"></i>128MB</span>
+                  <span>v2.1.0</span>
+                </div>
+                <button class="toggle" data-state="on"><span></span></button>
+              </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="skill-card bg-ink-900 border border-line rounded-xl p-5 flex flex-col gap-4" data-enabled="true">
+              <div class="flex items-start justify-between">
+                <div class="icon-tile bg-orange-500/15 border border-orange-500/20">
+                  <i data-lucide="bar-chart-3" class="w-5 h-5 text-orange-400"></i>
+                </div>
+                <span class="badge badge-orange" style="background:rgba(249,115,22,.12);color:#fb923c;border-color:rgba(249,115,22,.25)">系统工具</span>
+              </div>
+              <div>
+                <h3 class="text-white font-medium">System Monitor Pro</h3>
+                <p class="text-zinc-500 text-sm mt-1.5 leading-relaxed line-clamp-2">实时监控 CPU、内存及网络 IO，提供详细的性能分析报告与异常告警</p>
+              </div>
+              <div class="flex items-center justify-between mt-auto pt-3 border-t border-line-soft">
+                <div class="text-zinc-500 text-xs flex items-center gap-3">
+                  <span class="flex items-center gap-1"><i data-lucide="hard-drive" class="w-3 h-3"></i>32MB</span>
+                  <span>v1.4.5</span>
+                </div>
+                <button class="toggle" data-state="on"><span></span></button>
+              </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="skill-card bg-ink-900 border border-line rounded-xl p-5 flex flex-col gap-4" data-enabled="false">
+              <div class="flex items-start justify-between">
+                <div class="icon-tile bg-purple-500/15 border border-purple-500/20">
+                  <i data-lucide="palette" class="w-5 h-5 text-purple-400"></i>
+                </div>
+                <span class="badge" style="background:rgba(168,85,247,.12);color:#c084fc;border-color:rgba(168,85,247,.25)">增强组件</span>
+              </div>
+              <div>
+                <h3 class="text-white font-medium">Tailwind UI Kit</h3>
+                <p class="text-zinc-500 text-sm mt-1.5 leading-relaxed line-clamp-2">预设的精心UI 组件库，支持一键导出代码，显著提升开发效率</p>
+              </div>
+              <div class="flex items-center justify-between mt-auto pt-3 border-t border-line-soft">
+                <div class="text-zinc-500 text-xs flex items-center gap-3">
+                  <span class="flex items-center gap-1"><i data-lucide="hard-drive" class="w-3 h-3"></i>45MB</span>
+                  <span>v3.0.1</span>
+                </div>
+                <button class="toggle" data-state="off"><span></span></button>
+              </div>
+            </div>
+
+            <!-- Card 4 -->
+            <div class="skill-card bg-ink-900 border border-line rounded-xl p-5 flex flex-col gap-4" data-enabled="true">
+              <div class="flex items-start justify-between">
+                <div class="icon-tile bg-red-500/15 border border-red-500/20">
+                  <svg class="w-5 h-5 text-red-400" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L9 5H6a2 2 0 0 0-2 2v3l-3 3 3 3v3a2 2 0 0 0 2 2h3l3 3 3-3h3a2 2 0 0 0 2-2v-3l3-3-3-3V7a2 2 0 0 0-2-2h-3l-3-3zm-1 6h2v6h-2V8zm0 8h2v2h-2v-2z"/></svg>
+                </div>
+                <span class="badge" style="background:rgba(244,114,182,.12);color:#f472b6;border-color:rgba(244,114,182,.25)">开发工</span>
+              </div>
+              <div>
+                <h3 class="text-white font-medium">Git Flow Helper</h3>
+                <p class="text-zinc-500 text-sm mt-1.5 leading-relaxed line-clamp-2">简化复杂的 Git 分支管理流程，支持自动化合并请求与冲突预警</p>
+              </div>
+              <div class="flex items-center justify-between mt-auto pt-3 border-t border-line-soft">
+                <div class="text-zinc-500 text-xs flex items-center gap-3">
+                  <span class="flex items-center gap-1"><i data-lucide="hard-drive" class="w-3 h-3"></i>18MB</span>
+                  <span>v1.2.0</span>
+                </div>
+                <button class="toggle" data-state="on"><span></span></button>
+              </div>
+            </div>
+
+            <!-- Card 5 -->
+            <div class="skill-card bg-ink-900 border border-line rounded-xl p-5 flex flex-col gap-4" data-enabled="true">
+              <div class="flex items-start justify-between">
+                <div class="icon-tile bg-emerald-500/15 border border-emerald-500/20">
+                  <i data-lucide="code-2" class="w-5 h-5 text-emerald-400"></i>
+                </div>
+                <span class="badge" style="background:rgba(244,114,182,.12);color:#f472b6;border-color:rgba(244,114,182,.25)">开发工</span>
+              </div>
+              <div>
+                <h3 class="text-white font-medium">Smart Linter</h3>
+                <p class="text-zinc-500 text-sm mt-1.5 leading-relaxed line-clamp-2">基于 AI 的代码质量检测工具，支持 20+ 种编程语言的实时风格校验</p>
+              </div>
+              <div class="flex items-center justify-between mt-auto pt-3 border-t border-line-soft">
+                <div class="text-zinc-500 text-xs flex items-center gap-3">
+                  <span class="flex items-center gap-1"><i data-lucide="hard-drive" class="w-3 h-3"></i>64MB</span>
+                  <span>v2.0.4</span>
+                </div>
+                <button class="toggle" data-state="on"><span></span></button>
+              </div>
+            </div>
+
+            <!-- Card 6 -->
+            <div class="skill-card bg-ink-900 border border-line rounded-xl p-5 flex flex-col gap-4" data-enabled="false">
+              <div class="flex items-start justify-between">
+                <div class="icon-tile bg-yellow-500/15 border border-yellow-500/20">
+                  <svg class="w-5 h-5 text-yellow-400" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zm-10 9v4l10 5 10-5v-4l-10 5L2 11z"/></svg>
+                </div>
+                <span class="badge" style="background:rgba(168,85,247,.12);color:#c084fc;border-color:rgba(168,85,247,.25)">增强组件</span>
+              </div>
+              <div>
+                <h3 class="text-white font-medium">Rapid API Tester</h3>
+                <p class="text-zinc-500 text-sm mt-1.5 leading-relaxed line-clamp-2">轻量级接口调试工具，支持 GraphQL、REST 与WebSocket 协议测试</p>
+              </div>
+              <div class="flex items-center justify-between mt-auto pt-3 border-t border-line-soft">
+                <div class="text-zinc-500 text-xs flex items-center gap-3">
+                  <span class="flex items-center gap-1"><i data-lucide="hard-drive" class="w-3 h-3"></i>22MB</span>
+                  <span>v0.9.8</span>
+                </div>
+                <button class="toggle" data-state="off"><span></span></button>
+              </div>
+            </div>
+
+            <!-- Card 7 -->
+            <div class="skill-card bg-ink-900 border border-line rounded-xl p-5 flex flex-col gap-4" data-enabled="true">
+              <div class="flex items-start justify-between">
+                <div class="icon-tile bg-cyan-500/15 border border-cyan-500/20">
+                  <i data-lucide="database" class="w-5 h-5 text-cyan-400"></i>
+                </div>
+                <span class="badge badge-orange" style="background:rgba(249,115,22,.12);color:#fb923c;border-color:rgba(249,115,22,.25)">系统工具</span>
+              </div>
+              <div>
+                <h3 class="text-white font-medium">DB Explorer</h3>
+                <p class="text-zinc-500 text-sm mt-1.5 leading-relaxed line-clamp-2">统一的数据库管理界面，支持可视化查询、结构同步及数据导出</p>
+              </div>
+              <div class="flex items-center justify-between mt-auto pt-3 border-t border-line-soft">
+                <div class="text-zinc-500 text-xs flex items-center gap-3">
+                  <span class="flex items-center gap-1"><i data-lucide="hard-drive" class="w-3 h-3"></i>76MB</span>
+                  <span>v4.2.1</span>
+                </div>
+                <button class="toggle" data-state="on"><span></span></button>
+              </div>
+            </div>
+
+            <!-- Card 8 -->
+            <div class="skill-card bg-ink-900 border border-line rounded-xl p-5 flex flex-col gap-4" data-enabled="true">
+              <div class="flex items-start justify-between">
+                <div class="icon-tile bg-indigo-500/15 border border-indigo-500/20">
+                  <i data-lucide="cloud-cog" class="w-5 h-5 text-indigo-400"></i>
+                </div>
+                <span class="badge" style="background:rgba(168,85,247,.12);color:#c084fc;border-color:rgba(168,85,247,.25)">增强组件</span>
+              </div>
+              <div>
+                <h3 class="text-white font-medium">Cloud Sync Engine</h3>
+                <p class="text-zinc-500 text-sm mt-1.5 leading-relaxed line-clamp-2">多端配置自动同步引擎，确保您的技能设置在所有设备上保持一致</p>
+              </div>
+              <div class="flex items-center justify-between mt-auto pt-3 border-t border-line-soft">
+                <div class="text-zinc-500 text-xs flex items-center gap-3">
+                  <span class="flex items-center gap-1"><i data-lucide="hard-drive" class="w-3 h-3"></i>12MB</span>
+                  <span>v1.0.0</span>
+                </div>
+                <button class="toggle" data-state="on"><span></span></button>
+              </div>
+            </div>
+
+            <!-- Card 9 -->
+            <div class="skill-card bg-ink-900 border border-line rounded-xl p-5 flex flex-col gap-4" data-enabled="false">
+              <div class="flex items-start justify-between">
+                <div class="icon-tile bg-pink-500/15 border border-pink-500/20">
+                  <i data-lucide="image" class="w-5 h-5 text-pink-400"></i>
+                </div>
+                <span class="badge" style="background:rgba(236,72,153,.12);color:#f472b6;border-color:rgba(236,72,153,.25)">媒体工具</span>
+              </div>
+              <div>
+                <h3 class="text-white font-medium">OptiImage</h3>
+                <p class="text-zinc-500 text-sm mt-1.5 leading-relaxed line-clamp-2">无损图片压缩与格式转换工具，支持批量处理与WebP 自动优化</p>
+              </div>
+              <div class="flex items-center justify-between mt-auto pt-3 border-t border-line-soft">
+                <div class="text-zinc-500 text-xs flex items-center gap-3">
+                  <span class="flex items-center gap-1"><i data-lucide="hard-drive" class="w-3 h-3"></i>52MB</span>
+                  <span>v2.3.0</span>
+                </div>
+                <button class="toggle" data-state="off"><span></span></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== View: 系统设置 ===== -->
+      <section data-view="settings" class="view hidden">
+        <div class="h-16 px-8 flex items-center justify-between border-b border-line-soft">
+          <div class="flex items-center gap-3">
+            <button class="text-zinc-400 hover:text-white text-sm flex items-center gap-1.5">
+              <i data-lucide="arrow-left" class="w-4 h-4"></i><span data-i18n="common.back">返回</span>
+            </button>
+          </div>
+          <h1 class="text-xl font-semibold text-white absolute left-1/2 -translate-x-1/2" data-i18n="settings.title">系统设置</h1>
+          <div></div>
+        </div>
+
+        <div class="p-8 max-w-3xl mx-auto space-y-6">
+          <!-- 通用设置 -->
+          <div class="bg-ink-900 border border-line rounded-xl overflow-hidden">
+            <div class="px-6 py-3 text-sm text-zinc-400 bg-ink-850/40 border-b border-line-soft" data-i18n="settings.general">通用设置</div>
+            <div class="divide-y divide-line-soft">
+              <div class="px-6 py-4">
+                <div class="flex items-center gap-3 mb-3">
+                  <i data-lucide="languages" class="w-4 h-4 text-zinc-500"></i>
+                  <span class="text-zinc-200" data-i18n="settings.language">语言</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <button class="lang-option" data-lang="zh">
+                    <span class="lang-char"></span>
+                    <span class="lang-label" data-i18n="settings.language.zh">中文</span>
+                  </button>
+                  <button class="lang-option" data-lang="en">
+                    <span class="lang-char">A</span>
+                    <span class="lang-label">English</span>
+                  </button>
+                </div>
+              </div>
+              <div class="px-6 py-4">
+                <div class="flex items-center gap-3 mb-3">
+                  <i data-lucide="palette" class="w-4 h-4 text-zinc-500"></i>
+                  <span class="text-zinc-200" data-i18n="settings.theme">主题模式</span>
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                  <button class="theme-option" data-theme="dark">
+                    <i data-lucide="moon" class="w-5 h-5 theme-icon"></i>
+                    <span class="theme-label" data-i18n="common.themeDark">黑夜模式</span>
+                  </button>
+                  <button class="theme-option" data-theme="light">
+                    <i data-lucide="sun" class="w-5 h-5 theme-icon"></i>
+                    <span class="theme-label" data-i18n="common.themeLight">白天模式</span>
+                  </button>
+                  <button class="theme-option" data-theme="system">
+                    <i data-lucide="monitor" class="w-5 h-5 theme-icon"></i>
+                    <span class="theme-label" data-i18n="common.themeSystem">跟随系统</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- AGENT 管理 -->
+          <div class="bg-ink-900 border border-line rounded-xl overflow-hidden">
+            <div class="px-6 py-3 text-sm text-zinc-400 bg-ink-850/40 border-b border-line-soft" data-i18n="agent.title">AGENT 管理</div>
+            <div class="px-6 py-5 space-y-5">
+              <!-- Stats row -->
+              <div class="flex items-center gap-6 text-sm flex-wrap">
+                <div class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span class="text-zinc-300" data-i18n="agent.active">已激</span><span class="text-emerald-400 font-semibold">3</span></div>
+                <div class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span><span class="text-zinc-300" data-i18n="agent.enabled">已启</span><span class="text-blue-400 font-semibold">3</span></div>
+                <div class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-red-400"></span><span class="text-zinc-300" data-i18n="agent.custom">自定</span><span class="text-red-400 font-semibold">0</span></div>
+                <span class="text-zinc-500 text-xs ml-auto"><span data-i18n="agent.total">支持总数</span> 45</span>
+              </div>
+              <!-- Agent dir -->
+              <div>
+                <label class="text-zinc-500 text-xs mb-2 block" data-i18n="agent.dir">Agent 程序目录</label>
+                <div class="flex gap-2">
+                  <input type="text" value="/home/user/agents" class="flex-1 h-9 px-3 bg-ink-950 border border-line rounded-md text-sm text-zinc-300 focus:outline-none focus:border-zinc-600" />
+                  <button class="h-9 px-3 text-sm text-emerald-400 hover:bg-emerald-500/10 rounded-md" data-i18n="settings.browse">浏览</button>
+                </div>
+              </div>
+              <!-- Action buttons -->
+              <div class="flex items-center gap-2 flex-wrap pt-1">
+                <button class="h-8 px-3 rounded-md bg-emerald-500 hover:bg-emerald-600 text-white text-sm flex items-center gap-1.5">
+                  <i data-lucide="plus" class="w-4 h-4"></i><span data-i18n="agent.add">新增 Agent</span>
+                </button>
+                <button class="h-8 px-3 rounded-md border border-line text-zinc-300 text-sm hover:bg-ink-800" data-i18n="agent.enableAll">全部启用</button>
+                <button class="h-8 px-3 rounded-md border border-red-500/40 text-red-400 text-sm hover:bg-red-500/10" data-i18n="agent.disableAll">全部禁用</button>
+                <button class="h-8 px-3 rounded-md text-zinc-400 text-sm hover:text-white flex items-center gap-1.5">
+                  <i data-lucide="rotate-cw" class="w-4 h-4"></i><span data-i18n="agent.redetect">重新检</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Agent 列表 -->
+          <div class="bg-ink-900 border border-line rounded-xl overflow-hidden">
+            <div class="px-6 py-3 text-sm text-zinc-400 bg-ink-850/40 border-b border-line-soft" data-i18n="agent.list">Agent 列表</div>
+            <div class="px-6 py-2.5 text-xs text-zinc-500 bg-ink-950/40 border-b border-line-soft" data-i18n="agent.builtin">内置 Agent</div>
+            <div class="divide-y divide-line-soft">
+              <div class="agent-row px-6 py-3.5 flex items-center gap-4">
+                <span class="active-radio"></span>
+                <div class="flex-1 min-w-0 flex items-center gap-3 flex-wrap">
+                  <span class="text-white font-medium">OpenCode</span>
+                  <span class="badge badge-green" data-i18n="overview.status.enabled">已启</span>
+                </div>
+                <span class="text-zinc-500 text-sm truncate">~/config/opencode/skills</span>
+              </div>
+              <div class="agent-row px-6 py-3.5 flex items-center gap-4">
+                <span class="empty-radio"></span>
+                <span class="text-white font-medium flex-1">Claude Code</span>
+                <span class="badge badge-gray">未安</span>
+              </div>
+              <div class="agent-row px-6 py-3.5 flex items-center gap-4">
+                <span class="empty-radio"></span>
+                <span class="text-white font-medium flex-1">Gemini CLI</span>
+                <span class="badge badge-gray">未安</span>
+              </div>
+              <div class="agent-row px-6 py-3.5 flex items-center gap-4">
+                <span class="empty-radio"></span>
+                <span class="text-white font-medium flex-1">Windsurf</span>
+                <span class="badge badge-gray">未安</span>
+              </div>
+            </div>
+            <div class="px-6 py-2.5 text-xs text-zinc-500 bg-ink-950/40 border-y border-line-soft" data-i18n="agent.more">更多 Agent</div>
+            <div class="divide-y divide-line-soft">
+              <div class="agent-row px-6 py-3.5 flex items-center gap-4">
+                <span class="empty-radio"></span>
+                <span class="text-white font-medium flex-1">CodeBuddy</span>
+                <span class="badge badge-gray">未安</span>
+              </div>
+              <div class="agent-row px-6 py-3.5 flex items-center gap-4">
+                <span class="empty-radio"></span>
+                <span class="text-white font-medium flex-1">Cursor CLI</span>
+                <span class="badge badge-gray">未安</span>
+              </div>
+              <div class="agent-row px-6 py-3.5 flex items-center gap-4">
+                <span class="empty-radio"></span>
+                <span class="text-white font-medium flex-1">Copilot CLI</span>
+                <span class="badge badge-gray">未安</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 数据与更多-->
+          <div class="bg-ink-900 border border-line rounded-xl overflow-hidden">
+            <div class="px-6 py-3 text-sm text-zinc-400 bg-ink-850/40 border-b border-line-soft" data-i18n="settings.data">数据与更</div>
+            <div class="divide-y divide-line-soft">
+              <div class="px-6 py-4">
+                <div class="flex items-center gap-3 mb-3">
+                  <i data-lucide="folder-open" class="w-4 h-4 text-zinc-500"></i>
+                  <span class="text-zinc-200 text-sm" data-i18n="settings.dataPath">数据存储路径</span>
+                </div>
+                <div class="flex gap-2">
+                  <input type="text" value="/Users/skills/data" class="flex-1 h-10 px-3 bg-ink-950 border border-line rounded-md text-sm text-zinc-300 focus:outline-none focus:border-zinc-600" />
+                  <button class="text-sm text-emerald-400 hover:text-emerald-300 px-2" data-i18n="settings.browse">浏览</button>
+                </div>
+              </div>
+              <div class="px-6 py-4 flex items-center justify-between">
+                <div class="flex items-start gap-3">
+                  <i data-lucide="refresh-ccw" class="w-4 h-4 text-zinc-500 mt-0.5"></i>
+                  <div>
+                    <div class="text-zinc-200 text-sm" data-i18n="settings.autoUpdate">自动更新</div>
+                    <div class="text-zinc-500 text-xs mt-0.5" data-i18n="settings.autoUpdateDesc">在有新版本时自动下载更新</div>
+                  </div>
+                </div>
+                <button class="toggle" data-state="on"><span></span></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 通知与提供-->
+          <div class="bg-ink-900 border border-line rounded-xl overflow-hidden">
+            <div class="px-6 py-3 text-sm text-zinc-400 bg-ink-850/40 border-b border-line-soft" data-i18n="settings.notifications">通知与提</div>
+            <div class="divide-y divide-line-soft">
+              <div class="px-6 py-4 flex items-center justify-between">
+                <div class="flex items-start gap-3">
+                  <i data-lucide="bell" class="w-4 h-4 text-zinc-500 mt-0.5"></i>
+                  <div>
+                    <div class="text-zinc-200 text-sm" data-i18n="settings.notifications">通知设置</div>
+                    <div class="text-zinc-500 text-xs mt-0.5" data-i18n="settings.notificationsDesc">允许应用发送通知提醒</div>
+                  </div>
+                </div>
+                <button class="toggle" data-state="on"><span></span></button>
+              </div>
+              <div class="px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <i data-lucide="volume-2" class="w-4 h-4 text-zinc-500"></i>
+                  <span class="text-zinc-200 text-sm" data-i18n="settings.sound">声音提醒</span>
+                </div>
+                <button class="toggle" data-state="off"><span></span></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 关于 -->
+          <div class="bg-ink-900 border border-line rounded-xl overflow-hidden">
+            <div class="px-6 py-3 text-sm text-zinc-400 bg-ink-850/40 border-b border-line-soft" data-i18n="settings.about">关于</div>
+            <div class="px-6 py-10 flex flex-col items-center text-center">
+              <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/25 mb-4">
+                <span class="text-white font-bold text-2xl">A</span>
+              </div>
+              <div class="text-white font-semibold text-lg">AgentDock</div>
+              <div class="text-zinc-500 text-sm mt-1"><span data-i18n="settings.version">版本</span> 1.0.0</div>
+              <div class="text-zinc-600 text-xs mt-4" data-i18n="settings.copyright">© 2025 AgentDock. All rights reserved.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== View: 总览 ===== -->
+      <section data-view="overview" class="view hidden">
+        <div class="h-16 px-8 flex items-center border-b border-line-soft">
+          <h1 class="text-xl font-semibold text-white" data-i18n="overview.title">总览</h1>
+        </div>
+
+        <div class="p-8 max-w-5xl space-y-6">
+          <!-- Stats row -->
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="overview-stat-card">
+              <div class="overview-stat-label">
+                <i data-lucide="package" class="w-3.5 h-3.5 text-emerald-500"></i>
+                <span data-i18n="overview.totalSkills">已启用技</span>
+              </div>
+              <div class="overview-stat-value">33</div>
+            </div>
+            <div class="overview-stat-card">
+              <div class="overview-stat-label">
+                <i data-lucide="book-marked" class="w-3.5 h-3.5 text-blue-500"></i>
+                <span data-i18n="overview.totalRules">已配置规</span>
+              </div>
+              <div class="overview-stat-value text-zinc-500">—<span class="text-xs font-normal" data-i18n="overview.rulesPending">待定</span></div>
+            </div>
+            <div class="overview-stat-card">
+              <div class="overview-stat-label">
+                <i data-lucide="layers" class="w-3.5 h-3.5 text-purple-500"></i>
+                <span data-i18n="overview.totalScenarios">场景</span>
+              </div>
+              <div class="overview-stat-value">1</div>
+            </div>
+            <div class="overview-stat-card">
+              <div class="overview-stat-label">
+                <i data-lucide="cpu" class="w-3.5 h-3.5 text-orange-500"></i>
+                <span data-i18n="overview.totalAgents">Agent </span>
+              </div>
+              <div class="overview-stat-value">3 <span class="text-zinc-500 text-base font-normal">/ 7</span></div>
+            </div>
+          </div>
+
+          <!-- Agent breakdown -->
+          <div class="bg-ink-900 border border-line rounded-xl overflow-hidden">
+            <div class="px-6 py-4 border-b border-line-soft flex items-center gap-2">
+              <span class="w-1 h-4 bg-emerald-500 rounded"></span>
+              <h2 class="text-white font-medium" data-i18n="overview.agentBreakdown">Agent 资产引用</h2>
+            </div>
+            <div class="overview-agent-row header">
+              <div>AGENT</div>
+              <div data-i18n="overview.refSkills">引用 Skills</div>
+              <div data-i18n="overview.refRules">规则</div>
+              <div class="text-right" data-i18n="common.status">状</div>
+            </div>
+            <div class="overview-agent-row">
+              <div class="flex items-center gap-2.5">
+                <span class="mini-radio active"></span>
+                <span class="text-white font-medium">OpenCode</span>
+              </div>
+              <div class="text-zinc-200">12</div>
+              <div class="text-zinc-500"></div>
+              <div class="text-right"><span class="badge badge-green" data-i18n="overview.status.enabled">已启</span></div>
+            </div>
+            <div class="overview-agent-row">
+              <div class="flex items-center gap-2.5">
+                <span class="mini-radio empty"></span>
+                <span class="text-white font-medium">Claude Code</span>
+              </div>
+              <div class="text-zinc-500"></div>
+              <div class="text-zinc-500"></div>
+              <div class="text-right"><span class="badge badge-gray" data-i18n="overview.status.uninstalled">未安</span></div>
+            </div>
+            <div class="overview-agent-row">
+              <div class="flex items-center gap-2.5">
+                <span class="mini-radio empty"></span>
+                <span class="text-white font-medium">Gemini CLI</span>
+              </div>
+              <div class="text-zinc-500"></div>
+              <div class="text-zinc-500"></div>
+              <div class="text-right"><span class="badge badge-gray" data-i18n="overview.status.uninstalled">未安</span></div>
+            </div>
+            <div class="overview-agent-row">
+              <div class="flex items-center gap-2.5">
+                <span class="mini-radio empty"></span>
+                <span class="text-white font-medium">Windsurf</span>
+              </div>
+              <div class="text-zinc-500"></div>
+              <div class="text-zinc-500"></div>
+              <div class="text-right"><span class="badge badge-gray" data-i18n="overview.status.uninstalled">未安</span></div>
+            </div>
+            <div class="overview-agent-row">
+              <div class="flex items-center gap-2.5">
+                <span class="mini-radio empty"></span>
+                <span class="text-white font-medium">CodeBuddy</span>
+              </div>
+              <div class="text-zinc-500"></div>
+              <div class="text-zinc-500"></div>
+              <div class="text-right"><span class="badge badge-gray" data-i18n="overview.status.uninstalled">未安</span></div>
+            </div>
+            <div class="overview-agent-row">
+              <div class="flex items-center gap-2.5">
+                <span class="mini-radio empty"></span>
+                <span class="text-white font-medium">Cursor CLI</span>
+              </div>
+              <div class="text-zinc-500"></div>
+              <div class="text-zinc-500"></div>
+              <div class="text-right"><span class="badge badge-gray" data-i18n="overview.status.uninstalled">未安</span></div>
+            </div>
+            <div class="overview-agent-row">
+              <div class="flex items-center gap-2.5">
+                <span class="mini-radio empty"></span>
+                <span class="text-white font-medium">Copilot CLI</span>
+              </div>
+              <div class="text-zinc-500"></div>
+              <div class="text-zinc-500"></div>
+              <div class="text-right"><span class="badge badge-gray" data-i18n="overview.status.uninstalled">未安</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section data-view="install" class="view hidden">
+        <div class="p-8">
+          <h1 class="text-xl font-semibold text-white">安装技</h1>
+          <p class="text-zinc-500 mt-2 text-sm">从仓库浏览并安装新技能</p>
+        </div>
+      </section>
+      <section data-view="scenarios" class="view hidden">
+        <div class="p-8">
+          <h1 class="text-xl font-semibold text-white">场景</h1>
+          <p class="text-zinc-500 mt-2 text-sm">管理预设场景组合</p>
+        </div>
+      </section>
+      <section data-view="default-scenario" class="view hidden">
+        <div class="h-16 px-8 flex items-center gap-3 border-b border-line-soft">
+          <i data-lucide="sparkles" class="w-5 h-5 text-emerald-400"></i>
+          <h1 class="text-xl font-semibold text-white" data-i18n="nav.defaultScenario">默认场景</h1>
+        </div>
+        <div class="p-8 max-w-3xl">
+          <div class="bg-ink-900 border border-line rounded-xl p-6">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="w-1 h-4 bg-emerald-500 rounded"></span>
+              <h2 class="text-white font-medium" data-i18n="scenario.builtIn">内置默认场景</h2>
+            </div>
+            <p class="text-zinc-400 text-sm leading-relaxed mb-5" data-i18n="scenario.builtInDesc">默认场景是AgentDock 内置的开箱即用配置。包含12 个常用Skills 与OpenCode 作为默认 Agent</p>
+            <div class="grid grid-cols-3 gap-3">
+              <div class="bg-ink-950 border border-line rounded-lg p-3">
+                <div class="text-zinc-500 text-xs mb-1" data-i18n="scenario.skills">Skills</div>
+                <div class="text-white text-lg font-semibold">12</div>
+              </div>
+              <div class="bg-ink-950 border border-line rounded-lg p-3">
+                <div class="text-zinc-500 text-xs mb-1" data-i18n="scenario.rules">Rules</div>
+                <div class="text-zinc-500 text-lg font-semibold">—<span class="text-xs font-normal" data-i18n="overview.rulesPending">待定</span></div>
+              </div>
+              <div class="bg-ink-950 border border-line rounded-lg p-3">
+                <div class="text-zinc-500 text-xs mb-1" data-i18n="scenario.agent">Agent</div>
+                <div class="text-white text-lg font-semibold">OpenCode</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section data-view="projects" class="view hidden">
+        <div class="p-8">
+          <h1 class="text-xl font-semibold text-white">关联项目</h1>
+          <p class="text-zinc-500 mt-2 text-sm">绑定到你的项目仓库</p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    // ===== Theme management =====
+    const THEME_KEY = 'agentdock-theme';
+    let currentTheme = localStorage.getItem(THEME_KEY) || 'dark';
+
+    function resolveTheme(mode) {
+      if (mode === 'light' || mode === 'dark') return mode;
+      // system mode: follow OS
+      return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    }
+
+    function applyTheme(mode, persist) {
+      currentTheme = mode;
+      const resolved = resolveTheme(mode);
+      const html = document.documentElement;
+      html.classList.remove('theme-light', 'theme-dark');
+      html.classList.add(resolved === 'light' ? 'theme-light' : 'theme-dark');
+
+      // Update switcher active state
+      document.querySelectorAll('.theme-option').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-theme') === mode);
+      });
+
+      if (persist !== false) {
+        try { localStorage.setItem(THEME_KEY, mode); } catch (e) {}
+      }
+    }
+
+    // Sync switcher state with stored value
+    applyTheme(currentTheme, false);
+
+    // Click handlers
+    document.querySelectorAll('.theme-option').forEach(btn => {
+      btn.addEventListener('click', () => applyTheme(btn.getAttribute('data-theme')));
+    });
+
+    // React to OS theme changes when in system mode
+    window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
+      if (currentTheme === 'system') applyTheme('system', false);
+    });
+
+    // ===== i18n =====
+    const LANG_KEY = 'agentdock-lang';
+    const i18n = {
+      zh: {
+        'app.name': 'AgentDock',
+        'app.tagline': 'AI Agent 资产管理',
+        'nav.overview': '总览',
+        'nav.skills': '技能',
+        'nav.install': '安装技能',
+        'nav.settings': '系统设置',
+        'nav.defaultScenario': '默认场景',
+        'nav.linkedProjects': '关联项目',
+        'cat.scenarios': '场景',
+        'cat.workspaces': '工作区',
+        'action.newScenario': '新增场景',
+        'action.newProject': '新增项目',
+        'skills.title': '技能',
+        'skills.backup': '开始备份',
+        'skills.checkAll': '检查全部',
+        'skills.updateAll': '全部更新',
+        'skills.searchPlaceholder': '搜索技能名称、描述、标签…',
+        'common.tab.all': '全部',
+        'common.tab.enabled': '已启用',
+        'common.tab.disabled': '未启用',
+        'common.back': '返回',
+        'common.themeDark': '黑夜模式',
+        'common.themeLight': '白天模式',
+        'common.themeSystem': '跟随系统',
+        'common.status': '状态',
+        'settings.title': '系统设置',
+        'settings.general': '通用设置',
+        'settings.language': '语言',
+        'settings.language.zh': '中文',
+        'settings.theme': '主题模式',
+        'settings.browse': '浏览',
+        'settings.data': '数据与更新',
+        'settings.dataPath': '数据存储路径',
+        'settings.autoUpdate': '自动更新',
+        'settings.autoUpdateDesc': '在有新版本时自动下载更新',
+        'settings.notifications': '通知设置',
+        'settings.notificationsDesc': '允许应用发送通知提醒',
+        'settings.sound': '声音提醒',
+        'settings.about': '关于',
+        'settings.version': '版本',
+        'settings.copyright': '© 2025 AgentDock. All rights reserved.',
+        'agent.title': 'AGENT 管理',
+        'agent.active': '已激活',
+        'agent.enabled': '已启用',
+        'agent.custom': '自定义',
+        'agent.total': '支持总数',
+        'agent.dir': 'Agent 程序目录',
+        'agent.add': '新增 Agent',
+        'agent.enableAll': '全部启用',
+        'agent.disableAll': '全部禁用',
+        'agent.redetect': '重新检测',
+        'agent.list': 'Agent 列表',
+        'agent.builtin': '内置 Agent',
+        'agent.more': '更多 Agent',
+        'overview.title': '总览',
+        'overview.totalSkills': '已启用技能',
+        'overview.totalRules': '已配置规则',
+        'overview.totalScenarios': '场景数',
+        'overview.totalAgents': 'Agent 数',
+        'overview.rulesPending': '待定',
+        'overview.agentBreakdown': 'Agent 资产引用',
+        'overview.refSkills': '引用 Skills',
+        'overview.refRules': '规则',
+        'overview.status.enabled': '已启用',
+        'overview.status.uninstalled': '未安装',
+        'scenario.builtIn': '内置默认场景',
+        'scenario.builtInDesc': '默认场景是 AgentDock 内置的开箱即用配置，包含 12 个常用 Skills 与 OpenCode 作为默认 Agent。',
+        'scenario.skills': 'Skills',
+        'scenario.rules': 'Rules',
+        'scenario.agent': 'Agent',
+      },
+      en: {
+        'app.name': 'AgentDock',
+        'app.tagline': 'AI Agent Asset Manager',
+        'nav.overview': 'Overview',
+        'nav.skills': 'Skills',
+        'nav.install': 'Install Skills',
+        'nav.settings': 'Settings',
+        'nav.defaultScenario': 'Default scenario',
+        'nav.linkedProjects': 'Linked projects',
+        'cat.scenarios': 'Scenarios',
+        'cat.workspaces': 'Workspaces',
+        'action.newScenario': 'New scenario',
+        'action.newProject': 'New project',
+        'skills.title': 'Skills',
+        'skills.backup': 'Backup now',
+        'skills.checkAll': 'Check all',
+        'skills.updateAll': 'Update all',
+        'skills.searchPlaceholder': 'Search skill name, description, tags…',
+        'common.tab.all': 'All',
+        'common.tab.enabled': 'Enabled',
+        'common.tab.disabled': 'Disabled',
+        'common.back': 'Back',
+        'common.themeDark': 'Dark',
+        'common.themeLight': 'Light',
+        'common.themeSystem': 'System',
+        'common.status': 'Status',
+        'settings.title': 'Settings',
+        'settings.general': 'General',
+        'settings.language': 'Language',
+        'settings.language.zh': '中文',
+        'settings.theme': 'Theme',
+        'settings.browse': 'Browse',
+        'settings.data': 'Data & updates',
+        'settings.dataPath': 'Data storage path',
+        'settings.autoUpdate': 'Auto update',
+        'settings.autoUpdateDesc': 'Automatically download updates when new versions are available',
+        'settings.notifications': 'Notifications',
+        'settings.notificationsDesc': 'Allow the app to send notifications',
+        'settings.sound': 'Sound alerts',
+        'settings.about': 'About',
+        'settings.version': 'Version',
+        'settings.copyright': '© 2025 AgentDock. All rights reserved.',
+        'agent.title': 'AGENT MANAGEMENT',
+        'agent.active': 'Active',
+        'agent.enabled': 'Enabled',
+        'agent.custom': 'Custom',
+        'agent.total': 'Total supported',
+        'agent.dir': 'Agent program directory',
+        'agent.add': 'Add Agent',
+        'agent.enableAll': 'Enable all',
+        'agent.disableAll': 'Disable all',
+        'agent.redetect': 'Re-detect',
+        'agent.list': 'Agent list',
+        'agent.builtin': 'Built-in Agents',
+        'agent.more': 'More Agents',
+        'overview.title': 'Overview',
+        'overview.totalSkills': 'Enabled skills',
+        'overview.totalRules': 'Configured rules',
+        'overview.totalScenarios': 'Scenarios',
+        'overview.totalAgents': 'Agents',
+        'overview.rulesPending': 'TBD',
+        'overview.agentBreakdown': 'Agent asset references',
+        'overview.refSkills': 'Skills',
+        'overview.refRules': 'Rules',
+        'overview.status.enabled': 'Enabled',
+        'overview.status.uninstalled': 'Not installed',
+        'scenario.builtIn': 'Built-in default scenario',
+        'scenario.builtInDesc': 'The default scenario ships out of the box with 12 common Skills and OpenCode as the default Agent.',
+        'scenario.skills': 'Skills',
+        'scenario.rules': 'Rules',
+        'scenario.agent': 'Agent',
+      }
+    };
+
+    let currentLang = localStorage.getItem(LANG_KEY) || 'zh';
+
+    function applyLang(lang, persist) {
+      currentLang = lang;
+      const dict = i18n[lang] || i18n.zh;
+      document.documentElement.setAttribute('lang', lang === 'en' ? 'en' : 'zh-CN');
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        const val = dict[key];
+        if (val != null) {
+          if (val.includes('<')) {
+            el.innerHTML = val;
+          } else {
+            el.textContent = val;
+          }
+        }
+      });
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        const val = dict[key];
+        if (val != null) el.setAttribute('placeholder', val);
+      });
+      // Update language switcher active state
+      document.querySelectorAll('.lang-option').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+      });
+      if (persist !== false) {
+        try { localStorage.setItem(LANG_KEY, lang); } catch (e) {}
+      }
+    }
+
+    // Initial apply
+    applyLang(currentLang, false);
+
+    // Click handlers for language switcher
+    document.querySelectorAll('.lang-option').forEach(btn => {
+      btn.addEventListener('click', () => applyLang(btn.getAttribute('data-lang')));
+    });
+
+    // ===== Popover (more-btn ⋯) =====
+    function closeAllPopovers() {
+      document.querySelectorAll('.popover.open').forEach(p => p.classList.remove('open'));
+    }
+
+    document.querySelectorAll('.more-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = btn.getAttribute('data-popover-trigger');
+        const pop = document.getElementById(id);
+        if (!pop) return;
+        const wasOpen = pop.classList.contains('open');
+        closeAllPopovers();
+        if (!wasOpen) {
+          pop.classList.add('open');
+          // Refresh icons inside (lucide sometimes misses freshly-shown DOM)
+          if (window.lucide) lucide.createIcons();
+        }
+      });
+    });
+
+    // Action wiring inside popovers
+    document.querySelectorAll('.popover-item[data-action]').forEach(item => {
+      item.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const action = item.getAttribute('data-action');
+        const pop = item.closest('.popover');
+        if (action === 'new-scenario') {
+          alert(currentLang === 'en' ? 'New scenario (placeholder)' : '新增场景（占位）');
+        } else if (action === 'new-project') {
+          alert(currentLang === 'en' ? 'New project (placeholder)' : '新增项目（占位）');
+        }
+        if (pop) pop.classList.remove('open');
+      });
+    });
+
+    // Outside click closes any open popover
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.popover') && !e.target.closest('.more-btn')) {
+        closeAllPopovers();
+      }
+    });
+
+    // ESC closes popovers
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeAllPopovers();
+    });
+
+    // ===== Nav switcher =====
+    document.querySelectorAll('[data-nav]').forEach(el => {
+      el.addEventListener('click', () => {
+        const view = el.getAttribute('data-nav');
+        document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+        const target = document.querySelector(`[data-view="${view}"]`);
+        if (target) target.classList.remove('hidden');
+        // Clear active on both nav-item and nav-sub-item
+        document.querySelectorAll('.nav-item, .nav-sub-item').forEach(n => n.classList.remove('active'));
+        el.classList.add('active');
+        lucide.createIcons();
+      });
+    });
+
+    // ===== Tab switcher (skills) =====
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const tab = btn.getAttribute('data-tab');
+        const grid = document.getElementById('skills-grid');
+        if (!grid) return;
+        grid.querySelectorAll('.skill-card').forEach(card => {
+          const enabled = card.getAttribute('data-enabled') === 'true';
+          let show = true;
+          if (tab === 'enabled') show = enabled;
+          if (tab === 'disabled') show = !enabled;
+          card.style.display = show ? '' : 'none';
+        });
+      });
+    });
+
+    // ===== Toggle switcher =====
+    document.querySelectorAll('.toggle').forEach(t => {
+      t.addEventListener('click', () => {
+        const cur = t.getAttribute('data-state');
+        t.setAttribute('data-state', cur === 'on' ? 'off' : 'on');
+        // sync skill card data-enabled
+        const card = t.closest('.skill-card');
+        if (card) card.setAttribute('data-enabled', t.getAttribute('data-state') === 'on');
+      });
+    });
+
+    // ===== Init lucide icons =====
+    lucide.createIcons();
+  </script>
+</body>
+</html>
