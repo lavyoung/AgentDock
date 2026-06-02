@@ -335,6 +335,437 @@
     .mini-radio { width: 14px; height: 14px; border-radius: 9999px; display: inline-block; box-sizing: border-box; }
     .mini-radio.empty { border: 1.5px solid var(--fg-faint); }
     .mini-radio.active { border: 3px solid var(--accent); }
+
+    /* === Buttons === */
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; transition: background-color .15s, color .15s, border-color .15s; border: 1px solid transparent; }
+    .btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-strong); }
+    .btn-secondary { background: var(--bg-elevated); color: var(--fg-secondary); border-color: var(--bd); }
+    .btn-secondary:hover { background: var(--bg-hover); color: var(--fg-primary); }
+    .btn-ghost { background: transparent; color: var(--fg-muted); }
+    .btn-ghost:hover { background: var(--bg-hover); color: var(--fg-primary); }
+    .btn-danger { background: transparent; color: #f87171; border-color: rgba(239,68,68,.4); }
+    .btn-danger:hover { background: rgba(239,68,68,.10); color: #fca5a5; }
+    .btn-sm { padding: 4px 10px; font-size: 12px; }
+
+    /* === Form fields === */
+    .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+    .field label { font-size: 12px; font-weight: 500; color: var(--fg-muted); }
+    .field input[type="text"],
+    .field input[type="number"],
+    .field select,
+    .field textarea {
+      width: 100%; padding: 8px 12px; font-size: 13px;
+      background: var(--bg-input); color: var(--fg-primary);
+      border: 1px solid var(--bd); border-radius: 6px;
+      font-family: inherit;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg);
+    }
+    .field textarea { resize: vertical; min-height: 80px; }
+    .field .field-hint { font-size: 11px; color: var(--fg-faint); }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    /* === Centered detail panel (floating dialog) === */
+    .panel-backdrop {
+      position: fixed; inset: 0; background: rgba(0,0,0,.55);
+      z-index: 200; opacity: 0; pointer-events: none;
+      transition: opacity .2s ease;
+      backdrop-filter: blur(2px);
+    }
+    .panel-backdrop.open { opacity: 1; pointer-events: auto; }
+    :root.theme-light .panel-backdrop { background: rgba(0,0,0,.25); }
+
+    .detail-panel {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -48%) scale(.94);
+      opacity: 0;
+      width: 720px; max-width: 96vw;
+      max-height: 88vh;
+      background: var(--bg-panel);
+      border: 1px solid var(--bd);
+      border-radius: 14px;
+      z-index: 201;
+      display: flex; flex-direction: column;
+      transition: transform .22s cubic-bezier(.4,0,.2,1), opacity .18s;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,.04) inset,
+        0 24px 64px -12px rgba(0,0,0,.55),
+        0 12px 24px -8px rgba(0,0,0,.35);
+    }
+    :root.theme-light .detail-panel {
+      box-shadow:
+        0 0 0 1px rgba(0,0,0,.04) inset,
+        0 24px 64px -12px rgba(0,0,0,.25),
+        0 12px 24px -8px rgba(0,0,0,.15);
+    }
+    .detail-panel.open { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+
+    .detail-panel > header {
+      padding: 16px 24px; border-bottom: 1px solid var(--bd-soft);
+      display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+    }
+    .detail-panel > header .panel-title-block { flex: 1; min-width: 0; }
+    .detail-panel > header h2 { font-size: 16px; font-weight: 600; color: var(--fg-primary); }
+    .detail-panel > header .panel-subtitle { font-size: 12px; color: var(--fg-muted); margin-top: 2px; display: flex; align-items: center; gap: 6px; }
+    .detail-panel .panel-close {
+      width: 32px; height: 32px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      background: transparent; border: none; color: var(--fg-muted); cursor: pointer;
+      transition: background .15s, color .15s;
+    }
+    .detail-panel .panel-close:hover { background: var(--bg-hover); color: var(--fg-primary); }
+    .detail-panel .panel-close:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+    .detail-panel > nav[role="tablist"] {
+      display: flex; padding: 0 24px; gap: 4px;
+      border-bottom: 1px solid var(--bd-soft);
+      flex-shrink: 0;
+    }
+    .detail-panel .panel-tab {
+      padding: 10px 14px; background: transparent; border: none;
+      color: var(--fg-muted); font-size: 13px; font-weight: 500;
+      cursor: pointer; position: relative;
+      transition: color .15s;
+    }
+    .detail-panel .panel-tab:hover { color: var(--fg-primary); }
+    .detail-panel .panel-tab.active { color: var(--fg-primary); }
+    .detail-panel .panel-tab.active::after {
+      content: ''; position: absolute; left: 14px; right: 14px; bottom: -1px; height: 2px;
+      background: var(--accent); border-radius: 1px;
+    }
+    .detail-panel .panel-tab:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: 6px; }
+
+    .detail-panel .panel-body { flex: 1; overflow-y: auto; padding: 20px 24px; }
+    .detail-panel > footer {
+      border-top: 1px solid var(--bd-soft);
+      padding: 12px 24px;
+      display: flex; gap: 8px; justify-content: space-between; align-items: center;
+      flex-shrink: 0;
+    }
+    .detail-panel > footer .footer-left { display: flex; gap: 8px; }
+    .detail-panel > footer .footer-right { display: flex; gap: 8px; }
+
+    /* Editor (textarea) */
+    .editor {
+      font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, Consolas, monospace;
+      font-size: 12.5px; line-height: 1.6;
+      background: var(--bg-input); color: var(--fg-primary);
+      border: 1px solid var(--bd); border-radius: 6px;
+      padding: 12px; min-height: 360px; width: 100%;
+      resize: vertical; tab-size: 2;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .editor:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); }
+    .editor-meta {
+      display: flex; gap: 12px; padding: 8px 0; font-size: 11px; color: var(--fg-faint);
+    }
+    .editor-meta .dirty-dot {
+      width: 6px; height: 6px; border-radius: 9999px; background: var(--accent); display: none;
+    }
+    .editor-meta.dirty .dirty-dot { display: inline-block; }
+
+    /* Snapshot list */
+    .snapshot-list { display: flex; flex-direction: column; gap: 8px; }
+    .snapshot-row {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center; gap: 12px;
+      padding: 12px 14px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--bd-soft);
+      border-radius: 8px;
+      transition: border-color .15s;
+    }
+    .snapshot-row:hover { border-color: var(--fg-disabled); }
+    .snapshot-icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: var(--accent-bg); color: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .snapshot-info { min-width: 0; }
+    .snapshot-time { font-size: 13px; font-weight: 500; color: var(--fg-primary); }
+    .snapshot-meta { font-size: 11px; color: var(--fg-muted); margin-top: 2px; display: flex; gap: 8px; }
+    .snapshot-meta span { display: inline-flex; align-items: center; gap: 3px; }
+    .snapshot-actions { display: flex; gap: 4px; }
+    .snapshot-row.is-current { border-color: var(--accent); background: var(--accent-bg); }
+    .snapshot-row.is-current::before {
+      content: '当前'; position: absolute; /* fallback for label */
+    }
+    .snapshot-empty {
+      padding: 32px 16px; text-align: center; color: var(--fg-faint); font-size: 13px;
+      border: 1px dashed var(--bd); border-radius: 8px;
+    }
+
+    /* === Modal === */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(0,0,0,.55);
+      z-index: 300; display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity .2s, backdrop-filter .2s;
+      padding: 20px;
+      backdrop-filter: blur(2px);
+    }
+    .modal-backdrop.open { opacity: 1; pointer-events: auto; }
+    :root.theme-light .modal-backdrop { background: rgba(0,0,0,.25); }
+
+    .modal {
+      background: var(--bg-card);
+      border: 1px solid var(--bd);
+      border-radius: 14px;
+      width: 520px; max-width: 100%;
+      max-height: 90vh;
+      display: flex; flex-direction: column;
+      transform: scale(.94) translateY(8px); opacity: 0;
+      transition: transform .22s cubic-bezier(.4,0,.2,1), opacity .18s;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,.04) inset,
+        0 24px 64px -12px rgba(0,0,0,.55),
+        0 12px 24px -8px rgba(0,0,0,.35);
+    }
+    :root.theme-light .modal {
+      box-shadow:
+        0 0 0 1px rgba(0,0,0,.04) inset,
+        0 24px 64px -12px rgba(0,0,0,.25),
+        0 12px 24px -8px rgba(0,0,0,.15);
+    }
+    .modal-backdrop.open .modal { transform: scale(1); opacity: 1; }
+    .modal-sm { width: 420px; }
+    .modal-lg { width: 720px; max-width: 96vw; }
+    .modal-body-stack { display: flex; flex-direction: column; gap: 16px; }
+    .modal-divider { border: 0; height: 1px; background: var(--bd-soft); margin: 0; }
+    .modal-help-text {
+      font-size: 12px; line-height: 1.6; color: var(--fg-muted);
+      padding: 10px 12px; border-radius: 6px; background: var(--bg-soft);
+      border-left: 2px solid var(--accent);
+    }
+
+    /* === Two-column modal (asset creator) === */
+    .modal-row { display: grid; grid-template-columns: 240px 1fr; min-height: 380px; }
+    .modal-left {
+      padding: 24px 20px;
+      border-right: 1px solid var(--bd-soft);
+      background: var(--bg-base);
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .modal-right { padding: 24px 24px; }
+    .modal-left .left-section-title,
+    .left-section-title {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.05em;
+      text-transform: uppercase; color: var(--fg-faint);
+    }
+
+    /* === Color picker === */
+    .color-picker { display: flex; gap: 6px; flex-wrap: wrap; }
+    .color-dot {
+      width: 28px; height: 28px; border-radius: 9999px;
+      border: 2px solid transparent; cursor: pointer; padding: 0;
+      transition: transform .12s, border-color .15s;
+    }
+    .color-dot:hover { transform: scale(1.08); }
+    .color-dot.active { border-color: var(--fg-primary); box-shadow: 0 0 0 2px var(--bg-input); }
+
+    /* === Skill pick list (multi-select chips) === */
+    .skill-pick-list {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+      max-height: 200px; overflow-y: auto; padding: 4px 2px;
+    }
+    .skill-pick {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 8px; border-radius: 6px;
+      background: var(--bg-elevated); border: 1px solid var(--bd-soft);
+      font-size: 12px; color: var(--fg-secondary);
+      cursor: pointer; text-align: left;
+      transition: all .12s;
+    }
+    .skill-pick:hover { border-color: var(--fg-faint); }
+    .skill-pick.active { border-color: var(--accent); background: var(--accent-bg); color: var(--fg-primary); }
+    .skill-pick .skill-pick-check { margin-left: auto; opacity: 0; }
+    .skill-pick.active .skill-pick-check { opacity: 1; color: var(--accent); }
+
+    /* === Scenario preview card === */
+    .scenario-preview {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px; border-radius: 10px;
+      background: var(--bg-card); border: 1px solid var(--bd-soft);
+    }
+    .scenario-preview-icon {
+      width: 38px; height: 38px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--accent-bg); color: var(--accent);
+      flex-shrink: 0;
+    }
+    .scenario-preview-body { min-width: 0; }
+    .scenario-preview-title { font-size: 13px; font-weight: 500; color: var(--fg-primary); }
+    .scenario-preview-meta { font-size: 11px; color: var(--fg-muted); margin-top: 2px; }
+
+    /* === Path input (input + inline button) === */
+    .path-input { display: flex; gap: 6px; }
+    .path-input input { flex: 1; }
+
+    /* === Type picker (horizontal default) === */
+    .type-picker { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+    .type-list { display: flex; flex-direction: column; gap: 8px; }
+    .type-list .type-pick {
+      padding: 12px; flex-direction: row; align-items: flex-start; gap: 10px;
+    }
+    .type-list .type-pick .type-pick-icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--bg-elevated); color: var(--fg-muted);
+      flex-shrink: 0;
+    }
+    .type-list .type-pick.active .type-pick-icon {
+      background: var(--accent-bg); color: var(--accent);
+    }
+    .type-list .type-pick-body { min-width: 0; }
+    .type-list .type-pick-desc { font-size: 11px; line-height: 1.4; }
+
+    .preview-card {
+      background: var(--bg-card);
+      border: 1px solid var(--bd-soft);
+      border-radius: 10px;
+      padding: 14px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .preview-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+    .preview-card-icon {
+      width: 36px; height: 36px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .preview-card-body { min-width: 0; }
+    .preview-card-title { font-size: 13px; font-weight: 500; color: var(--fg-primary); }
+    .preview-card-desc { font-size: 11px; color: var(--fg-muted); margin-top: 4px; line-height: 1.4; }
+    .preview-card-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-top: 10px; border-top: 1px solid var(--bd-soft);
+      font-size: 11px; color: var(--fg-muted);
+    }
+    .preview-hint {
+      font-size: 11px; color: var(--fg-faint); line-height: 1.5;
+      padding: 8px 10px; border-radius: 6px;
+      background: var(--bg-soft);
+    }
+
+    /* === Keyboard hint row in modal footer === */
+    .kbd-hint {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 11px; color: var(--fg-faint);
+    }
+    .kbd {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 18px; height: 18px; padding: 0 4px;
+      border: 1px solid var(--bd); border-radius: 4px;
+      background: var(--bg-elevated); color: var(--fg-muted);
+      font-size: 10px; font-family: ui-monospace, monospace;
+    }
+
+    .modal > header {
+      padding: 16px 20px; border-bottom: 1px solid var(--bd-soft);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .modal > header h2 { font-size: 15px; font-weight: 600; color: var(--fg-primary); }
+    .modal > header .modal-close {
+      width: 28px; height: 28px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      background: transparent; border: none; color: var(--fg-muted); cursor: pointer;
+    }
+    .modal > header .modal-close:hover { background: var(--bg-hover); color: var(--fg-primary); }
+
+    .modal-body { padding: 20px; flex: 1; overflow-y: auto; }
+    .modal > footer {
+      padding: 12px 20px; border-top: 1px solid var(--bd-soft);
+      display: flex; gap: 8px; justify-content: flex-end;
+      flex-shrink: 0;
+    }
+    .modal p { font-size: 13px; color: var(--fg-secondary); line-height: 1.6; }
+    .modal p strong { color: var(--fg-primary); }
+
+    .type-pick {
+      padding: 14px 12px; border: 1px solid var(--bd); border-radius: 8px;
+      background: var(--bg-input); cursor: pointer; text-align: left;
+      transition: all .15s; display: flex; flex-direction: column; gap: 4px;
+    }
+    .type-pick:hover { border-color: var(--fg-faint); }
+    .type-pick.active { border-color: var(--accent); background: var(--accent-bg); }
+    .type-pick .type-pick-label { font-size: 13px; font-weight: 600; color: var(--fg-primary); }
+    .type-pick .type-pick-desc { font-size: 11px; color: var(--fg-muted); }
+
+    /* Tag chips */
+    .tag-chips { display: flex; flex-wrap: wrap; gap: 6px; min-height: 28px; padding: 4px 0; }
+    .tag-chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 8px; border-radius: 9999px;
+      background: var(--bg-elevated); border: 1px solid var(--bd);
+      font-size: 11px; color: var(--fg-secondary);
+    }
+    .tag-chip button {
+      width: 14px; height: 14px; border-radius: 9999px;
+      background: transparent; border: none; color: var(--fg-faint);
+      display: flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+    .tag-chip button:hover { color: var(--fg-primary); }
+
+    /* === Toast === */
+    #toast-container {
+      position: fixed; bottom: 24px; right: 24px;
+      z-index: 400; display: flex; flex-direction: column-reverse; gap: 8px;
+      pointer-events: none;
+    }
+    .toast {
+      background: var(--bg-elevated);
+      border: 1px solid var(--bd);
+      border-radius: 8px;
+      padding: 10px 14px;
+      display: flex; align-items: center; gap: 10px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.35);
+      font-size: 13px; color: var(--fg-primary);
+      pointer-events: auto;
+      animation: toast-in .25s cubic-bezier(.4,0,.2,1);
+      min-width: 240px; max-width: 360px;
+    }
+    .toast.toast-out { animation: toast-out .2s ease forwards; }
+    .toast-icon {
+      width: 20px; height: 20px; border-radius: 9999px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .toast.success { border-left: 3px solid var(--accent); }
+    .toast.success .toast-icon { background: var(--accent-bg); color: var(--accent); }
+    .toast.warn { border-left: 3px solid #f59e0b; }
+    .toast.warn .toast-icon { background: rgba(245,158,11,.15); color: #f59e0b; }
+    .toast.error { border-left: 3px solid #ef4444; }
+    .toast.error .toast-icon { background: rgba(239,68,68,.15); color: #f87171; }
+    @keyframes toast-in {
+      from { transform: translateX(110%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes toast-out {
+      to { transform: translateX(110%); opacity: 0; }
+    }
+
+    /* === Sync status pill === */
+    .sync-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 2px 8px; border-radius: 9999px;
+      font-size: 11px; font-weight: 500;
+    }
+    .sync-pill .pill-dot { width: 6px; height: 6px; border-radius: 9999px; }
+    .sync-pill.synced { background: var(--accent-bg); color: var(--accent); }
+    .sync-pill.synced .pill-dot { background: var(--accent); }
+    .sync-pill.pending { background: rgba(245,158,11,.15); color: #f59e0b; }
+    .sync-pill.pending .pill-dot { background: #f59e0b; }
+    .sync-pill.drift { background: rgba(239,68,68,.15); color: #f87171; }
+    .sync-pill.drift .pill-dot { background: #f87171; }
+
+    /* Card click affordance */
+    .skill-card { cursor: pointer; }
+    .skill-card .skill-card-body { display: contents; }
   </style>
 </head>
 <body class="text-zinc-200 min-h-screen">
@@ -432,6 +863,9 @@
             </button>
             <button class="h-9 px-3.5 rounded-md border border-line bg-ink-850 text-zinc-300 text-sm hover:bg-ink-800 flex items-center gap-1.5" aria-label="检查全部技能">
               <i data-lucide="clipboard-list" class="w-4 h-4" aria-hidden="true"></i><span data-i18n="skills.checkAll">检查全部</span>
+            </button>
+            <button id="new-asset-btn" class="h-9 px-3.5 rounded-md bg-emerald-500 hover:bg-emerald-600 text-white text-sm flex items-center gap-1.5" aria-label="新建资产">
+              <i data-lucide="plus" class="w-4 h-4" aria-hidden="true"></i><span data-i18n="skills.newAsset">新建资产</span>
             </button>
             <button class="h-9 px-3.5 rounded-md border border-emerald-500/40 text-emerald-400 text-sm hover:bg-emerald-500/10 flex items-center gap-1.5" aria-label="全部更新,共 0 个待更新">
               <i data-lucide="refresh-ccw" class="w-4 h-4" aria-hidden="true"></i><span data-i18n="skills.updateAll">全部更新</span> (0)
@@ -1086,11 +1520,14 @@
         'skills.backup': '开始备份',
         'skills.checkAll': '检查全部',
         'skills.updateAll': '全部更新',
+        'skills.newAsset': '新建资产',
         'skills.searchPlaceholder': '搜索技能名称、描述、标签…',
         'common.tab.all': '全部',
         'common.tab.enabled': '已启用',
         'common.tab.disabled': '未启用',
         'common.back': '返回',
+        'common.cancel': '取消',
+        'common.confirm': '确认',
         'common.themeDark': '黑夜模式',
         'common.themeLight': '白天模式',
         'common.themeSystem': '跟随系统',
@@ -1141,6 +1578,114 @@
         'scenario.skills': 'Skills',
         'scenario.rules': 'Rules',
         'scenario.agent': 'Agent',
+
+        // === Detail panel ===
+        'panel.versionLabel': '版本',
+        'panel.tab.overview': '概览',
+        'panel.tab.content': '内容',
+        'panel.tab.history': '历史',
+        'panel.historyDesc': '每次保存都会自动创建本地快照,可查看与回滚',
+        'panel.field.title': '标题',
+        'panel.field.id': '资产 ID',
+        'panel.field.idHint': '仅小写字母、数字、短横线,创建后不可修改',
+        'panel.field.description': '描述',
+        'panel.field.tags': '标签',
+        'panel.field.tagsPlaceholder': '输入后回车添加',
+        'panel.field.version': '版本',
+        'panel.field.type': '类型',
+        'panel.saveSnapshot': '保存并新建快照',
+        'panel.deleteAsset': '删除资产',
+        'panel.snapshotEmpty': '还没有快照,保存后会自动创建',
+        'panel.sync.synced': '已同步',
+        'panel.sync.pending': '未同步',
+        'panel.sync.drift': '已偏离',
+
+        // === Snapshot ===
+        'snapshot.current': '当前',
+        'snapshot.rollback': '回滚',
+        'snapshot.note.manual': '手动保存',
+
+        // === New asset ===
+        'newAsset.title': '新建资产',
+        'newAsset.type': '资产类型',
+        'newAsset.type.skillDesc': '面向具体能力的指令包,同步到 .agentdock/skills/<id>/SKILL.md',
+        'newAsset.type.agentsMdDesc': '项目级 Agent 协作规则,合并到目标目录的 AGENTS.md',
+        'newAsset.titleLabel': '标题',
+        'newAsset.titleHint': '例如:前端代码审查',
+        'newAsset.idLabel': '资产 ID(英文 slug)',
+        'newAsset.idHint': '根据标题自动生成,可手动调整,创建后不可修改',
+        'newAsset.descLabel': '描述(可选)',
+        'newAsset.tagsLabel': '标签(可选,逗号分隔)',
+        'newAsset.contentLabel': '初始文件内容',
+        'newAsset.contentHint': '这是资产文件的初始内容。创建后会在历史中作为第一个快照保存,后续可在详情面板继续编辑。',
+        'newAsset.resetTemplate': '恢复默认模板',
+        'newAsset.create': '创建',
+        'newAsset.preview': '预览',
+        'newAsset.previewHint': '新建后会立即出现在列表顶部,同步状态为"未同步"。',
+        'newAsset.hintCancel': '取消',
+        'newAsset.hintCreate': '创建',
+        'newAsset.placeholder.agentsTitle': '项目 Agent 协作规则',
+        'newAsset.placeholder.agentsBody': '在此处定义 Agent 的工作准则、约束与协作方式。',
+        'newAsset.placeholder.skillTitle': '新技能',
+        'newAsset.placeholder.skillBody': '简要描述此技能的触发条件与行为。',
+
+        // === New scenario ===
+        'newScenario.title': '新建场景',
+        'newScenario.help': '场景是一组预设配置(默认 Agent + 启用哪些技能)。创建后可在项目里选择使用某个场景。',
+        'newScenario.name': '场景名称',
+        'newScenario.iconColor': '图标颜色',
+        'newScenario.desc': '描述(可选)',
+        'newScenario.defaultAgent': '默认 Agent',
+        'newScenario.includedSkills': '包入的技能(点击切换)',
+        'newScenario.preview': '预览',
+        'newScenario.previewHint': '场景创建后会出现在侧栏"场景"分类下。',
+        'newScenario.create': '创建',
+        'newScenario.hintCancel': '取消',
+        'newScenario.hintCreate': '创建',
+
+        // === New project ===
+        'newProject.title': '新建项目',
+        'newProject.help': '项目是 Agent 的一个同步目标目录。把项目关联到 Agent 后,Agent 启动时会自动加载项目级别的 Skills / Rules / AGENTS.md。',
+        'newProject.name': '项目名称',
+        'newProject.path': '本地路径',
+        'newProject.pathHint': 'Agent 启动时会扫描此目录下的 .agentdock/ 与 AGENTS.md',
+        'newProject.browse': '浏览',
+        'newProject.desc': '描述(可选)',
+        'newProject.scenario': '默认场景',
+        'newProject.scenarioNone': '(暂不选择)',
+        'newProject.scenarioDefault': '默认场景 (内置)',
+        'newProject.syncMode': '同步模式',
+        'newProject.syncCopy': '复制 (copy)',
+        'newProject.syncCopyDesc': '将资产文件完整复制到目标目录,不修改目标文件',
+        'newProject.syncMerge': '合并 (merge)',
+        'newProject.syncMergeDesc': '对 AGENTS.md 等使用托管区块合并,保留用户手写内容',
+        'newProject.preview': '预览',
+        'newProject.previewHint': '项目创建后会出现在侧栏"工作区"分类下。',
+        'newProject.create': '创建',
+        'newProject.hintCancel': '取消',
+        'newProject.hintCreate': '创建',
+
+        // === Confirm dialogs ===
+        'confirm.rollbackTitle': '回滚到此快照?',
+        'confirm.rollbackMsg': '将把当前内容替换为 {at}(v{v}) 的版本。回滚后,该资产对所有 Target 的同步状态会变为"未同步"。此操作会创建一个新快照记录此次回滚。',
+        'confirm.rollbackOk': '确认回滚',
+        'confirm.deleteTitle': '删除资产?',
+        'confirm.deleteMsg': '将永久删除资产 "{name}" 及其全部历史快照。此操作不可撤销。',
+        'confirm.deleteOk': '确认删除',
+
+        // === Toast ===
+        'toast.savedWithSnapshot': '已保存并新建快照 v{v}',
+        'toast.rolledBack': '已回滚到 {at},同步状态变为未同步',
+        'toast.deleted': '已删除 "{name}"',
+        'toast.created': '已创建资产 "{name}"',
+        'toast.titleRequired': '请填写标题',
+        'toast.idInvalid': 'ID 只能包含小写字母、数字、短横线',
+        'toast.idDuplicate': '该 ID 已存在',
+        'toast.scenarioNameRequired': '请填写场景名称',
+        'toast.scenarioCreated': '已创建场景 "{name}"',
+        'toast.projectNameRequired': '请填写项目名称',
+        'toast.projectPathRequired': '请填写本地路径',
+        'toast.projectCreated': '已创建项目 "{name}"',
       },
       en: {
         'app.name': 'AgentDock',
@@ -1164,6 +1709,8 @@
         'common.tab.enabled': 'Enabled',
         'common.tab.disabled': 'Disabled',
         'common.back': 'Back',
+        'common.cancel': 'Cancel',
+        'common.confirm': 'Confirm',
         'common.themeDark': 'Dark',
         'common.themeLight': 'Light',
         'common.themeSystem': 'System',
@@ -1214,6 +1761,114 @@
         'scenario.skills': 'Skills',
         'scenario.rules': 'Rules',
         'scenario.agent': 'Agent',
+
+        // === Detail panel ===
+        'panel.versionLabel': 'Version',
+        'panel.tab.overview': 'Overview',
+        'panel.tab.content': 'Content',
+        'panel.tab.history': 'History',
+        'panel.historyDesc': 'A snapshot is created on every save. You can view and roll back here.',
+        'panel.field.title': 'Title',
+        'panel.field.id': 'Asset ID',
+        'panel.field.idHint': 'Lowercase letters, digits, hyphens only. Cannot be changed after creation.',
+        'panel.field.description': 'Description',
+        'panel.field.tags': 'Tags',
+        'panel.field.tagsPlaceholder': 'Type and press Enter',
+        'panel.field.version': 'Version',
+        'panel.field.type': 'Type',
+        'panel.saveSnapshot': 'Save & snapshot',
+        'panel.deleteAsset': 'Delete asset',
+        'panel.snapshotEmpty': 'No snapshots yet. Save to create the first one.',
+        'panel.sync.synced': 'Synced',
+        'panel.sync.pending': 'Pending',
+        'panel.sync.drift': 'Drifted',
+
+        // === Snapshot ===
+        'snapshot.current': 'Current',
+        'snapshot.rollback': 'Rollback',
+        'snapshot.note.manual': 'Manual save',
+
+        // === New asset ===
+        'newAsset.title': 'New asset',
+        'newAsset.type': 'Asset type',
+        'newAsset.type.skillDesc': 'A capability bundle. Synced to .agentdock/skills/<id>/SKILL.md',
+        'newAsset.type.agentsMdDesc': 'Project-level Agent rules. Merged into target AGENTS.md',
+        'newAsset.titleLabel': 'Title',
+        'newAsset.titleHint': 'e.g. Frontend code review',
+        'newAsset.idLabel': 'Asset ID (slug)',
+        'newAsset.idHint': 'Auto-generated from title, can be edited, immutable after creation',
+        'newAsset.descLabel': 'Description (optional)',
+        'newAsset.tagsLabel': 'Tags (optional, comma-separated)',
+        'newAsset.contentLabel': 'Initial file content',
+        'newAsset.contentHint': 'This is the initial file content. The first snapshot will be saved with this content; you can keep editing in the detail panel.',
+        'newAsset.resetTemplate': 'Reset to template',
+        'newAsset.create': 'Create',
+        'newAsset.preview': 'Preview',
+        'newAsset.previewHint': 'After creation, the new card appears at the top of the list with a "Pending" sync status.',
+        'newAsset.hintCancel': 'cancel',
+        'newAsset.hintCreate': 'create',
+        'newAsset.placeholder.agentsTitle': 'Project Agent rules',
+        'newAsset.placeholder.agentsBody': 'Define working principles, constraints and collaboration here.',
+        'newAsset.placeholder.skillTitle': 'New skill',
+        'newAsset.placeholder.skillBody': 'Describe the trigger and behavior of this skill.',
+
+        // === New scenario ===
+        'newScenario.title': 'New scenario',
+        'newScenario.help': 'A scenario is a preset bundle (default Agent + which skills to enable). After creation, you can attach it to a project.',
+        'newScenario.name': 'Scenario name',
+        'newScenario.iconColor': 'Icon color',
+        'newScenario.desc': 'Description (optional)',
+        'newScenario.defaultAgent': 'Default Agent',
+        'newScenario.includedSkills': 'Included skills (click to toggle)',
+        'newScenario.preview': 'Preview',
+        'newScenario.previewHint': 'Created scenarios appear under the "Scenarios" section in the sidebar.',
+        'newScenario.create': 'Create',
+        'newScenario.hintCancel': 'cancel',
+        'newScenario.hintCreate': 'create',
+
+        // === New project ===
+        'newProject.title': 'New project',
+        'newProject.help': 'A project is a sync target directory for an Agent. Once attached, the Agent loads project-level Skills / Rules / AGENTS.md on startup.',
+        'newProject.name': 'Project name',
+        'newProject.path': 'Local path',
+        'newProject.pathHint': 'AgentDock will scan this directory for .agentdock/ and AGENTS.md on Agent startup',
+        'newProject.browse': 'Browse',
+        'newProject.desc': 'Description (optional)',
+        'newProject.scenario': 'Default scenario',
+        'newProject.scenarioNone': '(none)',
+        'newProject.scenarioDefault': 'Default scenario (built-in)',
+        'newProject.syncMode': 'Sync mode',
+        'newProject.syncCopy': 'Copy',
+        'newProject.syncCopyDesc': 'Copy asset files into the target directory as-is, no changes to existing files',
+        'newProject.syncMerge': 'Merge',
+        'newProject.syncMergeDesc': 'Use managed blocks for AGENTS.md, preserving user-written content',
+        'newProject.preview': 'Preview',
+        'newProject.previewHint': 'Created projects appear under the "Workspaces" section in the sidebar.',
+        'newProject.create': 'Create',
+        'newProject.hintCancel': 'cancel',
+        'newProject.hintCreate': 'create',
+
+        // === Confirm dialogs ===
+        'confirm.rollbackTitle': 'Roll back to this snapshot?',
+        'confirm.rollbackMsg': 'This will replace the current content with the {at} (v{v}) version. After rollback, the sync status to all targets will become "Pending". A new snapshot will be created to record this rollback.',
+        'confirm.rollbackOk': 'Roll back',
+        'confirm.deleteTitle': 'Delete asset?',
+        'confirm.deleteMsg': 'This will permanently delete "{name}" and all its snapshots. This cannot be undone.',
+        'confirm.deleteOk': 'Delete',
+
+        // === Toast ===
+        'toast.savedWithSnapshot': 'Saved · new snapshot v{v}',
+        'toast.rolledBack': 'Rolled back to {at}, sync status set to pending',
+        'toast.deleted': 'Deleted "{name}"',
+        'toast.created': 'Created "{name}"',
+        'toast.titleRequired': 'Title is required',
+        'toast.idInvalid': 'ID may only contain lowercase letters, digits and hyphens',
+        'toast.idDuplicate': 'This ID already exists',
+        'toast.scenarioNameRequired': 'Scenario name is required',
+        'toast.scenarioCreated': 'Created scenario "{name}"',
+        'toast.projectNameRequired': 'Project name is required',
+        'toast.projectPathRequired': 'Local path is required',
+        'toast.projectCreated': 'Created project "{name}"',
       }
     };
 
@@ -1286,9 +1941,9 @@
         const action = item.getAttribute('data-action');
         const pop = item.closest('.popover');
         if (action === 'new-scenario') {
-          alert(currentLang === 'en' ? 'New scenario (placeholder)' : '新增场景（占位）');
+          openNewScenarioModal();
         } else if (action === 'new-project') {
-          alert(currentLang === 'en' ? 'New project (placeholder)' : '新增项目（占位）');
+          openNewProjectModal();
         }
         if (pop) pop.classList.remove('open');
       });
@@ -1363,6 +2018,1415 @@
 
     // ===== Init lucide icons =====
     lucide.createIcons();
+
+    // ============================================================
+    // ======  Asset detail / edit / snapshot / new asset  =========
+    // ============================================================
+  </script>
+
+  <!-- ============ Detail Panel (slide-over) ============ -->
+  <div id="panel-backdrop" class="panel-backdrop" aria-hidden="true"></div>
+  <aside id="detail-panel" class="detail-panel" role="dialog" aria-modal="true" aria-labelledby="panel-title" aria-hidden="true" tabindex="-1" hidden>
+    <header>
+      <div class="panel-title-block">
+        <h2 id="panel-title">—</h2>
+        <div class="panel-subtitle">
+          <span id="panel-type-badge" class="badge badge-blue">skill</span>
+          <span data-i18n="panel.versionLabel">版本</span>
+          <span id="panel-version" class="text-white font-medium">0.0.0</span>
+          <span class="text-zinc-600">·</span>
+          <span id="panel-sync" class="sync-pill synced">
+            <span class="pill-dot"></span><span data-i18n="panel.sync.synced">已同步</span>
+          </span>
+        </div>
+      </div>
+      <button class="panel-close" data-action="panel-close" aria-label="关闭面板">
+        <i data-lucide="x" class="w-4 h-4" aria-hidden="true"></i>
+      </button>
+    </header>
+
+    <nav role="tablist" aria-label="资产视图">
+      <button class="panel-tab active" role="tab" data-pane="overview" aria-selected="true" data-i18n="panel.tab.overview">概览</button>
+      <button class="panel-tab" role="tab" data-pane="content" aria-selected="false" data-i18n="panel.tab.content">内容</button>
+      <button class="panel-tab" role="tab" data-pane="history" aria-selected="false" data-i18n="panel.tab.history">历史</button>
+    </nav>
+
+    <div class="panel-body">
+      <!-- ===== Pane: Overview ===== -->
+      <section data-pane-section="overview" role="tabpanel" aria-labelledby="panel-title">
+        <div class="field">
+          <label for="f-title" data-i18n="panel.field.title">标题</label>
+          <input type="text" id="f-title" />
+        </div>
+        <div class="field">
+          <label for="f-id" data-i18n="panel.field.id">资产 ID</label>
+          <input type="text" id="f-id" pattern="[a-z0-9-]+" />
+          <span class="field-hint" data-i18n="panel.field.idHint">仅小写字母、数字、短横线,创建后不可修改</span>
+        </div>
+        <div class="field">
+          <label for="f-desc" data-i18n="panel.field.description">描述</label>
+          <textarea id="f-desc" rows="3"></textarea>
+        </div>
+        <div class="field">
+          <label data-i18n="panel.field.tags">标签</label>
+          <div class="tag-chips" id="f-tags" tabindex="0" aria-label="标签"></div>
+          <input type="text" id="f-tags-input" placeholder="输入后回车添加" data-i18n-placeholder="panel.field.tagsPlaceholder" />
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="f-version" data-i18n="panel.field.version">版本</label>
+            <input type="text" id="f-version" />
+          </div>
+          <div class="field">
+            <label for="f-type" data-i18n="panel.field.type">类型</label>
+            <select id="f-type" disabled>
+              <option value="skill">Skill</option>
+              <option value="agents-md">AGENTS.md</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Pane: Content ===== -->
+      <section data-pane-section="content" role="tabpanel" aria-labelledby="panel-title" hidden>
+        <div class="editor-meta" id="editor-meta">
+          <span class="dirty-dot" aria-hidden="true"></span>
+          <span id="editor-file-name">SKILL.md</span>
+          <span class="text-zinc-600">·</span>
+          <span id="editor-stats">0 行 · 0 字符</span>
+        </div>
+        <textarea id="editor" class="editor" spellcheck="false" aria-label="资产内容编辑器"></textarea>
+      </section>
+
+      <!-- ===== Pane: History ===== -->
+      <section data-pane-section="history" role="tabpanel" aria-labelledby="panel-title" hidden>
+        <div class="flex items-center justify-between mb-3">
+          <div class="text-sm text-zinc-400" data-i18n="panel.historyDesc">每次保存都会自动创建本地快照,可查看与回滚</div>
+        </div>
+        <div id="snapshot-list" class="snapshot-list" role="list"></div>
+      </section>
+    </div>
+
+    <footer>
+      <div class="footer-left">
+        <button class="btn btn-danger btn-sm" data-action="panel-delete" data-i18n="panel.deleteAsset">删除资产</button>
+      </div>
+      <div class="footer-right">
+        <button class="btn btn-secondary" data-action="panel-cancel" data-i18n="common.cancel">取消</button>
+        <button class="btn btn-primary" data-action="panel-save" data-i18n="panel.saveSnapshot">保存并新建快照</button>
+      </div>
+    </footer>
+  </aside>
+
+  <!-- ============ New Asset Modal ============ -->
+  <div id="new-asset-modal" class="modal-backdrop" hidden>
+    <div class="modal modal-lg" role="dialog" aria-modal="true" aria-labelledby="new-asset-title">
+      <header>
+        <h2 id="new-asset-title" data-i18n="newAsset.title">新建资产</h2>
+        <button class="modal-close" data-action="new-asset-close" aria-label="关闭">
+          <i data-lucide="x" class="w-4 h-4" aria-hidden="true"></i>
+        </button>
+      </header>
+      <div class="modal-body modal-body-stack">
+        <!-- Type picker (segmented, top) -->
+        <div>
+          <div class="left-section-title" data-i18n="newAsset.type">资产类型</div>
+          <div class="type-picker mt-2" role="radiogroup" aria-label="资产类型">
+            <button type="button" class="type-pick active" data-type="skill" role="radio" aria-checked="true">
+              <span class="type-pick-icon"><i data-lucide="package" class="w-4 h-4" aria-hidden="true"></i></span>
+              <span class="type-pick-body">
+                <span class="type-pick-label">Skill</span>
+                <span class="type-pick-desc" data-i18n="newAsset.type.skillDesc">面向具体能力的指令包,同步到 .agentdock/skills/&lt;id&gt;/SKILL.md</span>
+              </span>
+            </button>
+            <button type="button" class="type-pick" data-type="agents-md" role="radio" aria-checked="false">
+              <span class="type-pick-icon"><i data-lucide="file-text" class="w-4 h-4" aria-hidden="true"></i></span>
+              <span class="type-pick-body">
+                <span class="type-pick-label">AGENTS.md</span>
+                <span class="type-pick-desc" data-i18n="newAsset.type.agentsMdDesc">项目级 Agent 协作规则,合并到目标目录的 AGENTS.md</span>
+              </span>
+            </button>
+          </div>
+        </div>
+        <hr class="modal-divider" />
+        <!-- Form fields + content (left) and preview (right) -->
+        <div class="modal-row" style="grid-template-columns: 1fr 260px; min-height: 360px;">
+          <form id="new-asset-form" autocomplete="off" onsubmit="return false" class="flex flex-col gap-3 min-w-0">
+            <div class="field-row">
+              <div class="field" style="margin-bottom: 0;">
+                <label for="na-title" data-i18n="newAsset.titleLabel">标题</label>
+                <input type="text" id="na-title" required autocomplete="off" />
+              </div>
+              <div class="field" style="margin-bottom: 0;">
+                <label for="na-id" data-i18n="newAsset.idLabel">资产 ID(英文 slug)</label>
+                <input type="text" id="na-id" required pattern="[a-z0-9-]+" autocomplete="off" />
+              </div>
+            </div>
+            <div class="field" style="margin-bottom: 0;">
+              <label for="na-desc" data-i18n="newAsset.descLabel">描述(可选)</label>
+              <textarea id="na-desc" rows="2" autocomplete="off"></textarea>
+            </div>
+            <div class="field" style="margin-bottom: 0;">
+              <label for="na-tags" data-i18n="newAsset.tagsLabel">标签(可选,逗号分隔)</label>
+              <input type="text" id="na-tags" placeholder="frontend, review" autocomplete="off" />
+            </div>
+            <div class="field" style="margin-bottom: 0; flex: 1; min-height: 0; display: flex; flex-direction: column;">
+              <div class="flex items-center justify-between">
+                <label for="na-content" data-i18n="newAsset.contentLabel">初始文件内容</label>
+                <button type="button" class="btn btn-ghost btn-sm" id="na-reset-content" aria-label="恢复默认模板">
+                  <i data-lucide="rotate-ccw" class="w-3 h-3" aria-hidden="true"></i>
+                  <span data-i18n="newAsset.resetTemplate">恢复默认模板</span>
+                </button>
+              </div>
+              <textarea id="na-content" class="editor" rows="8" spellcheck="false" aria-label="资产文件初始内容"></textarea>
+              <span class="field-hint" data-i18n="newAsset.contentHint">这是资产文件的初始内容。创建后会在历史中作为第一个快照保存,后续可在详情面板继续编辑。</span>
+            </div>
+          </form>
+          <aside class="flex flex-col gap-2 min-w-0">
+            <div class="left-section-title" data-i18n="newAsset.preview">预览</div>
+            <div class="preview-card" id="na-preview">
+              <div class="preview-card-header">
+                <div class="preview-card-icon bg-blue-500/15" id="na-preview-icon">
+                  <i data-lucide="package" class="w-4 h-4 text-blue-400" aria-hidden="true"></i>
+                </div>
+                <span class="badge badge-blue" id="na-preview-badge">通用</span>
+              </div>
+              <div class="preview-card-body">
+                <div class="preview-card-title" id="na-preview-title">新资产</div>
+                <div class="preview-card-desc" id="na-preview-desc">在此处编辑,左侧会实时显示新资产的预览效果。</div>
+              </div>
+              <div class="preview-card-footer">
+                <span class="flex items-center gap-1" id="na-preview-id">
+                  <i data-lucide="hash" class="w-3 h-3" aria-hidden="true"></i>
+                  <span>—</span>
+                </span>
+                <span class="sync-pill pending">
+                  <span class="pill-dot"></span><span data-i18n="panel.sync.pending">未同步</span>
+                </span>
+              </div>
+            </div>
+            <div class="preview-hint" data-i18n="newAsset.previewHint">新建后会立即出现在列表顶部,同步状态为"未同步"。</div>
+          </aside>
+        </div>
+      </div>
+      <footer>
+        <div class="kbd-hint">
+          <span class="kbd">Esc</span> <span data-i18n="newAsset.hintCancel">取消</span>
+          <span class="ml-3"><span class="kbd">⌘</span> <span class="kbd">↵</span></span> <span data-i18n="newAsset.hintCreate">创建</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" class="btn btn-secondary" data-action="new-asset-close" data-i18n="common.cancel">取消</button>
+          <button type="button" class="btn btn-primary" data-action="new-asset-create" data-i18n="newAsset.create">创建</button>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ============ New Scenario Modal ============ -->
+  <div id="new-scenario-modal" class="modal-backdrop" hidden>
+    <div class="modal modal-lg" role="dialog" aria-modal="true" aria-labelledby="new-scenario-title">
+      <header>
+        <h2 id="new-scenario-title" data-i18n="newScenario.title">新建场景</h2>
+        <button class="modal-close" data-action="new-scenario-close" aria-label="关闭">
+          <i data-lucide="x" class="w-4 h-4" aria-hidden="true"></i>
+        </button>
+      </header>
+      <div class="modal-body modal-body-stack">
+        <!-- Description strip -->
+        <p class="modal-help-text" data-i18n="newScenario.help">
+          场景是一组预设配置(默认 Agent + 启用哪些技能与规则)。创建后可在项目里选择使用某个场景。
+        </p>
+        <div class="modal-row" style="grid-template-columns: 1fr 260px; min-height: 380px;">
+          <form id="new-scenario-form" autocomplete="off" onsubmit="return false" class="flex flex-col gap-3 min-w-0">
+            <div class="field-row">
+              <div class="field" style="margin-bottom: 0;">
+                <label for="ns-name" data-i18n="newScenario.name">场景名称</label>
+                <input type="text" id="ns-name" required autocomplete="off" placeholder="代码审查场景" />
+              </div>
+              <div class="field" style="margin-bottom: 0;">
+                <label for="ns-icon" data-i18n="newScenario.iconColor">图标颜色</label>
+                <div class="color-picker" role="radiogroup" aria-label="图标颜色">
+                  <button type="button" class="color-dot active" data-color="emerald" style="background:#22c55e" aria-label="emerald" role="radio" aria-checked="true"></button>
+                  <button type="button" class="color-dot" data-color="blue" style="background:#60a5fa" aria-label="blue" role="radio" aria-checked="false"></button>
+                  <button type="button" class="color-dot" data-color="purple" style="background:#c084fc" aria-label="purple" role="radio" aria-checked="false"></button>
+                  <button type="button" class="color-dot" data-color="orange" style="background:#fb923c" aria-label="orange" role="radio" aria-checked="false"></button>
+                  <button type="button" class="color-dot" data-color="pink" style="background:#f472b6" aria-label="pink" role="radio" aria-checked="false"></button>
+                  <button type="button" class="color-dot" data-color="cyan" style="background:#22d3ee" aria-label="cyan" role="radio" aria-checked="false"></button>
+                </div>
+              </div>
+            </div>
+            <div class="field" style="margin-bottom: 0;">
+              <label for="ns-desc" data-i18n="newScenario.desc">描述(可选)</label>
+              <textarea id="ns-desc" rows="2" placeholder="为某个使用场景预设一份默认配置"></textarea>
+            </div>
+            <div class="field" style="margin-bottom: 0;">
+              <label for="ns-agent" data-i18n="newScenario.defaultAgent">默认 Agent</label>
+              <select id="ns-agent">
+                <option value="opencode">OpenCode</option>
+                <option value="claude-code">Claude Code</option>
+                <option value="gemini-cli">Gemini CLI</option>
+                <option value="windsurf">Windsurf</option>
+                <option value="codebuddy">CodeBuddy</option>
+                <option value="cursor-cli">Cursor CLI</option>
+                <option value="copilot-cli">Copilot CLI</option>
+              </select>
+            </div>
+            <div class="field" style="margin-bottom: 0; flex: 1; min-height: 0;">
+              <label data-i18n="newScenario.includedSkills">包入的技能(点击切换)</label>
+              <div class="skill-pick-list" id="ns-skill-list" role="group" aria-label="可用技能"></div>
+            </div>
+          </form>
+          <aside class="flex flex-col gap-2 min-w-0">
+            <div class="left-section-title" data-i18n="newScenario.preview">预览</div>
+            <div class="scenario-preview" id="ns-preview">
+              <div class="scenario-preview-icon" id="ns-preview-icon">
+                <i data-lucide="sparkles" class="w-5 h-5" aria-hidden="true"></i>
+              </div>
+              <div class="scenario-preview-body">
+                <div class="scenario-preview-title" id="ns-preview-title">新场景</div>
+                <div class="scenario-preview-meta" id="ns-preview-meta">0 个技能 · OpenCode</div>
+              </div>
+            </div>
+            <div class="preview-hint" data-i18n="newScenario.previewHint">场景创建后会出现在侧栏"场景"分类下。</div>
+          </aside>
+        </div>
+      </div>
+      <footer>
+        <div class="kbd-hint">
+          <span class="kbd">Esc</span> <span data-i18n="newScenario.hintCancel">取消</span>
+          <span class="ml-3"><span class="kbd">⌘</span> <span class="kbd">↵</span></span> <span data-i18n="newScenario.hintCreate">创建</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" class="btn btn-secondary" data-action="new-scenario-close" data-i18n="common.cancel">取消</button>
+          <button type="button" class="btn btn-primary" data-action="new-scenario-create" data-i18n="newScenario.create">创建</button>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ============ New Project Modal ============ -->
+  <div id="new-project-modal" class="modal-backdrop" hidden>
+    <div class="modal modal-lg" role="dialog" aria-modal="true" aria-labelledby="new-project-title">
+      <header>
+        <h2 id="new-project-title" data-i18n="newProject.title">新建项目</h2>
+        <button class="modal-close" data-action="new-project-close" aria-label="关闭">
+          <i data-lucide="x" class="w-4 h-4" aria-hidden="true"></i>
+        </button>
+      </header>
+      <div class="modal-body modal-body-stack">
+        <p class="modal-help-text" data-i18n="newProject.help">
+          项目是 Agent 的一个同步目标目录。把项目关联到 Agent 后,Agent 启动时会自动加载项目级别的 Skills / Rules / AGENTS.md。
+        </p>
+        <div class="modal-row" style="grid-template-columns: 1fr 260px; min-height: 380px;">
+          <form id="new-project-form" autocomplete="off" onsubmit="return false" class="flex flex-col gap-3 min-w-0">
+            <div class="field-row">
+              <div class="field" style="margin-bottom: 0;">
+                <label for="np-name" data-i18n="newProject.name">项目名称</label>
+                <input type="text" id="np-name" required autocomplete="off" placeholder="my-awesome-app" />
+              </div>
+              <div class="field" style="margin-bottom: 0;">
+                <label for="np-scenario" data-i18n="newProject.scenario">默认场景</label>
+                <select id="np-scenario">
+                  <option value="" data-i18n="newProject.scenarioNone">(暂不选择)</option>
+                  <option value="default" data-i18n="newProject.scenarioDefault">默认场景 (内置)</option>
+                </select>
+              </div>
+            </div>
+            <div class="field" style="margin-bottom: 0;">
+              <label for="np-path" data-i18n="newProject.path">本地路径</label>
+              <div class="path-input">
+                <input type="text" id="np-path" required placeholder="~/work/my-app" />
+                <button type="button" class="btn btn-secondary btn-sm" data-i18n="newProject.browse">浏览</button>
+              </div>
+              <span class="field-hint" data-i18n="newProject.pathHint">Agent 启动时会扫描此目录下的 .agentdock/ 与 AGENTS.md</span>
+            </div>
+            <div class="field" style="margin-bottom: 0;">
+              <label for="np-desc" data-i18n="newProject.desc">描述(可选)</label>
+              <textarea id="np-desc" rows="2"></textarea>
+            </div>
+            <div class="field" style="margin-bottom: 0;">
+              <label data-i18n="newProject.syncMode">同步模式</label>
+              <div class="type-picker" role="radiogroup">
+                <button type="button" class="type-pick active" data-sync="copy" role="radio" aria-checked="true">
+                  <span class="type-pick-icon"><i data-lucide="copy" class="w-4 h-4" aria-hidden="true"></i></span>
+                  <span class="type-pick-body">
+                    <span class="type-pick-label" data-i18n="newProject.syncCopy">复制 (copy)</span>
+                    <span class="type-pick-desc" data-i18n="newProject.syncCopyDesc">将资产文件完整复制到目标目录,不修改目标文件</span>
+                  </span>
+                </button>
+                <button type="button" class="type-pick" data-sync="merge" role="radio" aria-checked="false">
+                  <span class="type-pick-icon"><i data-lucide="git-merge" class="w-4 h-4" aria-hidden="true"></i></span>
+                  <span class="type-pick-body">
+                    <span class="type-pick-label" data-i18n="newProject.syncMerge">合并 (merge)</span>
+                    <span class="type-pick-desc" data-i18n="newProject.syncMergeDesc">对 AGENTS.md 等使用托管区块合并,保留用户手写内容</span>
+                  </span>
+                </button>
+              </div>
+            </div>
+          </form>
+          <aside class="flex flex-col gap-2 min-w-0">
+            <div class="left-section-title" data-i18n="newProject.preview">预览</div>
+            <div class="scenario-preview" id="np-preview">
+              <div class="scenario-preview-icon" style="background: rgba(59,130,246,.12); color: #60a5fa;">
+                <i data-lucide="folder" class="w-5 h-5" aria-hidden="true"></i>
+              </div>
+              <div class="scenario-preview-body">
+                <div class="scenario-preview-title" id="np-preview-title">新项目</div>
+                <div class="scenario-preview-meta" id="np-preview-meta">未选择路径</div>
+              </div>
+            </div>
+            <div class="preview-hint" data-i18n="newProject.previewHint">项目创建后会出现在侧栏"工作区"分类下。</div>
+          </aside>
+        </div>
+      </div>
+      <footer>
+        <div class="kbd-hint">
+          <span class="kbd">Esc</span> <span data-i18n="newProject.hintCancel">取消</span>
+          <span class="ml-3"><span class="kbd">⌘</span> <span class="kbd">↵</span></span> <span data-i18n="newProject.hintCreate">创建</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" class="btn btn-secondary" data-action="new-project-close" data-i18n="common.cancel">取消</button>
+          <button type="button" class="btn btn-primary" data-action="new-project-create" data-i18n="newProject.create">创建</button>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ============ Confirm Dialog (generic) ============ -->
+  <div id="confirm-dialog" class="modal-backdrop" hidden>
+    <div class="modal modal-sm" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-message">
+      <header>
+        <h2 id="confirm-title">—</h2>
+      </header>
+      <div class="modal-body">
+        <p id="confirm-message">—</p>
+      </div>
+      <footer>
+        <button type="button" class="btn btn-secondary" data-action="confirm-cancel" data-i18n="common.cancel">取消</button>
+        <button type="button" class="btn btn-primary" data-action="confirm-ok" id="confirm-ok-btn">确认</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ============ Toast container ============ -->
+  <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+  <script>
+    // ============================================================
+    // =====  Asset detail / edit / snapshot / new asset JS  ======
+    // ============================================================
+
+    // ---------- Mock data: assets + snapshots + content ---------
+    // Each asset has: snapshots[] (newest first), content (current text)
+    const ASSETS_EXTRA = {
+      'auto-gpt-assistant': {
+        snapshots: [
+          { id: '2026-06-01-103000', at: '2026-06-01 10:30', version: '2.1.0', size: '4.2KB', note: '新增长记忆策略', isCurrent: true },
+          { id: '2026-05-25-140200', at: '2026-05-25 14:02', version: '2.0.4', size: '4.0KB', note: '修复 token 溢出' },
+          { id: '2026-05-12-091500', at: '2026-05-12 09:15', version: '2.0.0', size: '3.6KB', note: '切换到 GPT-4o' },
+          { id: '2026-04-30-180000', at: '2026-04-30 18:00', version: '1.9.0', size: '3.2KB', note: '初版可用' },
+        ],
+        content: `# Auto-GPT Assistant
+
+基于 GPT-4 的自主任务执行引擎,支持自动化工作流与长短期记忆管理。
+
+## 触发条件
+当用户描述一个多步骤任务时启用。
+
+## 行为
+1. 拆解任务为可执行子步骤
+2. 按依赖顺序执行,中间失败可回滚
+3. 维护短期上下文与长期记忆
+4. 完成所有步骤后输出执行报告
+
+## 约束
+- 单次执行不超过 20 步
+- 涉及文件系统操作需用户确认
+- 网络请求走白名单
+`
+      },
+      'system-monitor-pro': {
+        snapshots: [
+          { id: '2026-05-20-220000', at: '2026-05-20 22:00', version: '1.4.5', size: '2.1KB', note: '修复 macOS 内存采集', isCurrent: true },
+          { id: '2026-05-08-153000', at: '2026-05-08 15:30', version: '1.4.0', size: '2.0KB', note: '新增磁盘 IO' },
+        ],
+        content: `# System Monitor Pro
+
+实时监控系统资源,提供异常告警。
+
+## 指标
+- CPU / 内存 / 磁盘 / 网络
+- 进程级资源占用 Top 10
+`
+      },
+      'tailwind-ui-kit': {
+        snapshots: [
+          { id: '2026-04-15-110000', at: '2026-04-15 11:00', version: '3.0.1', size: '1.8KB', note: '新增空状态组件', isCurrent: true },
+        ],
+        content: `# Tailwind UI Kit
+
+精心打磨的 UI 组件库,一键导出代码。
+
+## 组件
+Button / Modal / Drawer / Tabs / Toast / Form fields
+`
+      },
+      'git-flow-helper': {
+        snapshots: [
+          { id: '2026-05-30-093000', at: '2026-05-30 09:30', version: '1.2.0', size: '1.2KB', note: '优化冲突预警文案', isCurrent: true },
+          { id: '2026-05-10-170000', at: '2026-05-10 17:00', version: '1.1.0', size: '1.0KB' },
+        ],
+        content: `# Git Flow Helper
+
+简化 Git 分支管理流程,自动化合并请求与冲突预警。
+`
+      },
+      'smart-linter': {
+        snapshots: [
+          { id: '2026-06-02-080000', at: '2026-06-02 08:00', version: '2.0.4', size: '2.5KB', note: '新增 Go / Rust 支持', isCurrent: true },
+          { id: '2026-05-22-140000', at: '2026-05-22 14:00', version: '2.0.0', size: '2.2KB' },
+        ],
+        content: `# Smart Linter
+
+基于 AI 的代码质量检测,支持 20+ 种语言。
+`
+      },
+      'rapid-api-tester': {
+        snapshots: [
+          { id: '2026-05-18-160000', at: '2026-05-18 16:00', version: '0.9.8', size: '3.0KB', note: 'GraphQL 补全', isCurrent: true },
+        ],
+        content: `# Rapid API Tester
+
+轻量级接口调试工具,GraphQL / REST / WebSocket。
+`
+      },
+      'db-explorer': {
+        snapshots: [
+          { id: '2026-05-28-120000', at: '2026-05-28 12:00', version: '4.2.1', size: '5.1KB', note: '新增 PostgreSQL 支持', isCurrent: true },
+          { id: '2026-05-15-100000', at: '2026-05-15 10:00', version: '4.2.0', size: '4.8KB' },
+        ],
+        content: `# DB Explorer
+
+统一数据库管理界面,可视化查询与结构同步。
+`
+      },
+      'cloud-sync-engine': {
+        snapshots: [
+          { id: '2026-06-01-150000', at: '2026-06-01 15:00', version: '1.0.0', size: '1.5KB', note: '首发', isCurrent: true },
+        ],
+        content: `# Cloud Sync Engine
+
+多端配置自动同步引擎。
+`
+      },
+      'optiimage': {
+        snapshots: [
+          { id: '2026-05-25-110000', at: '2026-05-25 11:00', version: '2.3.0', size: '0.9KB', note: 'WebP 优化提速 3x', isCurrent: true },
+        ],
+        content: `# OptiImage
+
+无损图片压缩与格式转换。
+`
+      },
+    };
+
+    // Default empty snapshot set for newly created assets
+    function defaultSnapshots() {
+      return [
+        { id: timestampId(), at: nowLabel(), version: '0.1.0', size: '0.5KB', note: '初始版本', isCurrent: true },
+      ];
+    }
+
+    function defaultContent(type) {
+      return type === 'agents-md'
+        ? `# ${t('newAsset.placeholder.agentsTitle')}\n\n${t('newAsset.placeholder.agentsBody')}\n`
+        : `# ${t('newAsset.placeholder.skillTitle')}\n\n${t('newAsset.placeholder.skillBody')}\n`;
+    }
+
+    function timestampId() {
+      const d = new Date();
+      const p = n => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`;
+    }
+    function nowLabel() {
+      const d = new Date();
+      const p = n => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+    }
+
+    // ---------- State ----------
+    const panelState = {
+      assetId: null,
+      pane: 'overview',
+      snapshotId: null, // which snapshot the user is viewing
+      dirty: false,
+    };
+
+    // ---------- Toast ----------
+    function toast(msg, type = 'success', ms = 2400) {
+      const c = document.getElementById('toast-container');
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.setAttribute('role', 'status');
+      const iconMap = { success: 'check', warn: 'alert-triangle', error: 'alert-circle' };
+      el.innerHTML = `<span class="toast-icon"><i data-lucide="${iconMap[type] || 'check'}" class="w-3 h-3" aria-hidden="true"></i></span><span></span>`;
+      el.lastElementChild.textContent = msg;
+      c.appendChild(el);
+      if (window.lucide) lucide.createIcons();
+      setTimeout(() => {
+        el.classList.add('toast-out');
+        setTimeout(() => el.remove(), 220);
+      }, ms);
+    }
+
+    // ---------- Confirm dialog ----------
+    let _confirmResolve = null;
+    function confirmDialog({ title, message, okText, okDanger }) {
+      return new Promise(resolve => {
+        _confirmResolve = resolve;
+        const dlg = document.getElementById('confirm-dialog');
+        document.getElementById('confirm-title').textContent = title;
+        document.getElementById('confirm-message').textContent = '';
+        const msgEl = document.getElementById('confirm-message');
+        if (typeof message === 'string') {
+          msgEl.textContent = message;
+        } else {
+          msgEl.replaceChildren(...message);
+        }
+        const okBtn = document.getElementById('confirm-ok-btn');
+        okBtn.textContent = okText || (currentLang === 'en' ? 'Confirm' : '确认');
+        okBtn.classList.toggle('btn-danger', !!okDanger);
+        okBtn.classList.toggle('btn-primary', !okDanger);
+        dlg.hidden = false;
+        requestAnimationFrame(() => dlg.classList.add('open'));
+        dlg.setAttribute('aria-hidden', 'false');
+        setTimeout(() => okBtn.focus(), 50);
+      });
+    }
+    function closeConfirm(result) {
+      const dlg = document.getElementById('confirm-dialog');
+      dlg.classList.remove('open');
+      dlg.setAttribute('aria-hidden', 'true');
+      setTimeout(() => { dlg.hidden = true; }, 180);
+      if (_confirmResolve) { _confirmResolve(result); _confirmResolve = null; }
+    }
+
+    // ---------- Detail panel: open / close / render ----------
+    function openDetailPanel(assetId) {
+      const asset = findAsset(assetId);
+      if (!asset) return;
+      panelState.assetId = assetId;
+      panelState.pane = 'overview';
+      panelState.dirty = false;
+
+      // Header
+      document.getElementById('panel-title').textContent = asset.name;
+      document.getElementById('panel-version').textContent = asset.version;
+      const typeBadge = document.getElementById('panel-type-badge');
+      typeBadge.textContent = asset.type === 'agents-md' ? 'AGENTS.md' : 'Skill';
+      typeBadge.className = `badge ${asset.type === 'agents-md' ? 'badge-purple' : 'badge-blue'}`;
+      // Sync pill
+      const pill = document.getElementById('panel-sync');
+      const syncClass = asset.sync || 'synced';
+      pill.className = `sync-pill ${syncClass}`;
+      pill.lastElementChild.textContent = t(`panel.sync.${syncClass}`);
+
+      // Overview fields
+      document.getElementById('f-title').value = asset.name;
+      document.getElementById('f-id').value = asset.id;
+      document.getElementById('f-desc').value = asset.description || '';
+      document.getElementById('f-version').value = asset.version;
+      document.getElementById('f-type').value = asset.type;
+      renderTagChips(asset.tags || []);
+
+      // Content
+      const extra = ASSETS_EXTRA[assetId] || {};
+      const content = extra.content || defaultContent(asset.type);
+      const editor = document.getElementById('editor');
+      editor.value = content;
+      document.getElementById('editor-file-name').textContent = asset.type === 'agents-md' ? 'AGENTS.md' : 'SKILL.md';
+      updateEditorStats();
+      editor.oninput = () => {
+        panelState.dirty = editor.value !== (extra.content || '');
+        document.getElementById('editor-meta').classList.toggle('dirty', panelState.dirty);
+        updateEditorStats();
+      };
+
+      // Snapshots
+      renderSnapshots(extra.snapshots || defaultSnapshots());
+
+      // Switch to overview tab
+      switchPane('overview');
+
+      // Open
+      const panel = document.getElementById('detail-panel');
+      const backdrop = document.getElementById('panel-backdrop');
+      panel.hidden = false;
+      backdrop.hidden = false;
+      requestAnimationFrame(() => {
+        panel.classList.add('open');
+        backdrop.classList.add('open');
+        panel.setAttribute('aria-hidden', 'false');
+        backdrop.setAttribute('aria-hidden', 'false');
+      });
+      setTimeout(() => document.getElementById('f-title').focus(), 250);
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeDetailPanel() {
+      const panel = document.getElementById('detail-panel');
+      const backdrop = document.getElementById('panel-backdrop');
+      panel.classList.remove('open');
+      backdrop.classList.remove('open');
+      panel.setAttribute('aria-hidden', 'true');
+      backdrop.setAttribute('aria-hidden', 'true');
+      setTimeout(() => { panel.hidden = true; backdrop.hidden = true; }, 250);
+      panelState.assetId = null;
+    }
+
+    async function saveAndSnapshot() {
+      const asset = findAsset(panelState.assetId);
+      if (!asset) return;
+      // Update asset fields
+      asset.name = document.getElementById('f-title').value.trim() || asset.name;
+      asset.description = document.getElementById('f-desc').value.trim();
+      asset.version = document.getElementById('f-version').value.trim() || asset.version;
+      asset.tags = collectTags();
+      const editor = document.getElementById('editor');
+      const extra = ASSETS_EXTRA[asset.id] || (ASSETS_EXTRA[asset.id] = {});
+      const oldContent = extra.content || '';
+      const newContent = editor.value;
+      // Bump version (very small heuristic — patch)
+      const m = asset.version.match(/^(\d+)\.(\d+)\.(\d+)$/);
+      if (m) asset.version = `${m[1]}.${m[2]}.${parseInt(m[3]) + 1}`;
+      document.getElementById('panel-version').textContent = asset.version;
+      document.getElementById('f-version').value = asset.version;
+
+      // Only create a snapshot if content actually changed
+      if (oldContent !== newContent) {
+        extra.content = newContent;
+        if (!extra.snapshots) extra.snapshots = defaultSnapshots();
+        extra.snapshots.unshift({ id: timestampId(), at: nowLabel(), version: asset.version, size: formatSize(newContent), note: t('snapshot.note.manual'), isCurrent: true });
+        extra.snapshots.forEach((s, i) => s.isCurrent = i === 0);
+        renderSnapshots(extra.snapshots);
+      } else {
+        // Just mark sync as pending (since metadata may have changed)
+        asset.sync = 'pending';
+        updateSyncPill();
+      }
+      panelState.dirty = false;
+      document.getElementById('editor-meta').classList.remove('dirty');
+
+      // Update grid card
+      refreshAssetCard(asset);
+      toast(t('toast.savedWithSnapshot', { v: asset.version }), 'success');
+    }
+
+    async function rollbackSnapshot(snapshotId) {
+      const asset = findAsset(panelState.assetId);
+      if (!asset) return;
+      const extra = ASSETS_EXTRA[asset.id];
+      const snap = (extra.snapshots || []).find(s => s.id === snapshotId);
+      if (!snap) return;
+      const ok = await confirmDialog({
+        title: t('confirm.rollbackTitle'),
+        message: t('confirm.rollbackMsg', { at: snap.at, v: snap.version }),
+        okText: t('confirm.rollbackOk'),
+        okDanger: true,
+      });
+      if (!ok) return;
+      // Simulate: replace current content with snapshot's version, mark sync pending
+      asset.version = snap.version;
+      asset.sync = 'pending';
+      // Mark this snapshot as current
+      extra.snapshots = extra.snapshots.map(s => ({ ...s, isCurrent: s.id === snapshotId }));
+      renderSnapshots(extra.snapshots);
+      document.getElementById('panel-version').textContent = asset.version;
+      document.getElementById('f-version').value = asset.version;
+      // Update DOM first so updateSyncPill reads the new data-sync
+      refreshAssetCard(asset);
+      updateSyncPill();
+      toast(t('toast.rolledBack', { at: snap.at }), 'warn');
+    }
+
+    async function deleteCurrentAsset() {
+      const asset = findAsset(panelState.assetId);
+      if (!asset) return;
+      const ok = await confirmDialog({
+        title: t('confirm.deleteTitle'),
+        message: t('confirm.deleteMsg', { name: asset.name }),
+        okText: t('confirm.deleteOk'),
+        okDanger: true,
+      });
+      if (!ok) return;
+      removeAssetCard(asset.id);
+      delete ASSETS_EXTRA[asset.id];
+      closeDetailPanel();
+      toast(t('toast.deleted', { name: asset.name }), 'warn');
+    }
+
+    // ---------- Pane switching ----------
+    function switchPane(name) {
+      panelState.pane = name;
+      document.querySelectorAll('.panel-tab').forEach(t => {
+        const active = t.getAttribute('data-pane') === name;
+        t.classList.toggle('active', active);
+        t.setAttribute('aria-selected', active ? 'true' : 'false');
+      });
+      document.querySelectorAll('[data-pane-section]').forEach(s => {
+        s.hidden = s.getAttribute('data-pane-section') !== name;
+      });
+    }
+
+    // ---------- Snapshot list rendering ----------
+    function renderSnapshots(snapshots) {
+      const list = document.getElementById('snapshot-list');
+      if (!snapshots.length) {
+        list.innerHTML = `<div class="snapshot-empty" data-i18n="panel.snapshotEmpty">还没有快照,保存后会自动创建</div>`;
+        if (window.lucide) lucide.createIcons();
+        return;
+      }
+      list.replaceChildren(...snapshots.map(s => {
+        const row = document.createElement('div');
+        row.className = 'snapshot-row' + (s.isCurrent ? ' is-current' : '');
+        row.setAttribute('role', 'listitem');
+        row.innerHTML = `
+          <div class="snapshot-icon" aria-hidden="true">
+            <i data-lucide="${s.isCurrent ? 'check-circle-2' : 'history'}" class="w-4 h-4"></i>
+          </div>
+          <div class="snapshot-info">
+            <div class="snapshot-time">${s.at}${s.isCurrent ? ` <span class="badge badge-green ml-1.5">${t('snapshot.current')}</span>` : ''}</div>
+            <div class="snapshot-meta">
+              <span><i data-lucide="package" class="w-3 h-3" aria-hidden="true"></i> v${s.version}</span>
+              <span><i data-lucide="hard-drive" class="w-3 h-3" aria-hidden="true"></i> ${s.size}</span>
+              ${s.note ? `<span><i data-lucide="message-square" class="w-3 h-3" aria-hidden="true"></i> ${escapeHtml(s.note)}</span>` : ''}
+            </div>
+          </div>
+          <div class="snapshot-actions">
+            <button type="button" class="btn btn-secondary btn-sm" data-rollback="${s.id}" ${s.isCurrent ? 'disabled' : ''}>
+              <i data-lucide="rotate-ccw" class="w-3.5 h-3.5" aria-hidden="true"></i>${t('snapshot.rollback')}
+            </button>
+          </div>
+        `;
+        return row;
+      }));
+      // Wire rollback
+      list.querySelectorAll('[data-rollback]').forEach(btn => {
+        btn.addEventListener('click', () => rollbackSnapshot(btn.getAttribute('data-rollback')));
+      });
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // ---------- Tag chips ----------
+    let _tags = [];
+    function renderTagChips(tags) {
+      _tags = [...tags];
+      const wrap = document.getElementById('f-tags');
+      wrap.replaceChildren(..._tags.map(t => {
+        const chip = document.createElement('span');
+        chip.className = 'tag-chip';
+        chip.innerHTML = `${escapeHtml(t)}<button type="button" aria-label="移除标签 ${escapeHtml(t)}" data-remove-tag="${escapeHtml(t)}"><i data-lucide="x" class="w-3 h-3" aria-hidden="true"></i></button>`;
+        return chip;
+      }));
+      wrap.querySelectorAll('[data-remove-tag]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          _tags = _tags.filter(x => x !== btn.getAttribute('data-remove-tag'));
+          renderTagChips(_tags);
+        });
+      });
+      if (window.lucide) lucide.createIcons();
+    }
+    function collectTags() { return [..._tags]; }
+
+    // ---------- New asset modal ----------
+    function openNewAssetModal() {
+      const m = document.getElementById('new-asset-modal');
+      // Reset form
+      document.getElementById('na-title').value = '';
+      document.getElementById('na-id').value = '';
+      document.getElementById('na-desc').value = '';
+      document.getElementById('na-tags').value = '';
+      setNewAssetType('skill');
+      // Reset content to default template based on type
+      const type = document.querySelector('#new-asset-modal .type-pick.active').getAttribute('data-type');
+      document.getElementById('na-content').value = defaultContent(type);
+      updateNewAssetPreview();
+      m.hidden = false;
+      requestAnimationFrame(() => m.classList.add('open'));
+      setTimeout(() => document.getElementById('na-title').focus(), 50);
+      if (window.lucide) lucide.createIcons();
+    }
+    function closeNewAssetModal() {
+      const m = document.getElementById('new-asset-modal');
+      m.classList.remove('open');
+      setTimeout(() => { m.hidden = true; }, 180);
+    }
+    function setNewAssetType(type) {
+      document.querySelectorAll('#new-asset-modal .type-pick').forEach(b => {
+        const active = b.getAttribute('data-type') === type;
+        b.classList.toggle('active', active);
+        b.setAttribute('aria-checked', active ? 'true' : 'false');
+      });
+      // Also reset content template if user hasn't edited it
+      const contentEl = document.getElementById('na-content');
+      const defaults = ['# 新技能\n\n简要描述此技能的触发条件与行为。\n', '# 项目 Agent 协作规则\n\n在此处定义 Agent 的工作准则、约束与协作方式。\n'];
+      const currentDefault = type === 'agents-md' ? defaults[1] : defaults[0];
+      if (defaults.includes(contentEl.value) || contentEl.value === '') {
+        contentEl.value = currentDefault;
+      }
+      updateNewAssetPreview();
+    }
+    function updateNewAssetPreview() {
+      const type = document.querySelector('#new-asset-modal .type-pick.active')?.getAttribute('data-type') || 'skill';
+      const title = document.getElementById('na-title').value.trim() || (currentLang === 'en' ? 'New asset' : '新资产');
+      const desc = document.getElementById('na-desc').value.trim() || (currentLang === 'en' ? 'Edit on the right; this preview updates in real time.' : '在此处编辑,左侧会实时显示新资产的预览效果。');
+      const id = document.getElementById('na-id').value.trim() || '—';
+      // Icon
+      const isAgentsMd = type === 'agents-md';
+      const iconName = isAgentsMd ? 'file-text' : 'package';
+      const iconColor = isAgentsMd ? 'purple' : 'blue';
+      const badgeText = isAgentsMd ? 'AGENTS.md' : '通用';
+      const badgeClass = isAgentsMd ? 'badge-purple' : 'badge-blue';
+      // Apply
+      const card = document.getElementById('na-preview');
+      if (!card) return;
+      const iconWrap = card.querySelector('.preview-card-icon');
+      if (iconWrap) {
+        // lucide replaces <i data-lucide> with <svg> on first render;
+        // rebuilding the inner element is the simplest way to re-trigger it
+        iconWrap.className = `preview-card-icon bg-${iconColor}-500/15`;
+        iconWrap.innerHTML = `<i data-lucide="${iconName}" class="w-4 h-4 text-${iconColor}-400" aria-hidden="true"></i>`;
+      }
+      const badge = card.querySelector('.badge');
+      if (badge) {
+        badge.className = `badge ${badgeClass}`;
+        badge.textContent = badgeText;
+      }
+      const titleEl = card.querySelector('.preview-card-title');
+      if (titleEl) titleEl.textContent = title;
+      const descEl = card.querySelector('.preview-card-desc');
+      if (descEl) descEl.textContent = desc;
+      const idEl = card.querySelector('#na-preview-id span:last-child');
+      if (idEl) idEl.textContent = id;
+      if (window.lucide) lucide.createIcons();
+    }
+    function createAsset() {
+      const title = document.getElementById('na-title').value.trim();
+      const id = document.getElementById('na-id').value.trim();
+      const desc = document.getElementById('na-desc').value.trim();
+      const tagsRaw = document.getElementById('na-tags').value.trim();
+      const type = document.querySelector('#new-asset-modal .type-pick.active').getAttribute('data-type');
+      const content = document.getElementById('na-content').value;
+      if (!title) { toast(t('toast.titleRequired'), 'error'); document.getElementById('na-title').focus(); return; }
+      if (!/^[a-z0-9-]+$/.test(id)) { toast(t('toast.idInvalid'), 'error'); document.getElementById('na-id').focus(); return; }
+      if (findAsset(id)) { toast(t('toast.idDuplicate'), 'error'); document.getElementById('na-id').focus(); return; }
+      const tags = tagsRaw ? tagsRaw.split(/[,,]/).map(s => s.trim()).filter(Boolean) : [];
+      // New asset model
+      const meta = { id, type, name: title, description: desc, version: '0.1.0', tags, enabled: true, size: '—', icon: type === 'agents-md' ? 'file-text' : 'package', iconColor: type === 'agents-md' ? 'purple' : 'blue' };
+      // Use user-provided content if changed, otherwise default
+      const defaultTxt = defaultContent(type);
+      const finalContent = (content && content !== defaultTxt) ? content : defaultTxt;
+      ASSETS_EXTRA[id] = {
+        snapshots: [{ id: timestampId(), at: nowLabel(), version: '0.1.0', size: formatSize(finalContent), note: '初始版本', isCurrent: true }],
+        content: finalContent,
+      };
+      insertAssetCard(meta);
+      closeNewAssetModal();
+      toast(t('toast.created', { name: title }), 'success');
+    }
+
+    // ---------- New scenario modal ----------
+    const SCENARIOS_STORE = []; // in-memory list of created scenarios
+    function openNewScenarioModal() {
+      const m = document.getElementById('new-scenario-modal');
+      // Reset
+      document.getElementById('ns-name').value = '';
+      document.getElementById('ns-desc').value = '';
+      document.getElementById('ns-agent').value = 'opencode';
+      // Render skill pick list from all current skills
+      renderScenarioSkillList([]);
+      // Reset color
+      document.querySelectorAll('#new-scenario-modal .color-dot').forEach(b => {
+        const isActive = b.getAttribute('data-color') === 'emerald';
+        b.classList.toggle('active', isActive);
+        b.setAttribute('aria-checked', isActive ? 'true' : 'false');
+      });
+      updateScenarioPreview();
+      m.hidden = false;
+      requestAnimationFrame(() => m.classList.add('open'));
+      setTimeout(() => document.getElementById('ns-name').focus(), 50);
+      if (window.lucide) lucide.createIcons();
+    }
+    function closeNewScenarioModal() {
+      const m = document.getElementById('new-scenario-modal');
+      m.classList.remove('open');
+      setTimeout(() => { m.hidden = true; }, 180);
+    }
+    function renderScenarioSkillList(selectedIds) {
+      const list = document.getElementById('ns-skill-list');
+      if (!list) return;
+      const allSkills = Array.from(document.querySelectorAll('#skills-grid .skill-card[data-asset-id]'));
+      list.replaceChildren(...allSkills.map(card => {
+        const id = card.getAttribute('data-asset-id');
+        const name = card.querySelector('h3')?.textContent || id;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'skill-pick' + (selectedIds.includes(id) ? ' active' : '');
+        btn.setAttribute('data-skill-id', id);
+        btn.setAttribute('role', 'checkbox');
+        btn.setAttribute('aria-checked', selectedIds.includes(id) ? 'true' : 'false');
+        btn.innerHTML = `<i data-lucide="package" class="w-3.5 h-3.5 flex-shrink-0" aria-hidden="true"></i><span class="truncate">${escapeHtml(name)}</span><i data-lucide="check" class="w-3.5 h-3.5 skill-pick-check" aria-hidden="true"></i>`;
+        btn.addEventListener('click', () => {
+          btn.classList.toggle('active');
+          const isActive = btn.classList.contains('active');
+          btn.setAttribute('aria-checked', isActive ? 'true' : 'false');
+          updateScenarioPreview();
+        });
+        return btn;
+      }));
+      if (window.lucide) lucide.createIcons();
+    }
+    function getSelectedScenarioSkills() {
+      return Array.from(document.querySelectorAll('#ns-skill-list .skill-pick.active'))
+        .map(b => b.getAttribute('data-skill-id'));
+    }
+    function updateScenarioPreview() {
+      const name = document.getElementById('ns-name').value.trim() || (currentLang === 'en' ? 'New scenario' : '新场景');
+      const color = document.querySelector('#new-scenario-modal .color-dot.active')?.getAttribute('data-color') || 'emerald';
+      const agent = document.getElementById('ns-agent').value;
+      const skillCount = getSelectedScenarioSkills().length;
+      const colorHex = { emerald: '#22c55e', blue: '#60a5fa', purple: '#c084fc', orange: '#fb923c', pink: '#f472b6', cyan: '#22d3ee' }[color];
+      const iconWrap = document.getElementById('ns-preview-icon');
+      if (iconWrap) {
+        iconWrap.style.background = `${colorHex}22`;
+        iconWrap.style.color = colorHex;
+        // Rebuild icon to re-trigger lucide
+        iconWrap.innerHTML = `<i data-lucide="sparkles" class="w-5 h-5" style="color: ${colorHex}" aria-hidden="true"></i>`;
+      }
+      const titleEl = document.getElementById('ns-preview-title');
+      if (titleEl) titleEl.textContent = name;
+      const metaEl = document.getElementById('ns-preview-meta');
+      if (metaEl) metaEl.textContent = `${skillCount} 个技能 · ${agent}`;
+      if (window.lucide) lucide.createIcons();
+    }
+    function createScenario() {
+      const name = document.getElementById('ns-name').value.trim();
+      const desc = document.getElementById('ns-desc').value.trim();
+      const agent = document.getElementById('ns-agent').value;
+      const color = document.querySelector('#new-scenario-modal .color-dot.active')?.getAttribute('data-color') || 'emerald';
+      const skills = getSelectedScenarioSkills();
+      if (!name) { toast(t('toast.scenarioNameRequired'), 'error'); document.getElementById('ns-name').focus(); return; }
+      const scenario = { id: autoGenId(name), name, desc, color, agent, skills };
+      SCENARIOS_STORE.push(scenario);
+      // Insert into sidebar
+      insertScenarioIntoSidebar(scenario);
+      closeNewScenarioModal();
+      toast(t('toast.scenarioCreated', { name }), 'success');
+    }
+    function insertScenarioIntoSidebar(s) {
+      // Find the scenarios category in the sidebar
+      const cat = document.querySelector('.category-label.first');
+      if (!cat) return;
+      // Get the parent .relative container
+      const container = cat.closest('.relative');
+      if (!container) return;
+      // Insert before any popover child
+      const popover = container.querySelector('.popover');
+      const link = document.createElement('a');
+      link.setAttribute('data-nav', `scenario-${s.id}`);
+      link.className = 'nav-sub-item';
+      link.setAttribute('data-scenario-id', s.id);
+      const colorHex = { emerald: '#22c55e', blue: '#60a5fa', purple: '#c084fc', orange: '#fb923c', pink: '#f472b6', cyan: '#22d3ee' }[s.color] || '#22c55e';
+      link.innerHTML = `<i data-lucide="sparkles" class="w-3.5 h-3.5" style="color: ${colorHex}" aria-hidden="true"></i><span>${escapeHtml(s.name)}</span>`;
+      if (popover) container.insertBefore(link, popover);
+      else container.appendChild(link);
+      // Also refresh the "项目" scenario dropdown
+      refreshProjectScenarioOptions();
+      if (window.lucide) lucide.createIcons();
+    }
+    function refreshProjectScenarioOptions() {
+      const sel = document.getElementById('np-scenario');
+      if (!sel) return;
+      // Keep the "none" + "default" options, add custom ones after
+      const baseOpts = sel.querySelectorAll('option[value=""], option[value="default"]');
+      // Remove all options after the base ones
+      while (sel.options.length > baseOpts.length) sel.remove(sel.options.length - 1);
+      SCENARIOS_STORE.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.id;
+        opt.textContent = s.name;
+        sel.appendChild(opt);
+      });
+    }
+
+    // ---------- New project modal ----------
+    const PROJECTS_STORE = []; // in-memory list of created projects
+    function openNewProjectModal() {
+      const m = document.getElementById('new-project-modal');
+      document.getElementById('np-name').value = '';
+      document.getElementById('np-path').value = '';
+      document.getElementById('np-desc').value = '';
+      document.getElementById('np-scenario').value = '';
+      // Reset sync mode
+      document.querySelectorAll('#new-project-modal .type-pick').forEach(b => {
+        const isCopy = b.getAttribute('data-sync') === 'copy';
+        b.classList.toggle('active', isCopy);
+        b.setAttribute('aria-checked', isCopy ? 'true' : 'false');
+      });
+      refreshProjectScenarioOptions();
+      updateProjectPreview();
+      m.hidden = false;
+      requestAnimationFrame(() => m.classList.add('open'));
+      setTimeout(() => document.getElementById('np-name').focus(), 50);
+      if (window.lucide) lucide.createIcons();
+    }
+    function closeNewProjectModal() {
+      const m = document.getElementById('new-project-modal');
+      m.classList.remove('open');
+      setTimeout(() => { m.hidden = true; }, 180);
+    }
+    function updateProjectPreview() {
+      const name = document.getElementById('np-name').value.trim() || (currentLang === 'en' ? 'New project' : '新项目');
+      const path = document.getElementById('np-path').value.trim() || (currentLang === 'en' ? 'No path selected' : '未选择路径');
+      document.getElementById('np-preview-title').textContent = name;
+      document.getElementById('np-preview-meta').textContent = path;
+    }
+    function createProject() {
+      const name = document.getElementById('np-name').value.trim();
+      const path = document.getElementById('np-path').value.trim();
+      const desc = document.getElementById('np-desc').value.trim();
+      const scenario = document.getElementById('np-scenario').value;
+      const syncMode = document.querySelector('#new-project-modal .type-pick.active')?.getAttribute('data-sync') || 'copy';
+      if (!name) { toast(t('toast.projectNameRequired'), 'error'); document.getElementById('np-name').focus(); return; }
+      if (!path) { toast(t('toast.projectPathRequired'), 'error'); document.getElementById('np-path').focus(); return; }
+      if (PROJECTS_STORE.find(p => p.id === autoGenId(name))) { toast(t('toast.idDuplicate'), 'error'); return; }
+      const project = { id: autoGenId(name), name, path, desc, scenario, syncMode };
+      PROJECTS_STORE.push(project);
+      insertProjectIntoSidebar(project);
+      closeNewProjectModal();
+      toast(t('toast.projectCreated', { name }), 'success');
+    }
+    function insertProjectIntoSidebar(p) {
+      // Find the "工作区" category container in the sidebar
+      const catLabels = document.querySelectorAll('.category-label');
+      let workspaceContainer = null;
+      for (const c of catLabels) {
+        if (c.textContent.includes('工作区')) {
+          workspaceContainer = c.closest('.relative');
+          break;
+        }
+      }
+      if (!workspaceContainer) return;
+      const popover = workspaceContainer.querySelector('.popover');
+      const link = document.createElement('a');
+      link.setAttribute('data-nav', `project-${p.id}`);
+      link.className = 'nav-sub-item';
+      link.setAttribute('data-project-id', p.id);
+      link.innerHTML = `<i data-lucide="folder" class="w-3.5 h-3.5" style="color: #60a5fa" aria-hidden="true"></i><span class="truncate">${escapeHtml(p.name)}</span>`;
+      link.title = p.path;
+      if (popover) workspaceContainer.insertBefore(link, popover);
+      else workspaceContainer.appendChild(link);
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // Auto-generate id from title
+    function autoGenId(title) {
+      return title.toLowerCase().trim()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '')
+        .slice(0, 40);
+    }
+
+    // ---------- Asset / card sync ----------
+    function findAsset(id) {
+      // Search in the existing card dataset
+      const card = document.querySelector(`[data-asset-id="${id}"]`);
+      if (!card) return null;
+      return readCardMeta(card);
+    }
+    function readCardMeta(card) {
+      return {
+        id: card.getAttribute('data-asset-id'),
+        type: card.getAttribute('data-asset-type'),
+        name: card.querySelector('h3').textContent,
+        description: card.querySelector('p').textContent,
+        size: card.querySelector('[data-asset-size]')?.textContent.trim() || '—',
+        version: card.querySelector('[data-asset-version]')?.textContent.trim().replace(/^v/, '') || '0.1.0',
+        tags: [],
+        enabled: card.getAttribute('data-enabled') === 'true',
+        sync: card.getAttribute('data-sync') || 'synced',
+      };
+    }
+    function refreshAssetCard(asset) {
+      const card = document.querySelector(`[data-asset-id="${asset.id}"]`);
+      if (!card) return;
+      card.querySelector('h3').textContent = asset.name;
+      card.querySelector('p').textContent = asset.description || (asset.type === 'agents-md' ? 'AGENTS.md 资产' : 'Skill 资产');
+      const ver = card.querySelector('[data-asset-version]');
+      if (ver) ver.textContent = `v${asset.version}`;
+      if (asset.sync) card.setAttribute('data-sync', asset.sync);
+    }
+    function insertAssetCard(meta) {
+      const grid = document.getElementById('skills-grid');
+      if (!grid) return;
+      const colorMap = {
+        blue:   { bg: 'bg-blue-500/15',   bd: 'border-blue-500/20',   tx: 'text-blue-400',   badge: 'badge-blue' },
+        orange: { bg: 'bg-orange-500/15', bd: 'border-orange-500/20', tx: 'text-orange-400', badge: 'badge-orange' },
+        purple: { bg: 'bg-purple-500/15', bd: 'border-purple-500/20', tx: 'text-purple-400', badge: 'badge-purple' },
+        pink:   { bg: 'bg-pink-500/15',   bd: 'border-pink-500/20',   tx: 'text-pink-400',   badge: 'badge-pink' },
+        cyan:   { bg: 'bg-cyan-500/15',   bd: 'border-cyan-500/20',   tx: 'text-cyan-400',   badge: 'badge-blue' },
+        emerald:{ bg: 'bg-emerald-500/15',bd: 'border-emerald-500/20',tx: 'text-emerald-400',badge: 'badge-green' },
+        red:    { bg: 'bg-red-500/15',    bd: 'border-red-500/20',    tx: 'text-red-400',    badge: 'badge-red' },
+        indigo: { bg: 'bg-indigo-500/15', bd: 'border-indigo-500/20', tx: 'text-indigo-400', badge: 'badge-blue' },
+        yellow: { bg: 'bg-yellow-500/15', bd: 'border-yellow-500/20', tx: 'text-yellow-400', badge: 'badge-orange' },
+      };
+      const c = colorMap[meta.iconColor] || colorMap.blue;
+      const badgeText = meta.type === 'agents-md' ? 'AGENTS.md' : '通用';
+      const card = document.createElement('div');
+      card.className = 'skill-card bg-ink-900 border border-line rounded-xl p-5 flex flex-col gap-4';
+      card.setAttribute('data-enabled', 'true');
+      card.setAttribute('data-asset-id', meta.id);
+      card.setAttribute('data-asset-type', meta.type);
+      card.setAttribute('data-sync', 'pending');
+      card.innerHTML = `
+        <div class="flex items-start justify-between">
+          <div class="icon-tile ${c.bg} border ${c.bd}">
+            <i data-lucide="${meta.icon}" class="w-5 h-5 ${c.tx}" aria-hidden="true"></i>
+          </div>
+          <span class="badge ${c.badge}">${badgeText}</span>
+        </div>
+        <div>
+          <h3 class="text-white font-medium">${escapeHtml(meta.name)}</h3>
+          <p class="text-zinc-500 text-sm mt-1.5 leading-relaxed line-clamp-2">${escapeHtml(meta.description || (meta.type === 'agents-md' ? 'AGENTS.md 资产' : '新建的 Skill 资产'))}</p>
+        </div>
+        <div class="flex items-center justify-between mt-auto pt-3 border-t border-line-soft">
+          <div class="text-zinc-500 text-xs flex items-center gap-3">
+            <span class="flex items-center gap-1" data-asset-size><i data-lucide="hard-drive" class="w-3 h-3" aria-hidden="true"></i>${escapeHtml(meta.size)}</span>
+            <span data-asset-version>v${escapeHtml(meta.version)}</span>
+            <span class="sync-pill pending"><span class="pill-dot"></span><span data-i18n="panel.sync.pending">未同步</span></span>
+          </div>
+          <button class="toggle" data-state="on" role="switch" aria-checked="true" aria-label="启用 ${escapeHtml(meta.name)}"><span></span></button>
+        </div>
+      `;
+      grid.insertBefore(card, grid.firstChild);
+      wireCardEvents(card);
+      if (window.lucide) lucide.createIcons();
+    }
+    function removeAssetCard(id) {
+      const card = document.querySelector(`[data-asset-id="${id}"]`);
+      if (card) card.remove();
+    }
+    function updateSyncPill() {
+      const asset = findAsset(panelState.assetId);
+      if (!asset) return;
+      const pill = document.getElementById('panel-sync');
+      const cls = asset.sync || 'synced';
+      pill.className = `sync-pill ${cls}`;
+      pill.lastElementChild.textContent = t(`panel.sync.${cls}`);
+    }
+    function updateEditorStats() {
+      const v = document.getElementById('editor').value;
+      const lines = v.split('\n').length;
+      const chars = v.length;
+      document.getElementById('editor-stats').textContent = `${lines} 行 · ${chars} 字符`;
+    }
+
+    // ---------- Card click → open panel ----------
+    function wireCardEvents(card) {
+      card.addEventListener('click', (e) => {
+        // Toggle click (for cards created after page load, where the global handler didn't attach)
+        const toggle = e.target.closest('.toggle');
+        if (toggle) {
+          const cur = toggle.getAttribute('data-state');
+          const next = cur === 'on' ? 'off' : 'on';
+          toggle.setAttribute('data-state', next);
+          toggle.setAttribute('aria-checked', next === 'on' ? 'true' : 'false');
+          card.setAttribute('data-enabled', next === 'on');
+          return;
+        }
+        // Card body click → open panel
+        if (e.target.closest('a')) return;
+        const id = card.getAttribute('data-asset-id');
+        if (id) openDetailPanel(id);
+      });
+    }
+    // Wire existing cards
+    document.querySelectorAll('#skills-grid .skill-card').forEach(wireCardEvents);
+
+    // ---------- Add data-asset-id to existing cards ----------
+    document.querySelectorAll('#skills-grid .skill-card').forEach((card, i) => {
+      // Map card → asset id by matching the title to ASSETS_EXTRA keys
+      const title = card.querySelector('h3')?.textContent.trim();
+      const idMap = {
+        'Auto-GPT Assistant': 'auto-gpt-assistant',
+        'System Monitor Pro': 'system-monitor-pro',
+        'Tailwind UI Kit': 'tailwind-ui-kit',
+        'Git Flow Helper': 'git-flow-helper',
+        'Smart Linter': 'smart-linter',
+        'Rapid API Tester': 'rapid-api-tester',
+        'DB Explorer': 'db-explorer',
+        'Cloud Sync Engine': 'cloud-sync-engine',
+        'OptiImage': 'optiimage',
+      };
+      const id = idMap[title];
+      if (id) {
+        card.setAttribute('data-asset-id', id);
+        card.setAttribute('data-asset-type', 'skill');
+        card.setAttribute('data-sync', card.getAttribute('data-sync') || 'synced');
+        // Tag the existing size / version spans so readCardMeta can find them
+        const spans = card.querySelectorAll('.text-zinc-500.text-xs > span');
+        if (spans[0]) spans[0].setAttribute('data-asset-size', '');
+        if (spans[1]) spans[1].setAttribute('data-asset-version', '');
+      }
+    });
+
+    // ---------- Wire panel / modal / confirm events ----------
+    document.getElementById('panel-backdrop').addEventListener('click', closeDetailPanel);
+    document.querySelectorAll('.panel-tab').forEach(tab => {
+      tab.addEventListener('click', () => switchPane(tab.getAttribute('data-pane')));
+    });
+    document.querySelectorAll('[data-action="panel-close"]').forEach(b => b.addEventListener('click', closeDetailPanel));
+    document.querySelectorAll('[data-action="panel-cancel"]').forEach(b => b.addEventListener('click', closeDetailPanel));
+    document.querySelectorAll('[data-action="panel-save"]').forEach(b => b.addEventListener('click', saveAndSnapshot));
+    document.querySelectorAll('[data-action="panel-delete"]').forEach(b => b.addEventListener('click', deleteCurrentAsset));
+
+    // Tag input: enter to add
+    const tagInput = document.getElementById('f-tags-input');
+    tagInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ',') {
+        e.preventDefault();
+        const v = tagInput.value.trim().replace(/,$/, '');
+        if (v && !_tags.includes(v)) {
+          _tags.push(v);
+          renderTagChips(_tags);
+        }
+        tagInput.value = '';
+      }
+    });
+
+    // New asset modal
+    document.querySelectorAll('[data-action="new-asset-close"]').forEach(b => b.addEventListener('click', closeNewAssetModal));
+    document.querySelectorAll('#new-asset-modal .type-pick').forEach(b => b.addEventListener('click', () => setNewAssetType(b.getAttribute('data-type'))));
+    document.querySelector('[data-action="new-asset-create"]').addEventListener('click', createAsset);
+    // Auto-gen id
+    document.getElementById('na-title').addEventListener('input', (e) => {
+      const idEl = document.getElementById('na-id');
+      if (!idEl.dataset.touched) idEl.value = autoGenId(e.target.value);
+      updateNewAssetPreview();
+    });
+    document.getElementById('na-id').addEventListener('input', (e) => {
+      e.target.dataset.touched = '1';
+      updateNewAssetPreview();
+    });
+    document.getElementById('na-desc').addEventListener('input', updateNewAssetPreview);
+    document.getElementById('na-tags').addEventListener('input', updateNewAssetPreview);
+    // Reset content to default template
+    document.getElementById('na-reset-content').addEventListener('click', () => {
+      const type = document.querySelector('#new-asset-modal .type-pick.active').getAttribute('data-type');
+      document.getElementById('na-content').value = defaultContent(type);
+    });
+    // Cmd/Ctrl+Enter inside the new asset form = submit
+    document.getElementById('new-asset-form').addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        e.preventDefault();
+        createAsset();
+      }
+    });
+
+    // New scenario modal
+    document.querySelectorAll('[data-action="new-scenario-close"]').forEach(b => b.addEventListener('click', closeNewScenarioModal));
+    document.querySelector('[data-action="new-scenario-create"]').addEventListener('click', createScenario);
+    document.getElementById('ns-name').addEventListener('input', updateScenarioPreview);
+    document.getElementById('ns-agent').addEventListener('change', updateScenarioPreview);
+    document.querySelectorAll('#new-scenario-modal .color-dot').forEach(b => {
+      b.addEventListener('click', () => {
+        document.querySelectorAll('#new-scenario-modal .color-dot').forEach(x => {
+          const isActive = x === b;
+          x.classList.toggle('active', isActive);
+          x.setAttribute('aria-checked', isActive ? 'true' : 'false');
+        });
+        updateScenarioPreview();
+      });
+    });
+    document.getElementById('new-scenario-form').addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        e.preventDefault();
+        createScenario();
+      }
+    });
+
+    // New project modal
+    document.querySelectorAll('[data-action="new-project-close"]').forEach(b => b.addEventListener('click', closeNewProjectModal));
+    document.querySelector('[data-action="new-project-create"]').addEventListener('click', createProject);
+    document.getElementById('np-name').addEventListener('input', updateProjectPreview);
+    document.getElementById('np-path').addEventListener('input', updateProjectPreview);
+    document.querySelectorAll('#new-project-modal .type-pick').forEach(b => {
+      b.addEventListener('click', () => {
+        document.querySelectorAll('#new-project-modal .type-pick').forEach(x => {
+          const isActive = x === b;
+          x.classList.toggle('active', isActive);
+          x.setAttribute('aria-checked', isActive ? 'true' : 'false');
+        });
+      });
+    });
+    document.getElementById('new-project-form').addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        e.preventDefault();
+        createProject();
+      }
+    });
+
+    // Confirm dialog
+    document.querySelectorAll('[data-action="confirm-cancel"]').forEach(b => b.addEventListener('click', () => closeConfirm(false)));
+    document.querySelectorAll('[data-action="confirm-ok"]').forEach(b => b.addEventListener('click', () => closeConfirm(true)));
+    // Click backdrop of confirm
+    document.getElementById('confirm-dialog').addEventListener('click', (e) => {
+      if (e.target.id === 'confirm-dialog') closeConfirm(false);
+    });
+
+    // Wire the new "New asset" button in the skill header
+    const newAssetBtn = document.getElementById('new-asset-btn');
+    if (newAssetBtn) newAssetBtn.addEventListener('click', openNewAssetModal);
+
+    // Global keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      // Esc closes topmost
+      if (e.key === 'Escape') {
+        if (!document.getElementById('confirm-dialog').hidden) { closeConfirm(false); return; }
+        if (!document.getElementById('new-asset-modal').hidden) { closeNewAssetModal(); return; }
+        if (!document.getElementById('new-scenario-modal').hidden) { closeNewScenarioModal(); return; }
+        if (!document.getElementById('new-project-modal').hidden) { closeNewProjectModal(); return; }
+        if (!document.getElementById('detail-panel').hidden) { closeDetailPanel(); return; }
+      }
+      // Cmd/Ctrl + S in editor → save
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+        const tag = document.activeElement?.tagName;
+        if (!document.getElementById('detail-panel').hidden) {
+          e.preventDefault();
+          saveAndSnapshot();
+        }
+      }
+    });
+
+    // ---------- helpers ----------
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+    function formatSize(s) {
+      const bytes = new Blob([s]).size;
+      if (bytes < 1024) return `${bytes}B`;
+      if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)}KB`;
+      return `${(bytes / 1024 / 1024).toFixed(1)}MB`;
+    }
+    function t(key, vars) {
+      const dict = i18n[currentLang] || i18n.zh;
+      let s = dict[key] || key;
+      if (vars) Object.keys(vars).forEach(k => s = s.replace(new RegExp(`\\{${k}\\}`, 'g'), vars[k]));
+      return s;
+    }
   </script>
 </body>
 </html>
