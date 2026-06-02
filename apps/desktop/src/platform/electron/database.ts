@@ -1,11 +1,17 @@
 import Database from "better-sqlite3";
 
-import type {AssetRepository} from "../../core/asset/assetRepository";
-import type {SnapshotRepository} from "../../core/snapshot/snapshotRepository";
-import type {TargetRepository} from "../../core/target/targetRepository";
-import type {AssetRecord} from "../../core/types/asset";
-import type {SnapshotRecord} from "../../core/types/snapshot";
-import type {TargetRecord} from "../../core/types/target";
+import type {ApplicationRepository} from "../../../../../packages/core/src/application/applicationRepository";
+import type {AssetRepository} from "../../../../../packages/core/src/asset/assetRepository";
+import type {SnapshotRepository} from "../../../../../packages/core/src/snapshot/snapshotRepository";
+import type {TargetRepository} from "../../../../../packages/core/src/target/targetRepository";
+import type {
+    ApplicationId,
+    ApplicationLocationRecord,
+    ApplicationRecord,
+} from "../../../../../packages/core/src/types/application";
+import type {AssetRecord} from "../../../../../packages/core/src/types/asset";
+import type {SnapshotRecord} from "../../../../../packages/core/src/types/snapshot";
+import type {TargetRecord} from "../../../../../packages/core/src/types/target";
 import {getDbPath} from "./paths";
 
 let db: Database.Database | null = null;
@@ -46,6 +52,32 @@ export function migrateDatabase(): void {
             deploy_mode TEXT    DEFAULT 'copy',
             created_at  TEXT,
             updated_at  TEXT
+        );
+
+        CREATE TABLE IF NOT EXISTS applications
+        (
+            id         TEXT PRIMARY KEY,
+            name       TEXT NOT NULL,
+            enabled    INTEGER DEFAULT 0,
+            created_at TEXT,
+            updated_at TEXT
+        );
+
+        CREATE TABLE IF NOT EXISTS application_locations
+        (
+            id            TEXT PRIMARY KEY,
+            application_id TEXT NOT NULL,
+            location_key  TEXT NOT NULL UNIQUE,
+            target_id     TEXT,
+            name          TEXT NOT NULL,
+            kind          TEXT NOT NULL,
+            scope         TEXT NOT NULL,
+            path          TEXT NOT NULL,
+            exists_flag   INTEGER DEFAULT 0,
+            enabled       INTEGER DEFAULT 0,
+            source        TEXT NOT NULL,
+            created_at    TEXT,
+            updated_at    TEXT
         );
 
         CREATE TABLE IF NOT EXISTS asset_targets
@@ -182,6 +214,368 @@ class SqliteAssetRepository implements AssetRepository {
             .run({
                 id,
                 updated_at: updatedAt,
+            });
+    }
+}
+
+class SqliteApplicationRepository implements ApplicationRepository {
+    private readonly database: Database.Database;
+
+    constructor(database: Database.Database) {
+        this.database = database;
+    }
+
+    listApplications(): ApplicationRecord[] {
+        const rows = this.database
+            .prepare(
+                `
+                    SELECT id,
+                           name,
+                           enabled,
+                           created_at,
+                           updated_at
+                    FROM applications
+                    ORDER BY name ASC
+                `
+            )
+            .all() as Array<{
+            id: ApplicationId;
+            name: string;
+            enabled: number;
+            created_at: string;
+            updated_at: string;
+        }>;
+
+        return rows.map((row) => ({
+            id: row.id,
+            name: row.name,
+            enabled: row.enabled === 1,
+            created_at: row.created_at,
+            updated_at: row.updated_at,
+        }));
+    }
+
+    findApplicationById(id: ApplicationId): ApplicationRecord | null {
+        const row = this.database
+            .prepare(
+                `
+                    SELECT id,
+                           name,
+                           enabled,
+                           created_at,
+                           updated_at
+                    FROM applications
+                    WHERE id = ?
+                `
+            )
+            .get(id) as
+            | {
+                  id: ApplicationId;
+                  name: string;
+                  enabled: number;
+                  created_at: string;
+                  updated_at: string;
+              }
+            | undefined;
+
+        if (!row) {
+            return null;
+        }
+
+        return {
+            id: row.id,
+            name: row.name,
+            enabled: row.enabled === 1,
+            created_at: row.created_at,
+            updated_at: row.updated_at,
+        };
+    }
+
+    upsertApplication(application: ApplicationRecord): void {
+        this.database
+            .prepare(
+                `
+                    INSERT INTO applications (id,
+                                              name,
+                                              enabled,
+                                              created_at,
+                                              updated_at)
+                    VALUES (@id,
+                            @name,
+                            @enabled,
+                            @created_at,
+                            @updated_at)
+                    ON CONFLICT(id) DO UPDATE SET
+                        name = excluded.name,
+                        enabled = excluded.enabled,
+                        updated_at = excluded.updated_at
+                `
+            )
+            .run({
+                id: application.id,
+                name: application.name,
+                enabled: application.enabled ? 1 : 0,
+                created_at: application.created_at,
+                updated_at: application.updated_at,
+            });
+    }
+
+    listLocations(applicationId: ApplicationId): ApplicationLocationRecord[] {
+        const rows = this.database
+            .prepare(
+                `
+                    SELECT id,
+                           application_id,
+                           location_key,
+                           target_id,
+                           name,
+                           kind,
+                           scope,
+                           path,
+                           exists_flag,
+                           enabled,
+                           source,
+                           created_at,
+                           updated_at
+                    FROM application_locations
+                    WHERE application_id = ?
+                    ORDER BY updated_at DESC
+                `
+            )
+            .all(applicationId) as Array<{
+            id: string;
+            application_id: ApplicationId;
+            location_key: string;
+            target_id: string | null;
+            name: string;
+            kind: ApplicationLocationRecord["kind"];
+            scope: ApplicationLocationRecord["scope"];
+            path: string;
+            exists_flag: number;
+            enabled: number;
+            source: ApplicationLocationRecord["source"];
+            created_at: string;
+            updated_at: string;
+        }>;
+
+        return rows.map((row) => ({
+            id: row.id,
+            application_id: row.application_id,
+            location_key: row.location_key,
+            target_id: row.target_id,
+            name: row.name,
+            kind: row.kind,
+            scope: row.scope,
+            path: row.path,
+            exists: row.exists_flag === 1,
+            enabled: row.enabled === 1,
+            source: row.source,
+            created_at: row.created_at,
+            updated_at: row.updated_at,
+        }));
+    }
+
+    findLocationById(id: string): ApplicationLocationRecord | null {
+        const row = this.database
+            .prepare(
+                `
+                    SELECT id,
+                           application_id,
+                           location_key,
+                           target_id,
+                           name,
+                           kind,
+                           scope,
+                           path,
+                           exists_flag,
+                           enabled,
+                           source,
+                           created_at,
+                           updated_at
+                    FROM application_locations
+                    WHERE id = ?
+                `
+            )
+            .get(id) as
+            | {
+                  id: string;
+                  application_id: ApplicationId;
+                  location_key: string;
+                  target_id: string | null;
+                  name: string;
+                  kind: ApplicationLocationRecord["kind"];
+                  scope: ApplicationLocationRecord["scope"];
+                  path: string;
+                  exists_flag: number;
+                  enabled: number;
+                  source: ApplicationLocationRecord["source"];
+                  created_at: string;
+                  updated_at: string;
+              }
+            | undefined;
+
+        if (!row) {
+            return null;
+        }
+
+        return {
+            id: row.id,
+            application_id: row.application_id,
+            location_key: row.location_key,
+            target_id: row.target_id,
+            name: row.name,
+            kind: row.kind,
+            scope: row.scope,
+            path: row.path,
+            exists: row.exists_flag === 1,
+            enabled: row.enabled === 1,
+            source: row.source,
+            created_at: row.created_at,
+            updated_at: row.updated_at,
+        };
+    }
+
+    findLocationByKey(
+        applicationId: ApplicationId,
+        locationKey: string
+    ): ApplicationLocationRecord | null {
+        const row = this.database
+            .prepare(
+                `
+                    SELECT id,
+                           application_id,
+                           location_key,
+                           target_id,
+                           name,
+                           kind,
+                           scope,
+                           path,
+                           exists_flag,
+                           enabled,
+                           source,
+                           created_at,
+                           updated_at
+                    FROM application_locations
+                    WHERE application_id = ?
+                      AND location_key = ?
+                `
+            )
+            .get(applicationId, locationKey) as
+            | {
+                  id: string;
+                  application_id: ApplicationId;
+                  location_key: string;
+                  target_id: string | null;
+                  name: string;
+                  kind: ApplicationLocationRecord["kind"];
+                  scope: ApplicationLocationRecord["scope"];
+                  path: string;
+                  exists_flag: number;
+                  enabled: number;
+                  source: ApplicationLocationRecord["source"];
+                  created_at: string;
+                  updated_at: string;
+              }
+            | undefined;
+
+        if (!row) {
+            return null;
+        }
+
+        return {
+            id: row.id,
+            application_id: row.application_id,
+            location_key: row.location_key,
+            target_id: row.target_id,
+            name: row.name,
+            kind: row.kind,
+            scope: row.scope,
+            path: row.path,
+            exists: row.exists_flag === 1,
+            enabled: row.enabled === 1,
+            source: row.source,
+            created_at: row.created_at,
+            updated_at: row.updated_at,
+        };
+    }
+
+    createLocation(location: ApplicationLocationRecord): void {
+        this.database
+            .prepare(
+                `
+                    INSERT INTO application_locations (id,
+                                                       application_id,
+                                                       location_key,
+                                                       target_id,
+                                                       name,
+                                                       kind,
+                                                       scope,
+                                                       path,
+                                                       exists_flag,
+                                                       enabled,
+                                                       source,
+                                                       created_at,
+                                                       updated_at)
+                    VALUES (@id,
+                            @application_id,
+                            @location_key,
+                            @target_id,
+                            @name,
+                            @kind,
+                            @scope,
+                            @path,
+                            @exists_flag,
+                            @enabled,
+                            @source,
+                            @created_at,
+                            @updated_at)
+                `
+            )
+            .run({
+                id: location.id,
+                application_id: location.application_id,
+                location_key: location.location_key,
+                target_id: location.target_id,
+                name: location.name,
+                kind: location.kind,
+                scope: location.scope,
+                path: location.path,
+                exists_flag: location.exists ? 1 : 0,
+                enabled: location.enabled ? 1 : 0,
+                source: location.source,
+                created_at: location.created_at,
+                updated_at: location.updated_at,
+            });
+    }
+
+    updateLocation(location: ApplicationLocationRecord): void {
+        this.database
+            .prepare(
+                `
+                    UPDATE application_locations
+                    SET target_id   = @target_id,
+                        name        = @name,
+                        kind        = @kind,
+                        scope       = @scope,
+                        path        = @path,
+                        exists_flag = @exists_flag,
+                        enabled     = @enabled,
+                        source      = @source,
+                        updated_at  = @updated_at
+                    WHERE id = @id
+                `
+            )
+            .run({
+                id: location.id,
+                target_id: location.target_id,
+                name: location.name,
+                kind: location.kind,
+                scope: location.scope,
+                path: location.path,
+                exists_flag: location.exists ? 1 : 0,
+                enabled: location.enabled ? 1 : 0,
+                source: location.source,
+                updated_at: location.updated_at,
             });
     }
 }
@@ -402,6 +796,10 @@ class SqliteTargetRepository implements TargetRepository {
 
 export function createAssetRepository(): AssetRepository {
     return new SqliteAssetRepository(getDatabase());
+}
+
+export function createApplicationRepository(): ApplicationRepository {
+    return new SqliteApplicationRepository(getDatabase());
 }
 
 export function createSnapshotRepository(): SnapshotRepository {

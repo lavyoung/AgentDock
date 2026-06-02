@@ -1,4 +1,4 @@
-import type {AgentdockApi} from "../../shared/agentdockApi";
+import type {AgentdockApi} from "../../../../../packages/shared/src/agentdockApi";
 
 function getApi(): AgentdockApi {
     return window.agentdock;
@@ -47,6 +47,23 @@ export const agentdockClient: AgentdockApi = {
         },
         delete(id) {
             return getApi().targets.delete(id);
+        },
+    },
+    applications: {
+        list() {
+            return getApi().applications.list();
+        },
+        get(id) {
+            return getApi().applications.get(id);
+        },
+        update(id, input) {
+            return getApi().applications.update(id, input);
+        },
+        refreshLocations(id) {
+            return getApi().applications.refreshLocations(id);
+        },
+        updateLocation(id, input) {
+            return getApi().applications.updateLocation(id, input);
         },
     },
 };

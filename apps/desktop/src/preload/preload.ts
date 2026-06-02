@@ -1,5 +1,5 @@
 import {contextBridge, ipcRenderer} from "electron";
-import type {AgentdockApi} from "../shared/agentdockApi";
+import type {AgentdockApi} from "../../../../packages/shared/src/agentdockApi";
 
 const agentdockApi: AgentdockApi = {
     app: {
@@ -21,6 +21,15 @@ const agentdockApi: AgentdockApi = {
         create: (input) => ipcRenderer.invoke("targets:create", input),
         update: (id, input) => ipcRenderer.invoke("targets:update", id, input),
         delete: (id) => ipcRenderer.invoke("targets:delete", id),
+    },
+    applications: {
+        list: () => ipcRenderer.invoke("applications:list"),
+        get: (id) => ipcRenderer.invoke("applications:get", id),
+        update: (id, input) => ipcRenderer.invoke("applications:update", id, input),
+        refreshLocations: (id) =>
+            ipcRenderer.invoke("applications:refresh-locations", id),
+        updateLocation: (id, input) =>
+            ipcRenderer.invoke("applications:update-location", id, input),
     },
 };
 

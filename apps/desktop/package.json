@@ -2,9 +2,9 @@
   "name": "@agentdock/desktop",
   "private": true,
   "version": "0.0.0",
-  "main": "dist-electron/main/main.js",
+  "main": "dist-electron/apps/desktop/src/main/main.js",
   "scripts": {
-    "dev": "concurrently -k \"vite\" \"tsc -p tsconfig.electron.json --watch\" \"wait-on http://localhost:5173 dist-electron/main/main.js dist-electron/preload/preload.js && cross-env NODE_ENV=development electron .\"",
+    "dev": "concurrently -k \"vite\" \"tsc -p tsconfig.electron.json --watch\" \"wait-on http://localhost:5173 dist-electron/apps/desktop/src/main/main.js dist-electron/apps/desktop/src/preload/preload.js && cross-env NODE_ENV=development electron .\"",
     "build": "tsc -p tsconfig.electron.json && vite build",
     "rebuild": "electron-rebuild -f -w better-sqlite3",
     "lint": "eslint .",

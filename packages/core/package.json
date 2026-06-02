@@ -1,0 +1,10 @@
+{
+  "name": "@agentdock/core",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "dependencies": {
+    "nanoid": "^5.1.11",
+    "yaml": "^2.9.0"
+  }
+}

@@ -1,8 +1,17 @@
 import {useEffect, useEffectEvent, useState} from "react";
 
-import type {AssetDetail, AssetRecord, AssetStatus, AssetType,} from "./core/types/asset";
-import type {SnapshotRecord} from "./core/types/snapshot";
-import type {TargetDeployMode, TargetRecord,} from "./core/types/target";
+import type {
+    ApplicationDetail,
+    ApplicationId,
+    ApplicationLocationKind,
+    ApplicationLocationRecord,
+    ApplicationLocationScope,
+    ApplicationLocationSource,
+    ApplicationRecord,
+} from "../../../packages/core/src/types/application";
+import type {AssetDetail, AssetRecord, AssetStatus, AssetType,} from "../../../packages/core/src/types/asset";
+import type {SnapshotRecord} from "../../../packages/core/src/types/snapshot";
+import type {TargetDeployMode, TargetRecord,} from "../../../packages/core/src/types/target";
 import {agentdockClient} from "./renderer/client/agentdockClient";
 import type {Locale} from "./renderer/i18n/messages";
 import {useI18n} from "./renderer/i18n/useI18n";
@@ -19,7 +28,12 @@ type ErrorMessageKey =
     | "errorTargetsGet"
     | "errorTargetsCreate"
     | "errorTargetsUpdate"
-    | "errorTargetsDelete";
+    | "errorTargetsDelete"
+    | "errorApplicationsList"
+    | "errorApplicationsGet"
+    | "errorApplicationsUpdate"
+    | "errorApplicationsRefreshLocations"
+    | "errorApplicationLocationsUpdate";
 
 function App() {
     const {formatDateTime, locale, setLocale, t} = useI18n();
@@ -29,12 +43,25 @@ function App() {
     const [editorTitle, setEditorTitle] = useState("");
     const [editorDescription, setEditorDescription] = useState("");
     const [editorContent, setEditorContent] = useState("");
+
     const [targets, setTargets] = useState<TargetRecord[]>([]);
     const [selectedTarget, setSelectedTarget] = useState<TargetRecord | null>(null);
     const [targetName, setTargetName] = useState("");
     const [targetPath, setTargetPath] = useState("");
     const [targetDeployMode, setTargetDeployMode] = useState<TargetDeployMode>("copy");
     const [targetEnabled, setTargetEnabled] = useState(true);
+
+    const [applications, setApplications] = useState<ApplicationRecord[]>([]);
+    const [selectedApplicationId, setSelectedApplicationId] =
+        useState<ApplicationId | null>(null);
+    const [selectedApplicationDetail, setSelectedApplicationDetail] =
+        useState<ApplicationDetail | null>(null);
+    const [applicationEnabled, setApplicationEnabled] = useState(false);
+    const [selectedLocation, setSelectedLocation] =
+        useState<ApplicationLocationRecord | null>(null);
+    const [locationName, setLocationName] = useState("");
+    const [locationPath, setLocationPath] = useState("");
+    const [locationEnabled, setLocationEnabled] = useState(false);
 
     function getErrorMessage(scopeKey: ErrorMessageKey, error: unknown): string {
         const action = t(scopeKey);
@@ -92,6 +119,44 @@ function App() {
         return enabled ? t("enabledYes") : t("enabledNo");
     }
 
+    function getApplicationDescription(applicationId: ApplicationId): string {
+        switch (applicationId) {
+            case "codex":
+                return t("applicationDescriptionCodex");
+        }
+    }
+
+    function getLocationKindLabel(kind: ApplicationLocationKind): string {
+        switch (kind) {
+            case "skills":
+                return t("applicationLocationKindSkills");
+            case "agents-md":
+                return t("applicationLocationKindAgentsMd");
+        }
+    }
+
+    function getLocationScopeLabel(scope: ApplicationLocationScope): string {
+        switch (scope) {
+            case "global":
+                return t("applicationLocationScopeGlobal");
+            case "project":
+                return t("applicationLocationScopeProject");
+        }
+    }
+
+    function getLocationSourceLabel(source: ApplicationLocationSource): string {
+        switch (source) {
+            case "detected":
+                return t("applicationLocationSourceDetected");
+            case "manual":
+                return t("applicationLocationSourceManual");
+        }
+    }
+
+    function getExistsLabel(exists: boolean): string {
+        return exists ? t("pathExistsYes") : t("pathExistsNo");
+    }
+
     function resetTargetForm(): void {
         setSelectedTarget(null);
         setTargetName("");
@@ -106,6 +171,45 @@ function App() {
         setTargetPath(target.path);
         setTargetDeployMode(target.deployMode);
         setTargetEnabled(target.enabled);
+    }
+
+    function resetLocationForm(): void {
+        setSelectedLocation(null);
+        setLocationName("");
+        setLocationPath("");
+        setLocationEnabled(false);
+    }
+
+    function fillLocationForm(location: ApplicationLocationRecord): void {
+        setSelectedLocation(location);
+        setLocationName(location.name);
+        setLocationPath(location.path);
+        setLocationEnabled(location.enabled);
+    }
+
+    function applyApplicationDetail(detail: ApplicationDetail | null): void {
+        setSelectedApplicationDetail(detail);
+
+        if (!detail) {
+            setApplicationEnabled(false);
+            resetLocationForm();
+            return;
+        }
+
+        setApplicationEnabled(detail.application.enabled);
+
+        if (selectedLocation) {
+            const matched = detail.locations.find(
+                (location) => location.id === selectedLocation.id
+            );
+
+            if (matched) {
+                fillLocationForm(matched);
+                return;
+            }
+        }
+
+        resetLocationForm();
     }
 
     const showErrorEvent = useEffectEvent(showError);
@@ -126,6 +230,14 @@ function App() {
         }
     }
 
+    async function refreshApplications(): Promise<void> {
+        try {
+            setApplications(await agentdockClient.applications.list());
+        } catch (error) {
+            showError("errorApplicationsList", error);
+        }
+    }
+
     async function refreshSnapshots(assetId: string): Promise<void> {
         try {
             setSnapshots(await agentdockClient.snapshots.list(assetId));
@@ -135,8 +247,15 @@ function App() {
     }
 
     async function refreshAll(): Promise<void> {
-        await refreshAssets();
-        await refreshTargets();
+        await Promise.all([
+            refreshAssets(),
+            refreshTargets(),
+            refreshApplications(),
+        ]);
+
+        if (selectedApplicationId) {
+            await openApplication(selectedApplicationId);
+        }
     }
 
     async function openAsset(id: string): Promise<void> {
@@ -175,6 +294,16 @@ function App() {
             fillTargetForm(target);
         } catch (error) {
             showError("errorTargetsGet", error);
+        }
+    }
+
+    async function openApplication(id: ApplicationId): Promise<void> {
+        try {
+            const detail = await agentdockClient.applications.get(id);
+            setSelectedApplicationId(id);
+            applyApplicationDetail(detail);
+        } catch (error) {
+            showError("errorApplicationsGet", error);
         }
     }
 
@@ -250,6 +379,54 @@ function App() {
         }
     }
 
+    async function saveApplication(): Promise<void> {
+        if (!selectedApplicationId) {
+            return;
+        }
+
+        try {
+            await agentdockClient.applications.update(selectedApplicationId, {
+                enabled: applicationEnabled,
+            });
+
+            await refreshApplications();
+            await openApplication(selectedApplicationId);
+        } catch (error) {
+            showError("errorApplicationsUpdate", error);
+        }
+    }
+
+    async function detectApplicationLocations(): Promise<void> {
+        if (!selectedApplicationId) {
+            return;
+        }
+
+        try {
+            await agentdockClient.applications.refreshLocations(selectedApplicationId);
+            await openApplication(selectedApplicationId);
+        } catch (error) {
+            showError("errorApplicationsRefreshLocations", error);
+        }
+    }
+
+    async function saveApplicationLocation(): Promise<void> {
+        if (!selectedLocation || !selectedApplicationId) {
+            return;
+        }
+
+        try {
+            await agentdockClient.applications.updateLocation(selectedLocation.id, {
+                name: locationName,
+                path: locationPath,
+                enabled: locationEnabled,
+            });
+
+            await openApplication(selectedApplicationId);
+        } catch (error) {
+            showError("errorApplicationLocationsUpdate", error);
+        }
+    }
+
     async function restoreSelectedSnapshot(snapshotId: string): Promise<void> {
         if (!selectedAsset) {
             return;
@@ -309,14 +486,35 @@ function App() {
 
         async function loadInitialData(): Promise<void> {
             try {
-                const [assetResult, targetResult] = await Promise.all([
+                const [assetResult, targetResult, applicationResult] = await Promise.all([
                     agentdockClient.assets.list(),
                     agentdockClient.targets.list(),
+                    agentdockClient.applications.list(),
                 ]);
 
-                if (isActive) {
-                    setAssets(assetResult);
-                    setTargets(targetResult);
+                if (!isActive) {
+                    return;
+                }
+
+                setAssets(assetResult);
+                setTargets(targetResult);
+                setApplications(applicationResult);
+
+                const firstApplication = applicationResult[0];
+
+                if (firstApplication) {
+                    const detail = await agentdockClient.applications.get(
+                        firstApplication.id
+                    );
+
+                    if (!isActive) {
+                        return;
+                    }
+
+                    setSelectedApplicationId(firstApplication.id);
+                    setSelectedApplicationDetail(detail);
+                    setApplicationEnabled(detail?.application.enabled ?? false);
+                    resetLocationForm();
                 }
             } catch (error) {
                 if (isActive) {
@@ -332,7 +530,7 @@ function App() {
         };
     }, []);
 
-    function renderLocaleButton(nextLocale: Locale, label: string): JSX.Element {
+    function renderLocaleButton(nextLocale: Locale, label: string): React.JSX.Element {
         const isActive = locale === nextLocale;
 
         return (
@@ -568,9 +766,7 @@ function App() {
                 </section>
 
                 <section>
-                    <h2>
-                        {selectedTarget ? t("targetEditor") : t("createTarget")}
-                    </h2>
+                    <h2>{selectedTarget ? t("targetEditor") : t("createTarget")}</h2>
 
                     <div style={{display: "flex", flexDirection: "column", gap: 12}}>
                         <div>
@@ -641,6 +837,234 @@ function App() {
 
                         {!selectedTarget ? <p>{t("selectTarget")}</p> : null}
                     </div>
+                </section>
+            </div>
+
+            <hr style={{margin: "32px 0"}} />
+
+            <div
+                style={{
+                    display: "grid",
+                    gridTemplateColumns: "360px 1fr",
+                    gap: 24,
+                }}
+            >
+                <section>
+                    <h2>{t("applicationList")}</h2>
+
+                    {applications.length === 0 ? (
+                        <p>{t("noApplicationsYet")}</p>
+                    ) : (
+                        <ul style={{paddingLeft: 16}}>
+                            {applications.map((application) => (
+                                <li key={application.id} style={{marginBottom: 12}}>
+                                    <button
+                                        onClick={() => void openApplication(application.id)}
+                                    >
+                                        {application.name}
+                                    </button>
+                                    <div>{getApplicationDescription(application.id)}</div>
+                                    <div>
+                                        {t("applicationEnabledLabel")}:{" "}
+                                        {getEnabledLabel(application.enabled)}
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </section>
+
+                <section>
+                    <h2>{t("applicationSettings")}</h2>
+
+                    {!selectedApplicationDetail ? (
+                        <p>{t("noApplicationsYet")}</p>
+                    ) : (
+                        <div style={{display: "flex", flexDirection: "column", gap: 12}}>
+                            <div>
+                                <strong>{selectedApplicationDetail.application.name}</strong>
+                                <p>{getApplicationDescription(selectedApplicationDetail.application.id)}</p>
+                            </div>
+
+                            <label
+                                htmlFor="application-enabled"
+                                style={{display: "flex", alignItems: "center", gap: 8}}
+                            >
+                                <input
+                                    id="application-enabled"
+                                    type="checkbox"
+                                    checked={applicationEnabled}
+                                    onChange={(event) =>
+                                        setApplicationEnabled(event.target.checked)
+                                    }
+                                />
+                                <span>{t("applicationEnabledLabel")}</span>
+                            </label>
+
+                            <div style={{display: "flex", gap: 8, flexWrap: "wrap"}}>
+                                <button onClick={() => void saveApplication()}>
+                                    {t("applicationSave")}
+                                </button>
+                                <button onClick={() => void detectApplicationLocations()}>
+                                    {t("applicationDetectLocations")}
+                                </button>
+                            </div>
+
+                            <hr />
+
+                            <section>
+                                <h3>{t("applicationLocations")}</h3>
+
+                                {selectedApplicationDetail.locations.length === 0 ? (
+                                    <p>{t("noApplicationLocationsYet")}</p>
+                                ) : (
+                                    <ul style={{paddingLeft: 16}}>
+                                        {selectedApplicationDetail.locations.map((location) => (
+                                            <li key={location.id} style={{marginBottom: 12}}>
+                                                <button
+                                                    onClick={() => fillLocationForm(location)}
+                                                >
+                                                    {location.name}
+                                                </button>
+                                                <div>
+                                                    {t("applicationLocationKindLabel")}:{" "}
+                                                    {getLocationKindLabel(location.kind)}
+                                                </div>
+                                                <div>
+                                                    {t("applicationLocationScopeLabel")}:{" "}
+                                                    {getLocationScopeLabel(location.scope)}
+                                                </div>
+                                                <div>
+                                                    {t("applicationLocationExistsLabel")}:{" "}
+                                                    {getExistsLabel(location.exists)}
+                                                </div>
+                                                <div>
+                                                    {t("applicationLocationSourceLabel")}:{" "}
+                                                    {getLocationSourceLabel(location.source)}
+                                                </div>
+                                                <div>
+                                                    {t("applicationLocationEnabledLabel")}:{" "}
+                                                    {getEnabledLabel(location.enabled)}
+                                                </div>
+                                                <div
+                                                    style={{
+                                                        fontSize: 12,
+                                                        opacity: 0.7,
+                                                    }}
+                                                >
+                                                    {location.path}
+                                                </div>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
+                            </section>
+
+                            <hr />
+
+                            <section>
+                                <h3>{t("applicationLocationEditor")}</h3>
+
+                                {!selectedLocation ? (
+                                    <p>{t("applicationLocationSelect")}</p>
+                                ) : (
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            gap: 12,
+                                        }}
+                                    >
+                                        <div>
+                                            <label htmlFor="location-name">
+                                                {t("applicationLocationNameLabel")}
+                                            </label>
+                                            <input
+                                                id="location-name"
+                                                value={locationName}
+                                                onChange={(event) =>
+                                                    setLocationName(event.target.value)
+                                                }
+                                                style={{
+                                                    display: "block",
+                                                    width: "100%",
+                                                    padding: 8,
+                                                }}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label htmlFor="location-path">
+                                                {t("applicationLocationPathLabel")}
+                                            </label>
+                                            <input
+                                                id="location-path"
+                                                value={locationPath}
+                                                onChange={(event) =>
+                                                    setLocationPath(event.target.value)
+                                                }
+                                                style={{
+                                                    display: "block",
+                                                    width: "100%",
+                                                    padding: 8,
+                                                }}
+                                            />
+                                            <p style={{fontSize: 12, opacity: 0.7}}>
+                                                {t("applicationLocationHint")}
+                                            </p>
+                                        </div>
+
+                                        <div>
+                                            {t("applicationLocationKindLabel")}:{" "}
+                                            {getLocationKindLabel(selectedLocation.kind)}
+                                        </div>
+                                        <div>
+                                            {t("applicationLocationScopeLabel")}:{" "}
+                                            {getLocationScopeLabel(selectedLocation.scope)}
+                                        </div>
+                                        <div>
+                                            {t("applicationLocationSourceLabel")}:{" "}
+                                            {getLocationSourceLabel(selectedLocation.source)}
+                                        </div>
+                                        <div>
+                                            {t("applicationLocationExistsLabel")}:{" "}
+                                            {getExistsLabel(selectedLocation.exists)}
+                                        </div>
+
+                                        <label
+                                            htmlFor="location-enabled"
+                                            style={{
+                                                display: "flex",
+                                                alignItems: "center",
+                                                gap: 8,
+                                            }}
+                                        >
+                                            <input
+                                                id="location-enabled"
+                                                type="checkbox"
+                                                checked={locationEnabled}
+                                                onChange={(event) =>
+                                                    setLocationEnabled(event.target.checked)
+                                                }
+                                            />
+                                            <span>{t("applicationLocationEnabledLabel")}</span>
+                                        </label>
+
+                                        <div style={{display: "flex", gap: 8, flexWrap: "wrap"}}>
+                                            <button
+                                                onClick={() => void saveApplicationLocation()}
+                                            >
+                                                {t("applicationLocationSave")}
+                                            </button>
+                                            <button onClick={resetLocationForm}>
+                                                {t("targetFormReset")}
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </section>
+                        </div>
+                    )}
                 </section>
             </div>
         </main>

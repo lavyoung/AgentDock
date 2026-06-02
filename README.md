@@ -47,10 +47,12 @@ Electron 不是最终目标架构。当前代码已实现：
 * 本地 Registry 结构
 * Skill / AGENTS.md Asset 编辑与保存
 * 本地快照创建与恢复
+* Target 目录管理
+* Codex Application Settings 与目录检测
+* 中英文界面切换
 
 当前阶段下一步实现：
 
-* Target 目录管理
 * Sync Matrix 交互
 * 同步预览与手动同步
 * AGENTS.md 托管区块合并
@@ -184,7 +186,52 @@ React + TypeScript 主要负责：
 
 ---
 
-## 📂 仓库目录规划
+## 📂 当前目录结构
+
+AgentDock 当前采用 Monorepo 结构，但已经开始把平台无关逻辑从桌面应用中抽离出来。
+
+```text
+AgentDock/
+  apps/
+    desktop/
+      src/
+        main/                 # Electron main process
+        preload/              # preload bridge
+        platform/
+          electron/           # Electron / SQLite / fs 实现
+        renderer/
+          client/             # agentdockClient
+          i18n/               # UI internationalization
+        App.tsx               # 当前原型主界面
+        main.tsx              # React 入口
+        global.d.ts           # window API typing
+
+  packages/
+    core/
+      src/
+        asset/                # Asset 业务逻辑与仓储接口
+        ports/                # FileSystem / Path 等抽象
+        snapshot/             # Snapshot 业务逻辑与仓储接口
+        target/               # Target 业务逻辑与仓储接口
+        types/                # 领域模型与基础类型
+
+    shared/
+      src/
+        agentdockApi.ts       # renderer / preload / main 共享 contract
+
+  docs/
+    architecture/             # 架构边界与迁移规划
+    mvp/                      # Phase 1 里程碑追踪
+
+  AGENTS.md
+  README.md
+  package.json
+  pnpm-workspace.yaml
+```
+
+## 📂 目标目录结构
+
+随着 Phase 1 继续推进，目录会逐步演进到下面的结构。这里表示的是目标，不代表当前全部已经落地。
 
 ```text
 AgentDock/
@@ -192,65 +239,47 @@ AgentDock/
     desktop/
       src/
         main/
-          main.ts
-          ipc.ts
         preload/
-          preload.ts
+        platform/
+          electron/
         renderer/
-          App.tsx
-          main.tsx
+          client/
+          i18n/
           pages/
           components/
           stores/
-          services/
-        core/
-          db/
-          storage/
-          asset/
-          target/
-          sync/
-          snapshot/
 
   packages/
     core/
-    schema/
+      src/
+        asset/
+        target/
+        sync/
+        snapshot/
+        managed-block/
+        ports/
+        types/
+
     shared/
+      src/
+        agentdockApi.ts
+
+    schema/
+      src/
+
     adapters/
+      src/
+        custom-folder/
+        codex/
+        claude/
+        cursor/
+        gemini/
 
   docs/
-    product/
     architecture/
     mvp/
-
-  pnpm-workspace.yaml
-  package.json
-  README.md
+    product/
 ```
-## 📂 目录说明
-
-AgentDock 当前采用 Monorepo 结构，方便后续扩展桌面端、CLI、核心包和适配器。
-
-```text
-AgentDock/
-  apps/                 # 可运行应用
-    desktop/            # 当前桌面端 Prototype
-
-  packages/             # 后续可复用包，当前先预留
-    core/               # 放核心业务逻辑
-    schema/             # 放类型和配置 Schema
-    shared/             # 放通用工具
-    adapters/           # 放 Claude / Codex / Cursor / Gemini 等适配器
-
-  docs/                 # 项目文档
-    architecture/       # 架构说明
-    mvp/                # 第一阶段计划
-    product/            # 产品需求和路线图
-
-  AGENTS.md             # 给 AI 编程助手看的项目级约束
-  README.md             # 给开发者看的项目说明
-  package.json          # 根目录脚本入口
-  pnpm-workspace.yaml   # pnpm workspace 配置
----
 
 ## 🗃 本地数据目录规划
 

@@ -6,6 +6,10 @@ export function getAgentDockDataDir(): string {
     return nodePathPort.join(app.getPath("home"), ".agentdock");
 }
 
+export function getHomeDir(): string {
+    return app.getPath("home");
+}
+
 export function getRegistryAssetsDir(): string {
     return nodePathPort.join(getAgentDockDataDir(), "registry", "assets");
 }

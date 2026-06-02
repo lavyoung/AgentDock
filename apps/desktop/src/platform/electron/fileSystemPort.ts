@@ -1,8 +1,8 @@
 import fs from "fs-extra";
 import path from "node:path";
 
-import type {FileSystemPort} from "../../core/ports/fileSystemPort";
-import type {PathPort} from "../../core/ports/pathPort";
+import type {FileSystemPort} from "../../../../../packages/core/src/ports/fileSystemPort";
+import type {PathPort} from "../../../../../packages/core/src/ports/pathPort";
 
 export const nodeFileSystemPort: FileSystemPort = {
     exists(targetPath) {

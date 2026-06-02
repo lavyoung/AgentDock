@@ -22,7 +22,7 @@ function createWindow() {
         win.loadURL("http://localhost:5173");
         win.webContents.openDevTools();
     } else {
-        win.loadFile(path.join(__dirname, "../../dist/index.html"));
+        win.loadFile(path.join(__dirname, "../../../../../apps/desktop/dist/index.html"));
     }
 }
 

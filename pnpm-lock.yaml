@@ -319,6 +319,17 @@ importers:
         specifier: ^9.0.10
         version: 9.0.10
 
+  packages/core:
+    dependencies:
+      nanoid:
+        specifier: ^5.1.11
+        version: 5.1.11
+      yaml:
+        specifier: ^2.9.0
+        version: 2.9.0
+
+  packages/shared: {}
+
 packages:
 
   7zip-bin@5.2.0:
