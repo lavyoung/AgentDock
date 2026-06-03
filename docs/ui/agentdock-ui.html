@@ -3530,9 +3530,9 @@ Button / Modal / Drawer / Tabs / Toast / Form fields
             </div>
           </div>
           <div class="snapshot-actions">
-            <button type="button" class="btn btn-secondary btn-sm" data-diff-against-current="${s.id}" title="与此版本对比当前内容" aria-label="对比版本">
+            ${s.isCurrent ? '' : `<button type="button" class="btn btn-secondary btn-sm" data-diff-against-current="${s.id}" title="对比此版本与当前版本" aria-label="对比版本">
               <i data-lucide="git-compare" class="w-3.5 h-3.5" aria-hidden="true"></i>${t('snapshot.compare')}
-            </button>
+            </button>`}
             <button type="button" class="btn btn-secondary btn-sm" data-rollback="${s.id}" ${s.isCurrent ? 'disabled' : ''}>
               <i data-lucide="rotate-ccw" class="w-3.5 h-3.5" aria-hidden="true"></i>${t('snapshot.rollback')}
             </button>
@@ -4287,6 +4287,19 @@ Button / Modal / Drawer / Tabs / Toast / Form fields
     }
     function closeVersionDiff() {
       hideModal('version-diff-modal');
+    }
+    // Generic modal show/hide (uses .modal-backdrop + .modal > .open for fade)
+    function showModal(id) {
+      const m = document.getElementById(id);
+      if (!m) return;
+      m.hidden = false;
+      requestAnimationFrame(() => m.classList.add('open'));
+    }
+    function hideModal(id) {
+      const m = document.getElementById(id);
+      if (!m) return;
+      m.classList.remove('open');
+      setTimeout(() => { m.hidden = true; }, 180);
     }
     document.querySelector('[data-action="version-diff-close"]')?.addEventListener('click', closeVersionDiff);
     document.getElementById('version-diff-modal')?.addEventListener('click', (e) => {
