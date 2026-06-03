@@ -2,11 +2,19 @@ import {ipcMain} from "electron";
 
 import {ApplicationService} from "../../../../packages/core/src/application/applicationService";
 import {AssetService} from "../../../../packages/core/src/asset/assetService";
+import {type CreateRuleInput, RuleService, type UpdateRuleInput} from "../../../../packages/core/src/rules/ruleService";
+import {
+    type CreateScenarioInput,
+    ScenarioService,
+    type UpdateScenarioInput
+} from "../../../../packages/core/src/scenario/scenarioService";
 import {SnapshotService} from "../../../../packages/core/src/snapshot/snapshotService";
 import {TargetService} from "../../../../packages/core/src/target/targetService";
 import {
     createApplicationRepository,
     createAssetRepository,
+    createRuleRepository,
+    createScenarioRepository,
     createSnapshotRepository,
     createTargetRepository,
 } from "../platform/electron/database";
@@ -18,6 +26,8 @@ export function registerIpc() {
     const applicationRepository = createApplicationRepository();
     const snapshotRepository = createSnapshotRepository();
     const targetRepository = createTargetRepository();
+    const scenarioRepository = createScenarioRepository();
+    const ruleRepository = createRuleRepository();
     const snapshotService = new SnapshotService({
         assetRepository,
         snapshotRepository,
@@ -43,6 +53,12 @@ export function registerIpc() {
         path: nodePathPort,
         targetRepository,
     });
+    const scenarioService = new ScenarioService({
+        scenarioRepository,
+    });
+    const ruleService = new RuleService({
+        ruleRepository,
+    });
 
     ipcMain.handle("assets:list", async () => {
         return assetService.listAssets();
@@ -58,6 +74,10 @@ export function registerIpc() {
 
     ipcMain.handle("assets:update", async (_event, id: string, input) => {
         return assetService.updateAsset(id, input);
+    });
+
+    ipcMain.handle("assets:setStatus", async (_event, id: string, status: "active" | "disabled") => {
+        return assetService.setAssetStatus(id, status);
     });
 
     ipcMain.handle("snapshots:list", async (_event, assetId: string) => {
@@ -118,4 +138,64 @@ export function registerIpc() {
             return applicationService.updateLocation(id, input);
         }
     );
+
+    // ---------- scenarios ----------
+    ipcMain.handle("scenarios:list", async () => {
+        return scenarioService.listScenarios();
+    });
+
+    ipcMain.handle("scenarios:get", async (_event, id: string) => {
+        return scenarioService.getScenario(id);
+    });
+
+    ipcMain.handle("scenarios:create", async (_event, input: CreateScenarioInput) => {
+        return scenarioService.createScenario(input);
+    });
+
+    ipcMain.handle("scenarios:update", async (_event, id: string, input: UpdateScenarioInput) => {
+        return scenarioService.updateScenario(id, input);
+    });
+
+    ipcMain.handle("scenarios:delete", async (_event, id: string) => {
+        scenarioService.deleteScenario(id);
+        return {deleted: true, scenario_id: id};
+    });
+
+    ipcMain.handle(
+        "scenarios:add-asset",
+        async (_event, scenarioId: string, field: "skillIds" | "ruleIds" | "agentFileIds", assetId: string) => {
+            await scenarioService.addAssetToScenario(scenarioId, field, assetId);
+            return scenarioService.getScenario(scenarioId);
+        }
+    );
+
+    ipcMain.handle(
+        "scenarios:remove-asset",
+        async (_event, scenarioId: string, field: "skillIds" | "ruleIds" | "agentFileIds", assetId: string) => {
+            await scenarioService.removeAssetFromScenario(scenarioId, field, assetId);
+            return scenarioService.getScenario(scenarioId);
+        }
+    );
+
+    // ---------- rules ----------
+    ipcMain.handle("rules:list", async () => {
+        return ruleService.listRules();
+    });
+
+    ipcMain.handle("rules:get", async (_event, id: string) => {
+        return ruleService.getRule(id);
+    });
+
+    ipcMain.handle("rules:create", async (_event, input: CreateRuleInput) => {
+        return ruleService.createRule(input);
+    });
+
+    ipcMain.handle("rules:update", async (_event, id: string, input: UpdateRuleInput) => {
+        return ruleService.updateRule(id, input);
+    });
+
+    ipcMain.handle("rules:delete", async (_event, id: string) => {
+        ruleService.deleteRule(id);
+        return {deleted: true, rule_id: id};
+    });
 }

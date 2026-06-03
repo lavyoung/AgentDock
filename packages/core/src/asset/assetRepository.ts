@@ -6,7 +6,7 @@ export interface AssetRepository {
     create(asset: AssetRecord): void;
     updateDetails(
         id: string,
-        changes: Pick<AssetRecord, "title" | "description" | "updated_at">
+        changes: Pick<AssetRecord, "title" | "description" | "status" | "updated_at">
     ): void;
     touch(id: string, updatedAt: string): void;
 }

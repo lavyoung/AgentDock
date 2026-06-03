@@ -5,7 +5,15 @@ import type {
     UpdateApplicationInput,
     UpdateApplicationLocationInput,
 } from "../../core/src/types/application";
-import type {AssetDetail, AssetRecord, CreateAssetInput, UpdateAssetInput,} from "../../core/src/types/asset";
+import type {
+    AssetDetail,
+    AssetRecord,
+    AssetStatus,
+    CreateAssetInput,
+    RuleRecord,
+    ScenarioRecord,
+    UpdateAssetInput,
+} from "../../core/src/types/asset";
 import type {SnapshotRecord} from "../../core/src/types/snapshot";
 import type {CreateTargetInput, TargetRecord, UpdateTargetInput,} from "../../core/src/types/target";
 
@@ -18,6 +26,14 @@ export interface AgentdockApi {
         get(id: string): Promise<AssetDetail | null>;
         create(input: CreateAssetInput): Promise<AssetRecord>;
         update(id: string, input: UpdateAssetInput): Promise<AssetDetail | null>;
+        setStatus(id: string, status: AssetStatus): Promise<AssetRecord | null>;
+    };
+    rules: {
+        list(): Promise<RuleRecord[]>;
+        get(id: string): Promise<RuleRecord | null>;
+        create(input: {name: string; title?: string; description?: string; severity: RuleRecord["severity"]; enabled?: boolean}): Promise<RuleRecord>;
+        update(id: string, input: Partial<RuleRecord>): Promise<RuleRecord>;
+        delete(id: string): Promise<{deleted: true; rule_id: string}>;
     };
     snapshots: {
         list(assetId: string): Promise<SnapshotRecord[]>;
@@ -33,6 +49,15 @@ export interface AgentdockApi {
         create(input: CreateTargetInput): Promise<TargetRecord>;
         update(id: string, input: UpdateTargetInput): Promise<TargetRecord>;
         delete(id: string): Promise<{deleted: true; target_id: string}>;
+    };
+    scenarios: {
+        list(): Promise<ScenarioRecord[]>;
+        get(id: string): Promise<ScenarioRecord | null>;
+        create(input: {name: string; title?: string; description?: string}): Promise<ScenarioRecord>;
+        update(id: string, input: Partial<ScenarioRecord>): Promise<ScenarioRecord>;
+        delete(id: string): Promise<{deleted: true; scenario_id: string}>;
+        addAsset(scenarioId: string, field: "skillIds" | "ruleIds" | "agentFileIds", assetId: string): Promise<void>;
+        removeAsset(scenarioId: string, field: "skillIds" | "ruleIds" | "agentFileIds", assetId: string): Promise<void>;
     };
     applications: {
         list(): Promise<ApplicationRecord[]>;

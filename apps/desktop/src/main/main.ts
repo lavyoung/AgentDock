@@ -11,6 +11,17 @@ function createWindow() {
     const win = new BrowserWindow({
         width: 1280,
         height: 800,
+        minWidth: 800,
+        minHeight: 560,
+        titleBarStyle: "hidden",
+        titleBarOverlay: {
+            color: "#0a0a0b",
+            symbolColor: "#a1a1aa",
+            height: 32,
+        },
+        backgroundColor: "#0a0a0b",
+        frame: false,
+        show: false,
         webPreferences: {
             preload: path.join(__dirname, "../preload/preload.js"),
             contextIsolation: true,
@@ -18,9 +29,12 @@ function createWindow() {
         },
     });
 
+    win.once("ready-to-show", () => {
+        win.show();
+    });
+
     if (isDev) {
         win.loadURL("http://localhost:5173");
-        win.webContents.openDevTools();
     } else {
         win.loadFile(path.join(__dirname, "../../../../../apps/desktop/dist/index.html"));
     }

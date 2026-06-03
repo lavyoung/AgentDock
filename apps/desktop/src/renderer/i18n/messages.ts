@@ -9,362 +9,530 @@ type MessageCatalog = {
     newDemoSkill: string;
     newDemoAgents: string;
     refresh: string;
-    assets: string;
-    editor: string;
-    snapshots: string;
-    noAssetsYet: string;
-    selectAsset: string;
-    typeLabel: string;
-    nameLabel: string;
-    versionLabel: string;
-    statusLabel: string;
-    titleLabel: string;
-    descriptionLabel: string;
-    contentLabel: string;
-    filePathLabel: string;
     save: string;
     restore: string;
-    noSnapshotsYet: string;
-    snapshotMessageBeforeAssetUpdate: string;
-    confirmRestore: string;
+    close: string;
+    toggleEnabled: string;
+    assetsTitle: string;
+    assetsUnit: string;
+    assetsList: string;
+    assetsEditor: string;
+    assetsEmpty: string;
+    assetsActions: string;
+    selectAsset: string;
+    skillsSearchPlaceholder: string;
+    skillsCheckAll: string;
+    skillsUpdateAll: string;
+    commonTabAll: string;
+    commonTabEnabled: string;
+    commonTabDisabled: string;
+    commonBack: string;
+    assetsFilterAll: string;
+    assetsFilterSkill: string;
+    assetsFilterAgentsMd: string;
+    assetsFilterRule: string;
     assetTypeSkill: string;
     assetTypeAgentsMd: string;
+    assetTypeRule: string;
     assetStatusActive: string;
-    targets: string;
-    targetList: string;
-    targetEditor: string;
-    createTarget: string;
-    deleteTarget: string;
-    newTarget: string;
-    noTargetsYet: string;
-    selectTarget: string;
-    targetNameLabel: string;
-    targetPathLabel: string;
-    targetDeployModeLabel: string;
-    targetEnabledLabel: string;
-    targetPathHint: string;
-    targetFormCreate: string;
-    targetFormSave: string;
-    targetFormReset: string;
-    confirmDeleteTarget: string;
     deployModeCopy: string;
     deployModeMerge: string;
-    enabledYes: string;
-    enabledNo: string;
-    applications: string;
-    applicationList: string;
-    noApplicationsYet: string;
-    applicationSettings: string;
-    applicationDescriptionCodex: string;
-    applicationEnabledLabel: string;
-    applicationSave: string;
-    applicationDetectLocations: string;
-    applicationLocations: string;
-    noApplicationLocationsYet: string;
-    applicationLocationEditor: string;
-    applicationLocationSelect: string;
-    applicationLocationNameLabel: string;
-    applicationLocationPathLabel: string;
-    applicationLocationKindLabel: string;
-    applicationLocationScopeLabel: string;
-    applicationLocationExistsLabel: string;
-    applicationLocationSourceLabel: string;
-    applicationLocationEnabledLabel: string;
-    applicationLocationHint: string;
-    applicationLocationSave: string;
-    applicationLocationKindSkills: string;
-    applicationLocationKindAgentsMd: string;
-    applicationLocationScopeGlobal: string;
-    applicationLocationScopeProject: string;
-    applicationLocationSourceDetected: string;
-    applicationLocationSourceManual: string;
-    pathExistsYes: string;
-    pathExistsNo: string;
-    errorPrefix: string;
-    errorAssetsList: string;
-    errorAssetsGet: string;
-    errorAssetsUpdate: string;
-    errorAssetsCreateSkill: string;
-    errorAssetsCreateAgents: string;
-    errorSnapshotsList: string;
-    errorSnapshotsRestore: string;
-    errorTargetsList: string;
-    errorTargetsGet: string;
-    errorTargetsCreate: string;
-    errorTargetsUpdate: string;
-    errorTargetsDelete: string;
-    errorApplicationsList: string;
-    errorApplicationsGet: string;
-    errorApplicationsUpdate: string;
-    errorApplicationsRefreshLocations: string;
-    errorApplicationLocationsUpdate: string;
+    targetsTitle: string;
+    targetsUnit: string;
+    targetsEmpty: string;
+    targetsName: string;
+    targetsPath: string;
+    targetsBrowse: string;
+    targetsDeployMode: string;
+    settingsTitle: string;
+    settingsLanguage: string;
+    settingsLanguageZh: string;
+    settingsTheme: string;
+    settingsThemeDark: string;
+    settingsThemeLight: string;
+    settingsThemeSystem: string;
+    settingsData: string;
+    settingsDataPath: string;
+    settingsBrowse: string;
+    settingsAutoUpdate: string;
+    settingsAutoUpdateDesc: string;
+    settingsNotifications: string;
+    settingsNotificationsDesc: string;
+    settingsSound: string;
+    settingsAbout: string;
+    settingsVersion: string;
+    settingsCopyright: string;
+    settingsGeneral: string;
+    overviewTitle: string;
+    overviewTotalSkills: string;
+    overviewTotalRules: string;
+    overviewTotalScenarios: string;
+    overviewTotalAgents: string;
+    overviewRulesPending: string;
+    overviewAgentBreakdown: string;
+    overviewRefSkills: string;
+    overviewRefRules: string;
+    overviewStatusEnabled: string;
+    overviewStatusUninstalled: string;
     demoSkillTitle: string;
     demoSkillDescription: string;
     demoSkillContent: string;
     demoAgentsTitle: string;
     demoAgentsDescription: string;
     demoAgentsContent: string;
+    navOverview: string;
+    navAssets: string;
+    navInstall: string;
+    navScenarios: string;
+    navScenariosCategory: string;
+    navTargets: string;
+    navSettings: string;
+    navWorkspacesCategory: string;
+    navDefaultScenario: string;
+    navLinkedProjects: string;
+    actionNewScenario: string;
+    actionNewProject: string;
+    skillsBackup: string;
+    skillsNewAsset: string;
+    installTitle: string;
+    installSubtitle: string;
+    projectsTitle: string;
+    projectsSubtitle: string;
+    scenariosTitle: string;
+    scenariosEmpty: string;
+    scenariosComingSoon: string;
+    newScenario: string;
+    scenarioBuiltIn: string;
+    scenarioBuiltInDesc: string;
+    scenarioSkills: string;
+    scenarioRules: string;
+    scenarioAgentFiles: string;
+    scenarioAgent: string;
+    scenarioProjects: string;
+    scenarioRecentActivity: string;
+    scenarioActivityNote: string;
+    scenarioUsedSkills: string;
+    scenarioAppliedRules: string;
+    scenarioAddSkill: string;
+    scenarioAddRule: string;
+    scenarioAddAgentFile: string;
+    scenarioAddAgent: string;
+    scenarioEditScenario: string;
+    scenarioDeleteScenario: string;
+    scenarioBackToScenarios: string;
+    newScenarioTitle: string;
+    newScenarioHelp: string;
+    newScenarioName: string;
+    newScenarioDescPlaceholder: string;
+    newScenarioPreviewHint: string;
+    newScenarioDescLabel: string;
+    newScenarioCountSuffix: string;
+    newScenarioItemSuffix: string;
+    scenarioNotFound: string;
+    breadcrumbAriaLabel: string;
+    scenarioNoProjects: string;
+    scenarioBadgeLabel: string;
+    rulesTitle: string;
+    rulesEmpty: string;
+    newDemoRule: string;
+    toastRuleNameRequired: string;
+    toastScenarioNameRequired: string;
+    toastScenarioCreated: string;
+    severityError: string;
+    severityWarning: string;
+    severityInfo: string;
+    assetPickerTitle: string;
+    assetPickerEmpty: string;
+    assetPickerAlreadyAdded: string;
+    savedSuccess: string;
+    saveFailed: string;
+    panelVersion: string;
+    panelSynced: string;
+    assetView: string;
+    panelTabOverview: string;
+    panelTabContent: string;
+    panelTabHistory: string;
+    panelFieldTitle: string;
+    panelFieldDescription: string;
+    assetContent: string;
+    panelHistoryDesc: string;
+    noSnapshotsYet: string;
+    snapshotMessageBeforeAssetUpdate: string;
+    snapshotRestored: string;
+    snapshotRestoreFailed: string;
+    targetList: string;
+    newTarget: string;
+    enabledYes: string;
+    enabledNo: string;
+    targetEditor: string;
+    createTarget: string;
+    targetNameLabel: string;
+    targetPathLabel: string;
+    targetPathHint: string;
+    targetDeployModeLabel: string;
+    targetEnabledLabel: string;
+    targetFormSave: string;
+    targetFormCreate: string;
+    targetFormReset: string;
+    deleteTarget: string;
+    confirmDeleteTarget: string;
 };
 
-export const messages: Record<Locale, MessageCatalog> = {
+type Catalog = {[K in keyof MessageCatalog]: string};
+
+export const messages: Record<Locale, Catalog> = {
+    "zh-CN": {
+        appTitle: "AgentDock",
+        currentScope: "\u5f53\u524d\u8303\u56f4",
+        localeLabel: "\u8bed\u8a00",
+        localeEnglish: "English",
+        localeChinese: "\u4e2d\u6587",
+        newDemoSkill: "\u65b0\u5efa\u793a\u4f8b Skill",
+        newDemoAgents: "\u65b0\u5efa\u793a\u4f8b AGENTS.md",
+        refresh: "\u5237\u65b0",
+        save: "\u4fdd\u5b58",
+        restore: "\u6062\u590d",
+        close: "\u5173\u95ed",
+        toggleEnabled: "\u5207\u6362\u542f\u7528\u72b6\u6001",
+        assetsTitle: "\u8d44\u4ea7",
+        assetsUnit: "\u9879",
+        assetsList: "\u8d44\u4ea7\u5217\u8868",
+        assetsEditor: "\u8d44\u4ea7\u7f16\u8f91\u5668",
+        assetsEmpty: "\u6682\u65e0\u8d44\u4ea7",
+        assetsActions: "\u64cd\u4f5c",
+        selectAsset: "\u9009\u62e9\u8d44\u4ea7",
+        skillsSearchPlaceholder: "\u641c\u7d22\u6280\u80fd\u540d\u79f0\u3001\u63cf\u8ff0\u3001\u6807\u7b7e\u2026",
+        skillsCheckAll: "\u68c0\u67e5\u5168\u90e8",
+        skillsUpdateAll: "\u5168\u90e8\u66f4\u65b0",
+        commonTabAll: "\u5168\u90e8",
+        commonTabEnabled: "\u5df2\u542f\u7528",
+        commonTabDisabled: "\u672a\u542f\u7528",
+        commonBack: "\u8fd4\u56de",
+        assetsFilterAll: "\u5168\u90e8\u7c7b\u578b",
+        assetsFilterSkill: "Skill",
+        assetsFilterAgentsMd: "AGENTS.md",
+        assetsFilterRule: "Rule",
+        assetTypeSkill: "Skill",
+        assetTypeAgentsMd: "AGENTS.md",
+        assetTypeRule: "Rule",
+        assetStatusActive: "\u5df2\u542f\u7528",
+        deployModeCopy: "\u590d\u5236",
+        deployModeMerge: "\u5408\u5e76",
+        targetsTitle: "\u76ee\u6807",
+        targetsUnit: "\u9879",
+        targetsEmpty: "\u6682\u65e0\u76ee\u6807\u3002\u521b\u5efa\u4e00\u4e2a\u76ee\u6807\u76ee\u5f55\u6765\u540c\u6b65\u8d44\u4ea7\u3002",
+        targetsName: "\u76ee\u6807\u540d\u79f0",
+        targetsPath: "\u76ee\u6807\u8def\u5f84",
+        targetsBrowse: "\u6d4f\u89c8",
+        targetsDeployMode: "\u90e8\u7f72\u6a21\u5f0f",
+        settingsTitle: "\u7cfb\u7edf\u8bbe\u7f6e",
+        settingsLanguage: "\u8bed\u8a00",
+        settingsLanguageZh: "\u4e2d\u6587",
+        settingsTheme: "\u4e3b\u9898\u6a21\u5f0f",
+        settingsThemeDark: "\u9ed1\u591c\u6a21\u5f0f",
+        settingsThemeLight: "\u767d\u5929\u6a21\u5f0f",
+        settingsThemeSystem: "\u8ddf\u968f\u7cfb\u7edf",
+        settingsData: "\u6570\u636e\u4e0e\u66f4\u65b0",
+        settingsDataPath: "\u6570\u636e\u5b58\u50a8\u8def\u5f84",
+        settingsBrowse: "\u6d4f\u89c8",
+        settingsAutoUpdate: "\u81ea\u52a8\u66f4\u65b0",
+        settingsAutoUpdateDesc: "\u5728\u6709\u65b0\u7248\u672c\u65f6\u81ea\u52a8\u4e0b\u8f7d\u66f4\u65b0",
+        settingsNotifications: "\u901a\u77e5\u8bbe\u7f6e",
+        settingsNotificationsDesc: "\u5141\u8bb8\u5e94\u7528\u53d1\u9001\u901a\u77e5\u63d0\u9192",
+        settingsSound: "\u58f0\u97f3\u63d0\u9192",
+        settingsAbout: "\u5173\u4e8e",
+        settingsVersion: "\u7248\u672c",
+        settingsCopyright: "\u00a9 2025 AgentDock. All rights reserved.",
+        settingsGeneral: "\u901a\u7528\u8bbe\u7f6e",
+        overviewTitle: "\u603b\u89c8",
+        overviewTotalSkills: "\u5df2\u542f\u7528\u6280\u80fd",
+        overviewTotalRules: "\u5df2\u914d\u7f6e\u89c4\u5219",
+        overviewTotalScenarios: "\u573a\u666f\u6570",
+        overviewTotalAgents: "Agent \u6570",
+        overviewRulesPending: "\u5f85\u5b9a",
+        overviewAgentBreakdown: "Agent \u8d44\u4ea7\u5f15\u7528",
+        overviewRefSkills: "\u5f15\u7528 Skills",
+        overviewRefRules: "\u89c4\u5219",
+        overviewStatusEnabled: "\u5df2\u542f\u7528",
+        overviewStatusUninstalled: "\u672a\u5b89\u88c5",
+        demoSkillTitle: "\u524d\u7aef\u4ee3\u7801\u5ba1\u67e5",
+        demoSkillDescription: "\u793a\u4f8b Skill \u8d44\u4ea7\uff0c\u7528\u4e8e\u524d\u7aef\u4ee3\u7801\u5ba1\u67e5\u3002",
+        demoSkillContent: "# Frontend Review\n\n## Use case\n\nUse when reviewing React and TypeScript projects.\n\n## Focus areas\n\n- Component structure\n- Type safety\n- Maintainability\n",
+        demoAgentsTitle: "\u524d\u7aef AGENTS.md",
+        demoAgentsDescription: "\u793a\u4f8b AGENTS.md \u8d44\u4ea7\uff0c\u7528\u4e8e\u524d\u7aef\u9879\u76ee\u3002",
+        demoAgentsContent: "# AGENTS.md\n\n## Project rules\n\nFollow the project's directory structure, naming conventions and code style.\n\n## Development notes\n\n- Understand existing implementation before making changes\n- Keep changes focused\n- Avoid introducing unrelated dependencies\n",
+        navOverview: "\u603b\u89c8",
+        navAssets: "\u8d44\u4ea7",
+        navInstall: "\u5b89\u88c5\u6280\u80fd",
+        navScenarios: "\u573a\u666f",
+        navScenariosCategory: "\u573a\u666f",
+        navTargets: "\u76ee\u6807",
+        navSettings: "\u7cfb\u7edf\u8bbe\u7f6e",
+        navWorkspacesCategory: "\u5de5\u4f5c\u533a",
+        navDefaultScenario: "\u9ed8\u8ba4\u573a\u666f",
+        navLinkedProjects: "\u5173\u8054\u9879\u76ee",
+        actionNewScenario: "\u65b0\u589e\u573a\u666f",
+        actionNewProject: "\u65b0\u589e\u9879\u76ee",
+        skillsBackup: "\u5f00\u59cb\u5907\u4efd",
+        skillsNewAsset: "\u65b0\u5efa\u8d44\u4ea7",
+        installTitle: "\u5b89\u88c5\u6280\u80fd",
+        installSubtitle: "\u4ece\u4ed3\u5e93\u6d4f\u89c8\u5e76\u5b89\u88c5\u65b0\u6280\u80fd",
+        projectsTitle: "\u5173\u8054\u9879\u76ee",
+        projectsSubtitle: "\u7ed1\u5b9a\u5230\u4f60\u7684\u9879\u76ee\u4ed3\u5e93",
+        scenariosTitle: "\u573a\u666f",
+        scenariosEmpty: "\u6682\u65e0\u573a\u666f\u3002",
+        scenariosComingSoon: "\u573a\u666f\u8ba9\u4f60\u53ef\u4ee5\u5c06\u8d44\u4ea7\u5206\u7ec4\u5e76\u6309\u573a\u666f\u542f\u7528/\u7981\u7528\u3002\u8fd9\u662f\u7b2c\u4e8c\u9636\u6bb5\u7684\u529f\u80fd\u3002",
+        newScenario: "\u65b0\u5efa\u573a\u666f",
+        scenarioBuiltIn: "\u5185\u7f6e\u9ed8\u8ba4\u573a\u666f",
+        scenarioBuiltInDesc: "\u9ed8\u8ba4\u573a\u666f\u662f AgentDock \u5185\u7f6e\u7684\u5f00\u7bb1\u5373\u7528\u914d\u7f6e\uff0c\u5305\u542b 12 \u4e2a\u5e38\u7528 Skills \u4e0e OpenCode \u4f5c\u4e3a\u9ed8\u8ba4 Agent\u3002",
+        scenarioSkills: "\u6280\u80fd",
+        scenarioRules: "\u89c4\u5219",
+        scenarioAgentFiles: "Agent \u6587\u4ef6",
+        scenarioAgent: "Agent",
+        scenarioProjects: "\u5173\u8054\u9879\u76ee",
+        scenarioRecentActivity: "\u6700\u8fd1\u6d3b\u52a8",
+        scenarioActivityNote: "\u573a\u666f\u53d8\u66f4\u540e\uff0c\u5173\u8054\u7684\u9879\u76ee\u4f1a\u5728\u4e0b\u6b21\u540c\u6b65\u65f6\u88ab\u91cd\u65b0\u8ba1\u7b97\u3002\u5982\u679c\u9879\u76ee\u5904\u4e8e\u201c\u5df2\u540c\u6b65\u201d\u72b6\u6001\uff0c\u9700\u8981\u5148\u5728\u9879\u76ee\u4e2d\u70b9\u201c\u672a\u540c\u6b65\u201d\u624d\u4f1a\u91cd\u65b0\u5e94\u7528\u3002",
+        scenarioUsedSkills: "\u4f7f\u7528\u7684\u6280\u80fd",
+        scenarioAppliedRules: "\u5e94\u7528\u7684\u89c4\u5219",
+        scenarioAddSkill: "\u6dfb\u52a0\u6280\u80fd",
+        scenarioAddRule: "\u6dfb\u52a0\u89c4\u5219",
+        scenarioAddAgentFile: "\u6dfb\u52a0 Agent \u6587\u4ef6",
+        scenarioAddAgent: "\u6dfb\u52a0 Agent",
+        scenarioEditScenario: "\u7f16\u8f91\u573a\u666f",
+        scenarioDeleteScenario: "\u5220\u9664\u573a\u666f",
+        scenarioBackToScenarios: "\u573a\u666f",
+        newScenarioTitle: "\u65b0\u5efa\u573a\u666f",
+        newScenarioHelp: "\u573a\u666f\u662f\u4e00\u7ec4\u9884\u8bbe\u914d\u7f6e\uff08\u5173\u8054\u7684 Agent + \u542f\u7528\u7684\u6280\u80fd\uff09\u3002\u4e00\u4e2a Agent \u53ef\u88ab\u591a\u4e2a\u573a\u666f\u5171\u7528\u3002",
+        newScenarioName: "\u573a\u666f\u540d\u79f0",
+        newScenarioDescPlaceholder: "\u63cf\u8ff0\u6b64\u573a\u666f\u7684\u7528\u9014\u2026",
+        newScenarioPreviewHint: "\u573a\u666f\u521b\u5efa\u540e\u4f1a\u51fa\u73b0\u5728\u4fa7\u680f\u201c\u573a\u666f\u201d\u5206\u7c7b\u4e0b\u3002",
+        newScenarioDescLabel: "\u63cf\u8ff0",
+        newScenarioCountSuffix: "\u5171",
+        newScenarioItemSuffix: "\u9879\u8d44\u4ea7",
+        scenarioNotFound: "\u573a\u666f\u672a\u627e\u5230",
+        breadcrumbAriaLabel: "\u9762\u5305\u5c51",
+        scenarioNoProjects: "\u6682\u65e0\u5173\u8054\u9879\u76ee",
+        scenarioBadgeLabel: "\u573a\u666f",
+        rulesTitle: "\u89c4\u5219",
+        rulesEmpty: "\u6682\u65e0\u89c4\u5219\u3002\u521b\u5efa\u793a\u4f8b\u89c4\u5219\u5f00\u59cb\u4f7f\u7528\u3002",
+        newDemoRule: "\u521b\u5efa\u793a\u4f8b\u89c4\u5219",
+        toastRuleNameRequired: "\u8bf7\u586b\u5199\u89c4\u5219\u540d\u79f0",
+        toastScenarioNameRequired: "\u8bf7\u586b\u5199\u573a\u666f\u540d\u79f0",
+        toastScenarioCreated: "\u573a\u666f \u201c{name}\u201d \u5df2\u521b\u5efa",
+        severityError: "\u9519\u8bef",
+        severityWarning: "\u8b66\u544a",
+        severityInfo: "\u63d0\u793a",
+        assetPickerTitle: "\u6dfb\u52a0\u8d44\u4ea7",
+        assetPickerEmpty: "\u6682\u65e0\u53ef\u6dfb\u52a0\u7684\u8d44\u4ea7",
+        assetPickerAlreadyAdded: "\u5df2\u6dfb\u52a0",
+        savedSuccess: "\u4fdd\u5b58\u6210\u529f",
+        saveFailed: "\u4fdd\u5b58\u5931\u8d25",
+        panelVersion: "\u7248\u672c",
+        panelSynced: "\u5df2\u540c\u6b65",
+        assetView: "\u8d44\u4ea7\u89c6\u56fe",
+        panelTabOverview: "\u6982\u89c8",
+        panelTabContent: "\u5185\u5bb9",
+        panelTabHistory: "\u5386\u53f2",
+        panelFieldTitle: "\u6807\u9898",
+        panelFieldDescription: "\u63cf\u8ff0",
+        assetContent: "\u5185\u5bb9",
+        panelHistoryDesc: "\u6bcf\u6b21\u4fdd\u5b58\u90fd\u4f1a\u81ea\u52a8\u521b\u5efa\u672c\u5730\u5feb\u7167\uff0c\u53ef\u67e5\u770b\u4e0e\u56de\u6eda",
+        noSnapshotsYet: "\u8fd8\u6ca1\u6709\u5feb\u7167",
+        snapshotMessageBeforeAssetUpdate: "\u6bcf\u6b21\u4fdd\u5b58\u90fd\u4f1a\u81ea\u52a8\u521b\u5efa\u672c\u5730\u5feb\u7167",
+        snapshotRestored: "\u5feb\u7167\u6062\u590d\u6210\u529f",
+        snapshotRestoreFailed: "\u5feb\u7167\u6062\u590d\u5931\u8d25",
+        targetList: "\u76ee\u6807\u5217\u8868",
+        newTarget: "\u65b0\u5efa\u76ee\u6807",
+        enabledYes: "\u5df2\u542f\u7528",
+        enabledNo: "\u672a\u542f\u7528",
+        targetEditor: "\u76ee\u6807\u7f16\u8f91\u5668",
+        createTarget: "\u521b\u5efa\u76ee\u6807",
+        targetNameLabel: "\u76ee\u6807\u540d\u79f0",
+        targetPathLabel: "\u76ee\u6807\u8def\u5f84",
+        targetPathHint: "\u76ee\u6807\u76ee\u5f55\u7684\u7edd\u5bf9\u8def\u5f84",
+        targetDeployModeLabel: "\u90e8\u7f72\u6a21\u5f0f",
+        targetEnabledLabel: "\u5df2\u542f\u7528",
+        targetFormSave: "\u4fdd\u5b58",
+        targetFormCreate: "\u521b\u5efa",
+        targetFormReset: "\u91cd\u7f6e",
+        deleteTarget: "\u5220\u9664\u76ee\u6807",
+        confirmDeleteTarget: "\u786e\u5b9a\u8981\u5220\u9664\u6b64\u76ee\u6807\u5417\uff1f",
+    },
     en: {
-        appTitle: "AgentDock Prototype",
-        currentScope:
-            "Current scope: asset registry, application settings, local editing, and snapshot restore.",
+        appTitle: "AgentDock",
+        currentScope: "Current scope",
         localeLabel: "Language",
         localeEnglish: "English",
         localeChinese: "Chinese",
-        newDemoSkill: "New Demo Skill",
-        newDemoAgents: "New Demo AGENTS.md",
+        newDemoSkill: "New sample Skill",
+        newDemoAgents: "New sample AGENTS.md",
         refresh: "Refresh",
-        assets: "Assets",
-        editor: "Editor",
-        snapshots: "Snapshots",
-        noAssetsYet: "No assets yet.",
-        selectAsset: "Select an asset to edit.",
-        typeLabel: "Type",
-        nameLabel: "Name",
-        versionLabel: "Version",
-        statusLabel: "Status",
-        titleLabel: "Title",
-        descriptionLabel: "Description",
-        contentLabel: "Content",
-        filePathLabel: "File path",
         save: "Save",
         restore: "Restore",
-        noSnapshotsYet: "No snapshots yet. Saving an asset will create one.",
-        snapshotMessageBeforeAssetUpdate: "Before asset update",
-        confirmRestore: "Restore this snapshot and overwrite the current asset?",
+        close: "Close",
+        toggleEnabled: "Toggle enabled",
+        assetsTitle: "Assets",
+        assetsUnit: "items",
+        assetsList: "Asset list",
+        assetsEditor: "Asset editor",
+        assetsEmpty: "No assets yet",
+        assetsActions: "Actions",
+        selectAsset: "Select asset",
+        skillsSearchPlaceholder: "Search by name, description, tags...",
+        skillsCheckAll: "Check all",
+        skillsUpdateAll: "Update all",
+        commonTabAll: "All",
+        commonTabEnabled: "Enabled",
+        commonTabDisabled: "Disabled",
+        commonBack: "Back",
+        assetsFilterAll: "All types",
+        assetsFilterSkill: "Skill",
+        assetsFilterAgentsMd: "AGENTS.md",
+        assetsFilterRule: "Rule",
         assetTypeSkill: "Skill",
         assetTypeAgentsMd: "AGENTS.md",
+        assetTypeRule: "Rule",
         assetStatusActive: "Active",
-        targets: "Targets",
-        targetList: "Target List",
-        targetEditor: "Target Editor",
-        createTarget: "Create Target",
-        deleteTarget: "Delete Target",
-        newTarget: "New Target",
-        noTargetsYet: "No targets yet.",
-        selectTarget: "Select a target to edit, or create a new one.",
-        targetNameLabel: "Target Name",
-        targetPathLabel: "Target Path",
-        targetDeployModeLabel: "Deploy Mode",
-        targetEnabledLabel: "Enabled",
-        targetPathHint: "Use an existing absolute directory path.",
-        targetFormCreate: "Create",
-        targetFormSave: "Save Target",
-        targetFormReset: "Reset",
-        confirmDeleteTarget: "Delete this target?",
         deployModeCopy: "Copy",
         deployModeMerge: "Merge",
-        enabledYes: "Yes",
-        enabledNo: "No",
-        applications: "Applications",
-        applicationList: "Application List",
-        noApplicationsYet: "No managed applications yet.",
-        applicationSettings: "Application Settings",
-        applicationDescriptionCodex:
-            "Manage Codex global skills and project-level Codex / AGENTS.md locations.",
-        applicationEnabledLabel: "Manage this application",
-        applicationSave: "Save Application",
-        applicationDetectLocations: "Detect Locations",
-        applicationLocations: "Detected Locations",
-        noApplicationLocationsYet: "No application locations yet. Run detection first.",
-        applicationLocationEditor: "Location Editor",
-        applicationLocationSelect:
-            "Select a detected location to review, confirm, or override.",
-        applicationLocationNameLabel: "Location Name",
-        applicationLocationPathLabel: "Location Path",
-        applicationLocationKindLabel: "Kind",
-        applicationLocationScopeLabel: "Scope",
-        applicationLocationExistsLabel: "Exists",
-        applicationLocationSourceLabel: "Source",
-        applicationLocationEnabledLabel: "Use this location",
-        applicationLocationHint:
-            "Detected locations can be confirmed directly or adjusted to a custom absolute path.",
-        applicationLocationSave: "Save Location",
-        applicationLocationKindSkills: "Skills",
-        applicationLocationKindAgentsMd: "AGENTS.md",
-        applicationLocationScopeGlobal: "Global",
-        applicationLocationScopeProject: "Project",
-        applicationLocationSourceDetected: "Detected",
-        applicationLocationSourceManual: "Manual",
-        pathExistsYes: "Found",
-        pathExistsNo: "Missing",
-        errorPrefix: "failed",
-        errorAssetsList: "Load assets",
-        errorAssetsGet: "Open asset",
-        errorAssetsUpdate: "Save asset",
-        errorAssetsCreateSkill: "Create demo skill",
-        errorAssetsCreateAgents: "Create demo AGENTS.md",
-        errorSnapshotsList: "Load snapshots",
-        errorSnapshotsRestore: "Restore snapshot",
-        errorTargetsList: "Load targets",
-        errorTargetsGet: "Open target",
-        errorTargetsCreate: "Create target",
-        errorTargetsUpdate: "Save target",
-        errorTargetsDelete: "Delete target",
-        errorApplicationsList: "Load applications",
-        errorApplicationsGet: "Open application",
-        errorApplicationsUpdate: "Save application",
-        errorApplicationsRefreshLocations: "Detect application locations",
-        errorApplicationLocationsUpdate: "Save application location",
+        targetsTitle: "Targets",
+        targetsUnit: "items",
+        targetsEmpty: "No targets yet. Create a target directory to sync assets.",
+        targetsName: "Target name",
+        targetsPath: "Target path",
+        targetsBrowse: "Browse",
+        targetsDeployMode: "Deploy mode",
+        settingsTitle: "Settings",
+        settingsLanguage: "Language",
+        settingsLanguageZh: "Chinese",
+        settingsTheme: "Theme",
+        settingsThemeDark: "Dark mode",
+        settingsThemeLight: "Light mode",
+        settingsThemeSystem: "Follow system",
+        settingsData: "Data & updates",
+        settingsDataPath: "Data path",
+        settingsBrowse: "Browse",
+        settingsAutoUpdate: "Auto-update",
+        settingsAutoUpdateDesc: "Automatically download updates when available",
+        settingsNotifications: "Notifications",
+        settingsNotificationsDesc: "Allow the app to send notification reminders",
+        settingsSound: "Sound alerts",
+        settingsAbout: "About",
+        settingsVersion: "Version",
+        settingsCopyright: "\u00a9 2025 AgentDock. All rights reserved.",
+        settingsGeneral: "General",
+        overviewTitle: "Overview",
+        overviewTotalSkills: "Enabled skills",
+        overviewTotalRules: "Configured rules",
+        overviewTotalScenarios: "Scenarios",
+        overviewTotalAgents: "Agents",
+        overviewRulesPending: "Pending",
+        overviewAgentBreakdown: "Agent asset references",
+        overviewRefSkills: "Skills",
+        overviewRefRules: "Rules",
+        overviewStatusEnabled: "Enabled",
+        overviewStatusUninstalled: "Uninstalled",
         demoSkillTitle: "Frontend Review",
-        demoSkillDescription: "Prototype skill asset for frontend code review.",
-        demoSkillContent: `# Frontend Review
-
-## Usage
-
-Use this skill when reviewing React and TypeScript projects.
-
-## Focus
-
-- Component structure
-- Type safety
-- Maintainability
-`,
+        demoSkillDescription: "Sample Skill asset for frontend code review.",
+        demoSkillContent: "# Frontend Review\n\n## Use case\n\nUse when reviewing React and TypeScript projects.\n\n## Focus areas\n\n- Component structure\n- Type safety\n- Maintainability\n",
         demoAgentsTitle: "Frontend AGENTS.md",
-        demoAgentsDescription: "Prototype AGENTS.md asset for frontend projects.",
-        demoAgentsContent: `# AGENTS.md
-
-## Project Rules
-
-Respect the project structure, naming rules, and code style.
-
-## Development Notes
-
-- Understand the current implementation before editing
-- Keep changes focused
-- Avoid unrelated dependencies
-`,
-    },
-    "zh-CN": {
-        appTitle: "AgentDock 原型",
-        currentScope: "当前范围：资产库、应用设置、本地编辑和快照恢复。",
-        localeLabel: "语言",
-        localeEnglish: "英文",
-        localeChinese: "中文",
-        newDemoSkill: "新建示例 Skill",
-        newDemoAgents: "新建示例 AGENTS.md",
-        refresh: "刷新",
-        assets: "资产",
-        editor: "编辑器",
-        snapshots: "快照",
-        noAssetsYet: "暂无资产。",
-        selectAsset: "请选择一个资产进行编辑。",
-        typeLabel: "类型",
-        nameLabel: "名称",
-        versionLabel: "版本",
-        statusLabel: "状态",
-        titleLabel: "标题",
-        descriptionLabel: "描述",
-        contentLabel: "内容",
-        filePathLabel: "文件路径",
-        save: "保存",
-        restore: "恢复",
-        noSnapshotsYet: "暂无快照。保存资产后会自动创建快照。",
-        snapshotMessageBeforeAssetUpdate: "更新资产前",
-        confirmRestore: "确认恢复这个快照并覆盖当前资产吗？",
-        assetTypeSkill: "Skill",
-        assetTypeAgentsMd: "AGENTS.md",
-        assetStatusActive: "启用中",
-        targets: "目标目录",
-        targetList: "目标列表",
-        targetEditor: "目标编辑",
-        createTarget: "创建目标",
-        deleteTarget: "删除目标",
-        newTarget: "新目标",
-        noTargetsYet: "暂无目标目录。",
-        selectTarget: "请选择一个目标进行编辑，或创建一个新目标。",
-        targetNameLabel: "目标名称",
-        targetPathLabel: "目标路径",
-        targetDeployModeLabel: "部署模式",
-        targetEnabledLabel: "启用",
-        targetPathHint: "请填写一个已存在的绝对目录路径。",
-        targetFormCreate: "创建",
-        targetFormSave: "保存目标",
-        targetFormReset: "重置",
-        confirmDeleteTarget: "确认删除这个目标吗？",
-        deployModeCopy: "复制",
-        deployModeMerge: "合并",
-        enabledYes: "是",
-        enabledNo: "否",
-        applications: "应用",
-        applicationList: "应用列表",
-        noApplicationsYet: "暂无受管应用。",
-        applicationSettings: "应用设置",
-        applicationDescriptionCodex:
-            "管理 Codex 全局 Skills 目录，以及项目级 Codex / AGENTS.md 位置。",
-        applicationEnabledLabel: "启用此应用管理",
-        applicationSave: "保存应用设置",
-        applicationDetectLocations: "检测位置",
-        applicationLocations: "检测到的位置",
-        noApplicationLocationsYet: "暂无应用位置，请先执行检测。",
-        applicationLocationEditor: "位置编辑",
-        applicationLocationSelect: "请选择一个检测到的位置进行确认或覆盖。",
-        applicationLocationNameLabel: "位置名称",
-        applicationLocationPathLabel: "位置路径",
-        applicationLocationKindLabel: "类型",
-        applicationLocationScopeLabel: "范围",
-        applicationLocationExistsLabel: "是否存在",
-        applicationLocationSourceLabel: "来源",
-        applicationLocationEnabledLabel: "使用此位置",
-        applicationLocationHint:
-            "检测到的位置可以直接确认，也可以调整为自定义绝对路径。",
-        applicationLocationSave: "保存位置",
-        applicationLocationKindSkills: "Skills",
-        applicationLocationKindAgentsMd: "AGENTS.md",
-        applicationLocationScopeGlobal: "全局",
-        applicationLocationScopeProject: "项目",
-        applicationLocationSourceDetected: "自动检测",
-        applicationLocationSourceManual: "手动覆盖",
-        pathExistsYes: "已找到",
-        pathExistsNo: "未找到",
-        errorPrefix: "失败",
-        errorAssetsList: "加载资产列表",
-        errorAssetsGet: "打开资产",
-        errorAssetsUpdate: "保存资产",
-        errorAssetsCreateSkill: "创建示例 Skill",
-        errorAssetsCreateAgents: "创建示例 AGENTS.md",
-        errorSnapshotsList: "加载快照列表",
-        errorSnapshotsRestore: "恢复快照",
-        errorTargetsList: "加载目标列表",
-        errorTargetsGet: "打开目标",
-        errorTargetsCreate: "创建目标",
-        errorTargetsUpdate: "保存目标",
-        errorTargetsDelete: "删除目标",
-        errorApplicationsList: "加载应用列表",
-        errorApplicationsGet: "打开应用",
-        errorApplicationsUpdate: "保存应用设置",
-        errorApplicationsRefreshLocations: "检测应用位置",
-        errorApplicationLocationsUpdate: "保存应用位置",
-        demoSkillTitle: "前端评审",
-        demoSkillDescription: "用于前端代码评审的示例 Skill 资产。",
-        demoSkillContent: `# 前端评审
-
-## 使用场景
-
-当你需要评审 React 与 TypeScript 项目时使用。
-
-## 关注点
-
-- 组件结构
-- 类型安全
-- 可维护性
-`,
-        demoAgentsTitle: "前端 AGENTS.md",
-        demoAgentsDescription: "用于前端项目的示例 AGENTS.md 资产。",
-        demoAgentsContent: `# AGENTS.md
-
-## 项目规则
-
-请遵循项目的目录结构、命名规范与代码风格。
-
-## 开发说明
-
-- 修改前先理解现有实现
-- 保持变更范围聚焦
-- 避免引入无关依赖
-`,
+        demoAgentsDescription: "Sample AGENTS.md asset for frontend projects.",
+        demoAgentsContent: "# AGENTS.md\n\n## Project rules\n\nFollow the project's directory structure, naming conventions and code style.\n\n## Development notes\n\n- Understand existing implementation before making changes\n- Keep changes focused\n- Avoid introducing unrelated dependencies\n",
+        navOverview: "Overview",
+        navAssets: "Assets",
+        navInstall: "Install Skills",
+        navScenarios: "Scenarios",
+        navScenariosCategory: "Scenarios",
+        navTargets: "Targets",
+        navSettings: "Settings",
+        navWorkspacesCategory: "Workspaces",
+        navDefaultScenario: "Default scenario",
+        navLinkedProjects: "Linked projects",
+        actionNewScenario: "New scenario",
+        actionNewProject: "New project",
+        skillsBackup: "Backup now",
+        skillsNewAsset: "New asset",
+        installTitle: "Install Skills",
+        installSubtitle: "Browse and install new skills from the registry",
+        projectsTitle: "Linked Projects",
+        projectsSubtitle: "Link to your project repositories",
+        scenariosTitle: "Scenarios",
+        scenariosEmpty: "No scenarios yet.",
+        scenariosComingSoon: "Scenarios let you group assets and enable/disable them by scenario. This is a Phase 2 feature.",
+        newScenario: "New scenario",
+        scenarioBuiltIn: "Built-in default scenario",
+        scenarioBuiltInDesc: "The default scenario ships out of the box with 12 common Skills and OpenCode as the default Agent.",
+        scenarioSkills: "Skills",
+        scenarioRules: "Rules",
+        scenarioAgentFiles: "Agent files",
+        scenarioAgent: "Agent",
+        scenarioProjects: "Linked projects",
+        scenarioRecentActivity: "Recent activity",
+        scenarioActivityNote: "After changing a scenario, linked projects will be recalculated on the next sync. If a project is in the 'synced' state, you need to click 'unsync' in the project first to reapply.",
+        scenarioUsedSkills: "Active Skills",
+        scenarioAppliedRules: "Applied Rules",
+        scenarioAddSkill: "Add skill",
+        scenarioAddRule: "Add rule",
+        scenarioAddAgentFile: "Add agent file",
+        scenarioAddAgent: "Add agent",
+        scenarioEditScenario: "Edit scenario",
+        scenarioDeleteScenario: "Delete scenario",
+        scenarioBackToScenarios: "Scenarios",
+        newScenarioTitle: "New scenario",
+        newScenarioHelp: "A scenario is a preset bundle (default Agent + which skills to enable). After creation, you can attach it to a project.",
+        newScenarioName: "Scenario name",
+        newScenarioDescPlaceholder: "Describe what this scenario is for...",
+        newScenarioPreviewHint: "The scenario will appear under 'Scenarios' in the sidebar after creation.",
+        newScenarioDescLabel: "Description",
+        newScenarioCountSuffix: "Total",
+        newScenarioItemSuffix: "assets",
+        scenarioNotFound: "Scenario not found",
+        breadcrumbAriaLabel: "Breadcrumb",
+        scenarioNoProjects: "No linked projects",
+        scenarioBadgeLabel: "Scenario",
+        rulesTitle: "Rules",
+        rulesEmpty: "No rules yet. Create a sample rule to get started.",
+        newDemoRule: "Create sample rule",
+        toastRuleNameRequired: "Please fill in the rule name",
+        toastScenarioNameRequired: "Please fill in the scenario name",
+        toastScenarioCreated: 'Scenario "{name}" created',
+        severityError: "Error",
+        severityWarning: "Warning",
+        severityInfo: "Info",
+        assetPickerTitle: "Add asset",
+        assetPickerEmpty: "No assets available to add",
+        assetPickerAlreadyAdded: "Already added",
+        savedSuccess: "Saved successfully",
+        saveFailed: "Save failed",
+        panelVersion: "Version",
+        panelSynced: "Synced",
+        assetView: "Asset view",
+        panelTabOverview: "Overview",
+        panelTabContent: "Content",
+        panelTabHistory: "History",
+        panelFieldTitle: "Title",
+        panelFieldDescription: "Description",
+        assetContent: "Content",
+        panelHistoryDesc: "Each save creates a local snapshot automatically for review and rollback.",
+        noSnapshotsYet: "No snapshots yet",
+        snapshotMessageBeforeAssetUpdate: "Each save creates a local snapshot automatically.",
+        snapshotRestored: "Snapshot restored successfully",
+        snapshotRestoreFailed: "Failed to restore snapshot",
+        targetList: "Target list",
+        newTarget: "New target",
+        enabledYes: "Enabled",
+        enabledNo: "Disabled",
+        targetEditor: "Target editor",
+        createTarget: "Create target",
+        targetNameLabel: "Target name",
+        targetPathLabel: "Target path",
+        targetPathHint: "Absolute path to the target directory",
+        targetDeployModeLabel: "Deploy mode",
+        targetEnabledLabel: "Enabled",
+        targetFormSave: "Save",
+        targetFormCreate: "Create",
+        targetFormReset: "Reset",
+        deleteTarget: "Delete target",
+        confirmDeleteTarget: "Are you sure you want to delete this target?",
     },
 };

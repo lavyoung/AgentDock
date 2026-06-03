@@ -1,5 +1,6 @@
-import {type PropsWithChildren, useEffect, useState,} from "react";
+import {type JSX, type PropsWithChildren, useEffect, useState,} from "react";
 
+import {bindStoreT} from "../stores/useAppStore";
 import {type Locale, messages} from "./messages";
 import {I18nContext, type I18nContextValue} from "./i18nContext";
 
@@ -27,12 +28,14 @@ export function I18nProvider({children}: PropsWithChildren): JSX.Element {
     }, [locale]);
 
     const catalog = messages[locale];
+    const t = (key: keyof typeof catalog): string => catalog[key] ?? key;
+    useEffect(() => {
+        bindStoreT((k) => catalog[k as keyof typeof catalog] ?? k);
+    }, [catalog]);
     const value: I18nContextValue = {
         locale,
         setLocale,
-        t(key) {
-            return catalog[key];
-        },
+        t,
         formatDateTime(input) {
             return new Intl.DateTimeFormat(locale, {
                 year: "numeric",

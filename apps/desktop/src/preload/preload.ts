@@ -10,6 +10,7 @@ const agentdockApi: AgentdockApi = {
         get: (id) => ipcRenderer.invoke("assets:get", id),
         create: (input) => ipcRenderer.invoke("assets:create", input),
         update: (id, input) => ipcRenderer.invoke("assets:update", id, input),
+        setStatus: (id, status) => ipcRenderer.invoke("assets:setStatus", id, status),
     },
     snapshots: {
         list: (assetId) => ipcRenderer.invoke("snapshots:list", assetId),
@@ -21,6 +22,24 @@ const agentdockApi: AgentdockApi = {
         create: (input) => ipcRenderer.invoke("targets:create", input),
         update: (id, input) => ipcRenderer.invoke("targets:update", id, input),
         delete: (id) => ipcRenderer.invoke("targets:delete", id),
+    },
+    rules: {
+        list: () => ipcRenderer.invoke("rules:list"),
+        get: (id) => ipcRenderer.invoke("rules:get", id),
+        create: (input) => ipcRenderer.invoke("rules:create", input),
+        update: (id, input) => ipcRenderer.invoke("rules:update", id, input),
+        delete: (id) => ipcRenderer.invoke("rules:delete", id),
+    },
+    scenarios: {
+        list: () => ipcRenderer.invoke("scenarios:list"),
+        get: (id) => ipcRenderer.invoke("scenarios:get", id),
+        create: (input) => ipcRenderer.invoke("scenarios:create", input),
+        update: (id, input) => ipcRenderer.invoke("scenarios:update", id, input),
+        delete: (id) => ipcRenderer.invoke("scenarios:delete", id),
+        addAsset: (scenarioId, field, assetId) =>
+            ipcRenderer.invoke("scenarios:add-asset", scenarioId, field, assetId),
+        removeAsset: (scenarioId, field, assetId) =>
+            ipcRenderer.invoke("scenarios:remove-asset", scenarioId, field, assetId),
     },
     applications: {
         list: () => ipcRenderer.invoke("applications:list"),

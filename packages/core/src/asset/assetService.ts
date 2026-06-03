@@ -101,6 +101,7 @@ export class AssetService {
         const now = new Date().toISOString();
         const nextTitle = input.title ?? asset.title;
         const nextDescription = input.description ?? asset.description;
+        const nextStatus = input.status ?? asset.status;
         const currentDir = this.path.join(asset.path, "current");
         const metadata = {
             id: asset.id,
@@ -109,14 +110,16 @@ export class AssetService {
             title: nextTitle,
             description: nextDescription,
             version: asset.version,
-            status: asset.status,
+            status: nextStatus,
         };
 
-        await this.snapshotService.createSnapshot(
-            asset.id,
-            asset.path,
-            "asset.update.before"
-        );
+        if (typeof input.content === "string" || input.status !== undefined) {
+            await this.snapshotService.createSnapshot(
+                asset.id,
+                asset.path,
+                "asset.update.before"
+            );
+        }
         await this.fileSystem.writeText(
             this.path.join(currentDir, "asset.yaml"),
             yaml.stringify(metadata)
@@ -132,9 +135,16 @@ export class AssetService {
         this.assetRepository.updateDetails(id, {
             title: nextTitle,
             description: nextDescription,
+            status: nextStatus,
             updated_at: now,
         });
 
         return this.getAsset(id);
+    }
+
+    async setAssetStatus(id: string, status: AssetStatus): Promise<AssetRecord | null> {
+        const updated = await this.updateAsset(id, {status});
+        if (!updated) return null;
+        return this.assetRepository.findById(id);
     }
 }

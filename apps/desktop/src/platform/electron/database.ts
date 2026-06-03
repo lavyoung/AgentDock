@@ -2,6 +2,8 @@ import Database from "better-sqlite3";
 
 import type {ApplicationRepository} from "../../../../../packages/core/src/application/applicationRepository";
 import type {AssetRepository} from "../../../../../packages/core/src/asset/assetRepository";
+import type {RuleRepository} from "../../../../../packages/core/src/rules/ruleRepository";
+import type {ScenarioRepository} from "../../../../../packages/core/src/scenario/scenarioRepository";
 import type {SnapshotRepository} from "../../../../../packages/core/src/snapshot/snapshotRepository";
 import type {TargetRepository} from "../../../../../packages/core/src/target/targetRepository";
 import type {
@@ -9,7 +11,7 @@ import type {
     ApplicationLocationRecord,
     ApplicationRecord,
 } from "../../../../../packages/core/src/types/application";
-import type {AssetRecord} from "../../../../../packages/core/src/types/asset";
+import type {AssetRecord, RuleRecord, ScenarioRecord} from "../../../../../packages/core/src/types/asset";
 import type {SnapshotRecord} from "../../../../../packages/core/src/types/snapshot";
 import type {TargetRecord} from "../../../../../packages/core/src/types/target";
 import {getDbPath} from "./paths";
@@ -99,7 +101,70 @@ export function migrateDatabase(): void {
             message       TEXT,
             created_at    TEXT
         );
+
+        CREATE TABLE IF NOT EXISTS scenarios
+        (
+            id            TEXT PRIMARY KEY,
+            name          TEXT NOT NULL,
+            title         TEXT NOT NULL,
+            description   TEXT,
+            skill_ids     TEXT    DEFAULT '[]',
+            rule_ids      TEXT    DEFAULT '[]',
+            agent_file_ids TEXT   DEFAULT '[]',
+            agent_app_ids TEXT    DEFAULT '[]',
+            project_ids   TEXT    DEFAULT '[]',
+            is_built_in   INTEGER DEFAULT 0,
+            created_at    TEXT,
+            updated_at    TEXT
+        );
+
+        CREATE TABLE IF NOT EXISTS rules
+        (
+            id          TEXT PRIMARY KEY,
+            name        TEXT NOT NULL,
+            title       TEXT NOT NULL,
+            description TEXT,
+            severity    TEXT NOT NULL,
+            enabled     INTEGER DEFAULT 1,
+            created_at  TEXT,
+            updated_at  TEXT
+        );
     `);
+
+    // Bootstrap a built-in default scenario if none exists
+    const count = database
+        .prepare(`SELECT COUNT(*) as c FROM scenarios`)
+        .get() as {c: number};
+
+    if (count.c === 0) {
+        const now = new Date().toISOString();
+        database
+            .prepare(
+                `
+                    INSERT INTO scenarios (id,
+                                           name,
+                                           title,
+                                           description,
+                                           skill_ids,
+                                           rule_ids,
+                                           agent_file_ids,
+                                           agent_app_ids,
+                                           project_ids,
+                                           is_built_in,
+                                           created_at,
+                                           updated_at)
+                    VALUES (?, ?, ?, ?, '[]', '[]', '[]', '[]', '[]', 1, ?, ?)
+                `
+            )
+            .run(
+                "default",
+                "default",
+                "默认场景",
+                "内置默认场景，包含常用技能与 OpenCode Agent",
+                now,
+                now
+            );
+    }
 }
 
 class SqliteAssetRepository implements AssetRepository {
@@ -184,7 +249,7 @@ class SqliteAssetRepository implements AssetRepository {
 
     updateDetails(
         id: string,
-        changes: Pick<AssetRecord, "title" | "description" | "updated_at">
+        changes: Pick<AssetRecord, "title" | "description" | "status" | "updated_at">
     ): void {
         this.database
             .prepare(
@@ -192,6 +257,7 @@ class SqliteAssetRepository implements AssetRepository {
                     UPDATE assets
                     SET title       = @title,
                         description = @description,
+                        status      = @status,
                         updated_at  = @updated_at
                     WHERE id = @id
                 `
@@ -808,4 +874,428 @@ export function createSnapshotRepository(): SnapshotRepository {
 
 export function createTargetRepository(): TargetRepository {
     return new SqliteTargetRepository(getDatabase());
+}
+
+class SqliteRuleRepository implements RuleRepository {
+    private readonly database: Database.Database;
+
+    constructor(database: Database.Database) {
+        this.database = database;
+    }
+
+    list(): RuleRecord[] {
+        const rows = this.database
+            .prepare(
+                `
+                    SELECT id,
+                           name,
+                           title,
+                           description,
+                           severity,
+                           enabled,
+                           created_at,
+                           updated_at
+                    FROM rules
+                    ORDER BY updated_at DESC
+                `
+            )
+            .all() as Array<{
+            id: string;
+            name: string;
+            title: string;
+            description: string;
+            severity: RuleRecord["severity"];
+            enabled: number;
+            created_at: string;
+            updated_at: string;
+        }>;
+
+        return rows.map((row) => ({
+            id: row.id,
+            name: row.name,
+            title: row.title,
+            description: row.description ?? "",
+            severity: row.severity,
+            enabled: row.enabled === 1,
+            created_at: row.created_at,
+            updated_at: row.updated_at,
+        }));
+    }
+
+    findById(id: string): RuleRecord | null {
+        const row = this.database
+            .prepare(
+                `
+                    SELECT id,
+                           name,
+                           title,
+                           description,
+                           severity,
+                           enabled,
+                           created_at,
+                           updated_at
+                    FROM rules
+                    WHERE id = ?
+                `
+            )
+            .get(id) as
+            | {
+                  id: string;
+                  name: string;
+                  title: string;
+                  description: string;
+                  severity: RuleRecord["severity"];
+                  enabled: number;
+                  created_at: string;
+                  updated_at: string;
+              }
+            | undefined;
+
+        if (!row) return null;
+
+        return {
+            id: row.id,
+            name: row.name,
+            title: row.title,
+            description: row.description ?? "",
+            severity: row.severity,
+            enabled: row.enabled === 1,
+            created_at: row.created_at,
+            updated_at: row.updated_at,
+        };
+    }
+
+    findByName(name: string): RuleRecord | null {
+        const row = this.database
+            .prepare(`SELECT id, name, title, description, severity, enabled, created_at, updated_at FROM rules WHERE name = ?`)
+            .get(name) as
+            | {
+                  id: string;
+                  name: string;
+                  title: string;
+                  description: string;
+                  severity: RuleRecord["severity"];
+                  enabled: number;
+                  created_at: string;
+                  updated_at: string;
+              }
+            | undefined;
+
+        if (!row) return null;
+
+        return {
+            id: row.id,
+            name: row.name,
+            title: row.title,
+            description: row.description ?? "",
+            severity: row.severity,
+            enabled: row.enabled === 1,
+            created_at: row.created_at,
+            updated_at: row.updated_at,
+        };
+    }
+
+    create(rule: RuleRecord): void {
+        this.database
+            .prepare(
+                `
+                    INSERT INTO rules (id,
+                                       name,
+                                       title,
+                                       description,
+                                       severity,
+                                       enabled,
+                                       created_at,
+                                       updated_at)
+                    VALUES (@id,
+                            @name,
+                            @title,
+                            @description,
+                            @severity,
+                            @enabled,
+                            @created_at,
+                            @updated_at)
+                `
+            )
+            .run({
+                id: rule.id,
+                name: rule.name,
+                title: rule.title,
+                description: rule.description,
+                severity: rule.severity,
+                enabled: rule.enabled ? 1 : 0,
+                created_at: rule.created_at,
+                updated_at: rule.updated_at,
+            });
+    }
+
+    update(rule: RuleRecord): void {
+        this.database
+            .prepare(
+                `
+                    UPDATE rules
+                    SET name        = @name,
+                        title       = @title,
+                        description = @description,
+                        severity    = @severity,
+                        enabled     = @enabled,
+                        updated_at  = @updated_at
+                    WHERE id = @id
+                `
+            )
+            .run({
+                id: rule.id,
+                name: rule.name,
+                title: rule.title,
+                description: rule.description,
+                severity: rule.severity,
+                enabled: rule.enabled ? 1 : 0,
+                updated_at: rule.updated_at,
+            });
+    }
+
+    delete(id: string): void {
+        this.database.prepare(`DELETE FROM rules WHERE id = ?`).run(id);
+    }
+}
+
+class SqliteScenarioRepository implements ScenarioRepository {
+    private readonly database: Database.Database;
+
+    constructor(database: Database.Database) {
+        this.database = database;
+    }
+
+    private rowToRecord(row: any): ScenarioRecord {
+        return {
+            id: row.id,
+            name: row.name,
+            title: row.title,
+            description: row.description ?? "",
+            skillIds: JSON.parse(row.skill_ids ?? "[]"),
+            ruleIds: JSON.parse(row.rule_ids ?? "[]"),
+            agentFileIds: JSON.parse(row.agent_file_ids ?? "[]"),
+            agentAppIds: JSON.parse(row.agent_app_ids ?? "[]"),
+            projectIds: JSON.parse(row.project_ids ?? "[]"),
+            isBuiltIn: row.is_built_in === 1,
+            created_at: row.created_at,
+            updated_at: row.updated_at,
+        };
+    }
+
+    list(): ScenarioRecord[] {
+        const rows = this.database
+            .prepare(
+                `
+                    SELECT id,
+                           name,
+                           title,
+                           description,
+                           skill_ids,
+                           rule_ids,
+                           agent_file_ids,
+                           agent_app_ids,
+                           project_ids,
+                           is_built_in,
+                           created_at,
+                           updated_at
+                    FROM scenarios
+                    ORDER BY is_built_in DESC, updated_at DESC
+                `
+            )
+            .all() as any[];
+
+        return rows.map((row) => this.rowToRecord(row));
+    }
+
+    findById(id: string): ScenarioRecord | null {
+        const row = this.database
+            .prepare(
+                `
+                    SELECT id,
+                           name,
+                           title,
+                           description,
+                           skill_ids,
+                           rule_ids,
+                           agent_file_ids,
+                           agent_app_ids,
+                           project_ids,
+                           is_built_in,
+                           created_at,
+                           updated_at
+                    FROM scenarios
+                    WHERE id = ?
+                `
+            )
+            .get(id) as any;
+
+        return row ? this.rowToRecord(row) : null;
+    }
+
+    findByName(name: string): ScenarioRecord | null {
+        const row = this.database
+            .prepare(
+                `
+                    SELECT id,
+                           name,
+                           title,
+                           description,
+                           skill_ids,
+                           rule_ids,
+                           agent_file_ids,
+                           agent_app_ids,
+                           project_ids,
+                           is_built_in,
+                           created_at,
+                           updated_at
+                    FROM scenarios
+                    WHERE name = ?
+                `
+            )
+            .get(name) as any;
+
+        return row ? this.rowToRecord(row) : null;
+    }
+
+    count(): number {
+        const row = this.database
+            .prepare(`SELECT COUNT(*) as c FROM scenarios`)
+            .get() as {c: number};
+
+        return row.c;
+    }
+
+    create(scenario: ScenarioRecord): void {
+        this.database
+            .prepare(
+                `
+                    INSERT INTO scenarios (id,
+                                           name,
+                                           title,
+                                           description,
+                                           skill_ids,
+                                           rule_ids,
+                                           agent_file_ids,
+                                           agent_app_ids,
+                                           project_ids,
+                                           is_built_in,
+                                           created_at,
+                                           updated_at)
+                    VALUES (@id,
+                            @name,
+                            @title,
+                            @description,
+                            @skill_ids,
+                            @rule_ids,
+                            @agent_file_ids,
+                            @agent_app_ids,
+                            @project_ids,
+                            @is_built_in,
+                            @created_at,
+                            @updated_at)
+                `
+            )
+            .run({
+                id: scenario.id,
+                name: scenario.name,
+                title: scenario.title,
+                description: scenario.description,
+                skill_ids: JSON.stringify(scenario.skillIds),
+                rule_ids: JSON.stringify(scenario.ruleIds),
+                agent_file_ids: JSON.stringify(scenario.agentFileIds),
+                agent_app_ids: JSON.stringify(scenario.agentAppIds),
+                project_ids: JSON.stringify(scenario.projectIds),
+                is_built_in: scenario.isBuiltIn ? 1 : 0,
+                created_at: scenario.created_at,
+                updated_at: scenario.updated_at,
+            });
+    }
+
+    update(scenario: ScenarioRecord): void {
+        this.database
+            .prepare(
+                `
+                    UPDATE scenarios
+                    SET name           = @name,
+                        title          = @title,
+                        description    = @description,
+                        skill_ids      = @skill_ids,
+                        rule_ids       = @rule_ids,
+                        agent_file_ids = @agent_file_ids,
+                        agent_app_ids  = @agent_app_ids,
+                        project_ids    = @project_ids,
+                        updated_at     = @updated_at
+                    WHERE id = @id
+                `
+            )
+            .run({
+                id: scenario.id,
+                name: scenario.name,
+                title: scenario.title,
+                description: scenario.description,
+                skill_ids: JSON.stringify(scenario.skillIds),
+                rule_ids: JSON.stringify(scenario.ruleIds),
+                agent_file_ids: JSON.stringify(scenario.agentFileIds),
+                agent_app_ids: JSON.stringify(scenario.agentAppIds),
+                project_ids: JSON.stringify(scenario.projectIds),
+                updated_at: scenario.updated_at,
+            });
+    }
+
+    delete(id: string): void {
+        this.database
+            .prepare(`DELETE FROM scenarios WHERE id = ?`)
+            .run(id);
+    }
+
+    addAssetId(
+        id: string,
+        field: "skillIds" | "ruleIds" | "agentFileIds",
+        assetId: string
+    ): void {
+        const columnMap: Record<typeof field, string> = {
+            skillIds: "skill_ids",
+            ruleIds: "rule_ids",
+            agentFileIds: "agent_file_ids",
+        };
+        const column = columnMap[field];
+
+        const current = this.findById(id);
+        if (!current) return;
+        if (current[field].includes(assetId)) return;
+
+        const next = [...current[field], assetId];
+        this.database
+            .prepare(`UPDATE scenarios SET ${column} = ? WHERE id = ?`)
+            .run(JSON.stringify(next), id);
+    }
+
+    removeAssetId(
+        id: string,
+        field: "skillIds" | "ruleIds" | "agentFileIds",
+        assetId: string
+    ): void {
+        const columnMap: Record<typeof field, string> = {
+            skillIds: "skill_ids",
+            ruleIds: "rule_ids",
+            agentFileIds: "agent_file_ids",
+        };
+        const column = columnMap[field];
+
+        const current = this.findById(id);
+        if (!current) return;
+        const next = current[field].filter((aid) => aid !== assetId);
+        this.database
+            .prepare(`UPDATE scenarios SET ${column} = ? WHERE id = ?`)
+            .run(JSON.stringify(next), id);
+    }
+}
+
+export function createScenarioRepository(): ScenarioRepository {
+    return new SqliteScenarioRepository(getDatabase());
+}
+
+export function createRuleRepository(): RuleRepository {
+    return new SqliteRuleRepository(getDatabase());
 }
