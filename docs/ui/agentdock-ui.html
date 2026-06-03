@@ -208,6 +208,19 @@
 
     .icon-tile { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 
+    /* Rule severity: left color bar + card border tint */
+    .rule-card { position: relative; }
+    .rule-card::before {
+      content: ""; position: absolute; left: 0; top: 14px; bottom: 14px;
+      width: 3px; border-radius: 0 2px 2px 0;
+    }
+    .rule-card[data-severity="error"]::before   { background: #ef4444; }
+    .rule-card[data-severity="warning"]::before { background: #f97316; }
+    .rule-card[data-severity="info"]::before    { background: #3b82f6; }
+
+    /* Asset type filter visibility */
+    .skill-card.hidden-by-filter { display: none !important; }
+
     .agent-row { transition: background .15s; }
     .agent-row:hover { background: var(--bg-soft); }
 
@@ -292,6 +305,98 @@
     .popover-item i { color: var(--fg-muted); }
     .popover-item:hover i { color: var(--fg-primary); }
     .popover-item:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+    /* === Scenario edit mode === */
+    #scenario-detail-view.scenario-edit-mode .scenario-section-add {
+      display: inline-flex !important;
+    }
+    #scenario-detail-view.scenario-edit-mode .skill-mini {
+      padding-right: 36px;
+    }
+    #scenario-detail-view.scenario-edit-mode .skill-mini-remove {
+      display: inline-flex !important;
+    }
+    #scenario-detail-view.scenario-edit-mode .scenario-empty-add {
+      display: flex !important;
+    }
+    .scenario-section-add {
+      display: none;
+      align-items: center; justify-content: center;
+      width: 24px; height: 24px;
+      border-radius: 5px;
+      background: rgba(59,130,246,.10);
+      color: #60a5fa;
+      border: 1px solid rgba(59,130,246,.25);
+      cursor: pointer;
+      transition: background .12s;
+    }
+    .scenario-section-add:hover { background: rgba(59,130,246,.20); }
+    .skill-mini-remove {
+      display: none;
+      position: absolute;
+      right: 6px; top: 6px;
+      width: 22px; height: 22px;
+      align-items: center; justify-content: center;
+      border-radius: 5px;
+      background: rgba(239,68,68,.12);
+      color: #f87171;
+      border: 1px solid rgba(239,68,68,.25);
+      cursor: pointer;
+      z-index: 2;
+    }
+    .skill-mini-remove:hover { background: rgba(239,68,68,.22); }
+    .skill-mini { position: relative; }
+    .scenario-empty-add {
+      display: none;
+      flex-direction: column; gap: 8px;
+      padding: 12px;
+      align-items: center;
+    }
+    .scenario-empty-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 12px; border-radius: 999px;
+      background: var(--bg-soft);
+      border: 1px solid var(--bd);
+      color: var(--fg-secondary);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all .12s;
+    }
+    .scenario-empty-chip:hover {
+      background: rgba(59,130,246,.10);
+      border-color: rgba(59,130,246,.40);
+      color: #60a5fa;
+    }
+    /* Asset picker dropdown for + button */
+    .scenario-asset-picker {
+      position: absolute;
+      top: calc(100% + 4px);
+      right: 0;
+      z-index: 50;
+      min-width: 260px;
+      max-width: 320px;
+      max-height: 280px;
+      overflow-y: auto;
+      background: var(--bg-elevated);
+      border: 1px solid var(--bd);
+      border-radius: 8px;
+      padding: 4px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.4);
+    }
+    .scenario-asset-picker-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 8px; border-radius: 5px;
+      font-size: 13px; color: var(--fg-secondary);
+      cursor: pointer; background: transparent; border: none; width: 100%;
+      text-align: left;
+    }
+    .scenario-asset-picker-item:hover { background: var(--bg-hover); color: var(--fg-primary); }
+    .scenario-asset-picker-item.is-already { opacity: 0.45; cursor: not-allowed; }
+    .scenario-asset-picker-empty {
+      padding: 12px; text-align: center;
+      color: var(--fg-muted); font-size: 12px;
+    }
+    .scenario-section-header { position: relative; }
 
     /* === Nav sub-item (under category label) === */
     .nav-sub-item {
@@ -471,6 +576,79 @@
 
     /* Snapshot list */
     .snapshot-list { display: flex; flex-direction: column; gap: 8px; }
+
+    /* === Version Diff === */
+    .modal.modal-xl { width: 92vw; max-width: 1280px; }
+    .diff-pane {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      border: 1px solid var(--bd);
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--bg-soft);
+    }
+    .diff-side {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .diff-side-left { border-right: 1px solid var(--bd); }
+    .diff-side-header {
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--fg-secondary);
+      background: var(--bg-elevated);
+      border-bottom: 1px solid var(--bd);
+    }
+    .diff-content {
+      margin: 0;
+      padding: 0;
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 12.5px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      overflow: auto;
+      max-height: 60vh;
+      color: var(--fg-secondary);
+    }
+    .diff-content .diff-line {
+      display: flex;
+      padding: 0 12px;
+      min-height: 1.55em;
+    }
+    .diff-content .diff-line .ln {
+      flex: 0 0 36px;
+      color: var(--fg-muted);
+      user-select: none;
+      text-align: right;
+      padding-right: 10px;
+      font-size: 11px;
+      border-right: 1px solid var(--bd-soft, var(--bd));
+      margin-right: 10px;
+    }
+    .diff-content .diff-line.add {
+      background: rgba(34,197,94,.10);
+      color: #86efac;
+    }
+    .diff-content .diff-line.del {
+      background: rgba(239,68,68,.10);
+      color: #fca5a5;
+    }
+    .diff-content .diff-line.same {
+      color: var(--fg-secondary);
+    }
+    .diff-content .diff-line.placeholder {
+      background: rgba(113,113,122,.06);
+      color: transparent;
+    }
+    .diff-content .diff-line .marker {
+      flex: 0 0 14px;
+      text-align: center;
+      font-weight: 700;
+    }
     .snapshot-row {
       display: grid;
       grid-template-columns: auto 1fr auto;
@@ -537,6 +715,36 @@
     .modal-sm { width: 420px; }
     .modal-lg { width: 720px; max-width: 96vw; }
     .modal-body-stack { display: flex; flex-direction: column; gap: 16px; }
+    /* === Resizable + maximizable modal === */
+    .modal { min-width: 480px; min-height: 320px; }
+    .modal-lg { min-width: 640px; min-height: 480px; }
+    .modal-backdrop { padding: 0; }
+    .modal-backdrop .modal { position: relative; }
+    .modal.is-resized { max-width: 96vw; }
+    .modal.is-maximized {
+      width: 96vw !important; max-width: 96vw !important;
+      height: 92vh !important; max-height: 92vh !important;
+      border-radius: 10px;
+    }
+    /* Resize handle (bottom-right corner) */
+    .modal-resize-handle {
+      position: absolute; right: 0; bottom: 0;
+      width: 18px; height: 18px;
+      cursor: nwse-resize;
+      background:
+        linear-gradient(135deg, transparent 50%, var(--fg-faint) 50%, var(--fg-faint) 60%, transparent 60%, transparent 75%, var(--fg-faint) 75%, var(--fg-faint) 85%, transparent 85%);
+      opacity: 0.6;
+      transition: opacity 0.15s;
+      z-index: 5;
+    }
+    .modal-resize-handle:hover { opacity: 1; }
+    /* Maximize button in header */
+    .modal-maximize-btn {
+      background: transparent; border: none; color: var(--fg-muted);
+      cursor: pointer; padding: 6px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .modal-maximize-btn:hover { background: var(--bg-hover); color: var(--fg-primary); }
     .modal-divider { border: 0; height: 1px; background: var(--bd-soft); margin: 0; }
     .modal-help-text {
       font-size: 12px; line-height: 1.6; color: var(--fg-muted);
@@ -557,6 +765,96 @@
     .left-section-title {
       font-size: 11px; font-weight: 600; letter-spacing: 0.05em;
       text-transform: uppercase; color: var(--fg-faint);
+    }
+    /* === Left card (section in main page, e.g. scenario detail) === */
+    .left-card {
+      background: var(--bg-card);
+      border: 1px solid var(--bd-soft);
+      border-radius: 12px;
+    }
+    .left-card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--bd-soft);
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+    }
+    .left-card-header h3 {
+      font-size: 13px; font-weight: 600; color: var(--fg-primary);
+    }
+    .left-card-body { padding: 12px 16px; }
+    .left-card-body.skill-mini-grid { padding: 12px 16px; }
+
+    /* === Skill mini-card (used in scenario page) === */
+    .skill-mini-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;
+    }
+    .skill-mini-grid-cols-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .skill-mini-grid-cols-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .skill-mini {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--bd-soft);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .skill-mini:hover { border-color: var(--fg-faint); background: var(--bg-hover); }
+    .skill-mini-icon {
+      width: 32px; height: 32px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .skill-mini-body { min-width: 0; flex: 1; }
+    .skill-mini-title {
+      font-size: 13px; color: var(--fg-primary); font-weight: 500;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .skill-mini-meta {
+      font-size: 11px; color: var(--fg-muted);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      margin-top: 2px;
+    }
+
+    /* === Detail row (skill/agent row in scenario page or new modal) === */
+    .detail-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--bd-soft);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .detail-row:hover { border-color: var(--fg-faint); background: var(--bg-hover); }
+    .detail-row-icon {
+      width: 32px; height: 32px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .detail-row-body { flex: 1; min-width: 0; }
+    .detail-row-title { font-size: 13px; color: var(--fg-primary); font-weight: 500; }
+    .detail-row-meta { font-size: 11px; color: var(--fg-muted); margin-top: 2px;
+      display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;
+      overflow: hidden; }
+    .detail-row-arrow { color: var(--fg-faint); flex-shrink: 0; }
+    .detail-row:hover .detail-row-arrow { color: var(--fg-muted); }
+
+    /* === Agent pill (compact chip) === */
+    .agent-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 10px 4px 4px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--bd-soft);
+      border-radius: 9999px;
+      font-size: 12px; color: var(--fg-secondary);
+    }
+    .agent-pill-icon {
+      width: 22px; height: 22px; border-radius: 9999px;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(168,85,247,.15); color: #c084fc;
+      flex-shrink: 0;
     }
 
     /* === Color picker === */
@@ -801,13 +1099,13 @@
         <!-- Scenarios category -->
         <div class="relative">
           <div class="category-label first">
-            <span data-i18n="cat.scenarios">场景</span>
+            <span data-i18n="cat.scenarios" data-action="show-scenarios" style="cursor: pointer">场景</span>
             <button class="more-btn" data-popover-trigger="popover-scenarios" title="更多" aria-haspopup="menu" aria-expanded="false" aria-label="场景操作">
               <i data-lucide="more-horizontal" class="w-4 h-4" aria-hidden="true"></i>
             </button>
           </div>
-          <a data-nav="default-scenario" class="nav-sub-item">
-            <i data-lucide="sparkles" class="w-3.5 h-3.5" aria-hidden="true"></i>
+          <a data-action="open-scenario-default" data-scenario-id="default" class="nav-sub-item" href="#">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5" style="color: #22c55e" aria-hidden="true"></i>
             <span data-i18n="nav.defaultScenario">默认场景</span>
           </a>
           <div id="popover-scenarios" class="popover" role="menu">
@@ -854,8 +1152,8 @@
       <section data-view="skills" class="view">
         <div class="h-16 px-8 flex items-center justify-between border-b border-line-soft">
           <div class="flex items-center gap-3">
-          <h1 class="text-xl font-semibold text-white" data-i18n="skills.title">技能</h1>
-          <span class="text-zinc-500 text-base" aria-label="共 33 个技能">33</span>
+          <h1 class="text-xl font-semibold text-white" data-i18n="assets.title">资产</h1>
+          <span class="text-zinc-500 text-base" aria-label="显示中"><span id="asset-visible-count">9</span> / <span id="asset-total-count">14</span> <span data-i18n="assets.unit">项</span></span>
           </div>
           <div class="flex items-center gap-2">
             <button class="h-9 px-3.5 rounded-md border border-line bg-ink-850 text-zinc-300 text-sm hover:bg-ink-800 flex items-center gap-1.5" aria-label="开始备份">
@@ -888,12 +1186,18 @@
               <button class="tab-btn px-4 h-8 rounded" data-tab="enabled" role="tab" aria-selected="false" data-i18n="common.tab.enabled">已启用</button>
               <button class="tab-btn px-4 h-8 rounded" data-tab="disabled" role="tab" aria-selected="false" data-i18n="common.tab.disabled">未启用</button>
             </div>
+            <div class="flex bg-ink-900 border border-line rounded-md p-1 text-sm" role="tablist" aria-label="类型过滤">
+              <button class="tab-btn type-tab active px-4 h-8 rounded" data-type-filter="all" role="tab" aria-selected="true" data-i18n="assets.filter.all">全部类型</button>
+              <button class="tab-btn type-tab px-4 h-8 rounded" data-type-filter="skill" role="tab" aria-selected="false" data-i18n="assets.filter.skill">Skill</button>
+              <button class="tab-btn type-tab px-4 h-8 rounded" data-type-filter="rule" role="tab" aria-selected="false" data-i18n="assets.filter.rule">Rule</button>
+              <button class="tab-btn type-tab px-4 h-8 rounded" data-type-filter="agents-md" role="tab" aria-selected="false" data-i18n="assets.filter.agentsMd">AGENTS.md</button>
+            </div>
           </div>
 
           <!-- Grid -->
           <div id="skills-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             <!-- Card 1 -->
-            <div class="skill-card bg-ink-900 border border-line rounded-xl p-5 flex flex-col gap-4" data-enabled="true">
+            <div class="skill-card bg-ink-900 border border-line rounded-xl p-5 flex flex-col gap-4" data-enabled="true" data-asset-type="skill">
               <div class="flex items-start justify-between">
                 <div class="icon-tile bg-blue-500/15 border border-blue-500/20">
                   <svg class="w-6 h-6 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a4 4 0 0 0-4 4v.5A4 4 0 0 0 5 10v1a4 4 0 0 0 1 2.83V18a4 4 0 0 0 4 4h4a4 4 0 0 0 4-4v-4.17A4 4 0 0 0 19 11v-1a4 4 0 0 0-3-3.5V6a4 4 0 0 0-4-4z"/><circle cx="12" cy="12" r="2"/></svg>
@@ -914,7 +1218,7 @@
             </div>
 
             <!-- Card 2 -->
-            <div class="skill-card bg-ink-900 border border-line rounded-xl p-5 flex flex-col gap-4" data-enabled="true">
+            <div class="skill-card bg-ink-900 border border-line rounded-xl p-5 flex flex-col gap-4" data-enabled="true" data-asset-type="skill">
               <div class="flex items-start justify-between">
                 <div class="icon-tile bg-orange-500/15 border border-orange-500/20">
                   <i data-lucide="bar-chart-3" class="w-5 h-5 text-orange-400" aria-hidden="true"></i>
@@ -935,7 +1239,7 @@
             </div>
 
             <!-- Card 3 -->
-            <div class="skill-card bg-ink-900 border border-line rounded-xl p-5 flex flex-col gap-4" data-enabled="false">
+            <div class="skill-card bg-ink-900 border border-line rounded-xl p-5 flex flex-col gap-4" data-enabled="false" data-asset-type="skill">
               <div class="flex items-start justify-between">
                 <div class="icon-tile bg-purple-500/15 border border-purple-500/20">
                   <i data-lucide="palette" class="w-5 h-5 text-purple-400" aria-hidden="true"></i>
@@ -956,7 +1260,7 @@
             </div>
 
             <!-- Card 4 -->
-            <div class="skill-card bg-ink-900 border border-line rounded-xl p-5 flex flex-col gap-4" data-enabled="true">
+            <div class="skill-card bg-ink-900 border border-line rounded-xl p-5 flex flex-col gap-4" data-enabled="true" data-asset-type="skill">
               <div class="flex items-start justify-between">
                 <div class="icon-tile bg-red-500/15 border border-red-500/20">
                   <svg class="w-5 h-5 text-red-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2L9 5H6a2 2 0 0 0-2 2v3l-3 3 3 3v3a2 2 0 0 0 2 2h3l3 3 3-3h3a2 2 0 0 0 2-2v-3l3-3-3-3V7a2 2 0 0 0-2-2h-3l-3-3zm-1 6h2v6h-2V8zm0 8h2v2h-2v-2z"/></svg>
@@ -977,7 +1281,7 @@
             </div>
 
             <!-- Card 5 -->
-            <div class="skill-card bg-ink-900 border border-line rounded-xl p-5 flex flex-col gap-4" data-enabled="true">
+            <div class="skill-card bg-ink-900 border border-line rounded-xl p-5 flex flex-col gap-4" data-enabled="true" data-asset-type="skill">
               <div class="flex items-start justify-between">
                 <div class="icon-tile bg-emerald-500/15 border border-emerald-500/20">
                   <i data-lucide="code-2" class="w-5 h-5 text-emerald-400" aria-hidden="true"></i>
@@ -998,7 +1302,7 @@
             </div>
 
             <!-- Card 6 -->
-            <div class="skill-card bg-ink-900 border border-line rounded-xl p-5 flex flex-col gap-4" data-enabled="false">
+            <div class="skill-card bg-ink-900 border border-line rounded-xl p-5 flex flex-col gap-4" data-enabled="false" data-asset-type="skill">
               <div class="flex items-start justify-between">
                 <div class="icon-tile bg-yellow-500/15 border border-yellow-500/20">
                   <svg class="w-5 h-5 text-yellow-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2L2 7l10 5 10-5-10-5zm-10 9v4l10 5 10-5v-4l-10 5L2 11z"/></svg>
@@ -1019,7 +1323,7 @@
             </div>
 
             <!-- Card 7 -->
-            <div class="skill-card bg-ink-900 border border-line rounded-xl p-5 flex flex-col gap-4" data-enabled="true">
+            <div class="skill-card bg-ink-900 border border-line rounded-xl p-5 flex flex-col gap-4" data-enabled="true" data-asset-type="skill">
               <div class="flex items-start justify-between">
                 <div class="icon-tile bg-cyan-500/15 border border-cyan-500/20">
                   <i data-lucide="database" class="w-5 h-5 text-cyan-400" aria-hidden="true"></i>
@@ -1040,7 +1344,7 @@
             </div>
 
             <!-- Card 8 -->
-            <div class="skill-card bg-ink-900 border border-line rounded-xl p-5 flex flex-col gap-4" data-enabled="true">
+            <div class="skill-card bg-ink-900 border border-line rounded-xl p-5 flex flex-col gap-4" data-enabled="true" data-asset-type="skill">
               <div class="flex items-start justify-between">
                 <div class="icon-tile bg-indigo-500/15 border border-indigo-500/20">
                   <i data-lucide="cloud-cog" class="w-5 h-5 text-indigo-400" aria-hidden="true"></i>
@@ -1061,7 +1365,7 @@
             </div>
 
             <!-- Card 9 -->
-            <div class="skill-card bg-ink-900 border border-line rounded-xl p-5 flex flex-col gap-4" data-enabled="false">
+            <div class="skill-card bg-ink-900 border border-line rounded-xl p-5 flex flex-col gap-4" data-enabled="false" data-asset-type="skill">
               <div class="flex items-start justify-between">
                 <div class="icon-tile bg-pink-500/15 border border-pink-500/20">
                   <i data-lucide="image" class="w-5 h-5 text-pink-400" aria-hidden="true"></i>
@@ -1078,6 +1382,125 @@
                   <span>v2.3.0</span>
                 </div>
                 <button class="toggle" data-state="off" role="switch" aria-checked="false" aria-label="启用 OptiImage"><span></span></button>
+              </div>
+            </div>
+
+            <!-- Card: Rule no-console-log (severity: error) -->
+            <div class="skill-card rule-card bg-ink-900 border border-red-500/30 rounded-xl p-5 flex flex-col gap-4" data-enabled="true" data-severity="error" data-asset-type="rule" data-rule-id="no-console-log">
+              <div class="flex items-start justify-between">
+                <div class="icon-tile bg-red-500/15 border border-red-500/30">
+                  <i data-lucide="shield-alert" class="w-6 h-6 text-red-400" aria-hidden="true"></i>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <span class="badge badge-red text-[10px]">ERROR</span>
+                  <span class="badge badge-orange text-[10px]">Rule</span>
+                </div>
+              </div>
+              <div>
+                <h3 class="text-white font-medium">Rule: 禁止 console.log</h3>
+                <p class="text-zinc-500 text-sm mt-1.5 leading-relaxed line-clamp-2">在生产代码中只允许 debug 级别的 console 输出。所有临时的 console.log 必须在提交前移除。</p>
+              </div>
+              <div class="flex items-center justify-between mt-auto pt-3 border-t border-line-soft">
+                <div class="text-zinc-500 text-xs flex items-center gap-3">
+                  <span class="flex items-center gap-1"><i data-lucide="hard-drive" class="w-3 h-3" aria-hidden="true"></i>0.6KB</span>
+                  <span>v1.2.0</span>
+                </div>
+                <button class="toggle" data-state="on" role="switch" aria-checked="true" aria-label="启用 Rule: 禁止 console.log"><span></span></button>
+              </div>
+            </div>
+
+            <!-- Card: Rule prefer-const (severity: warning) -->
+            <div class="skill-card rule-card bg-ink-900 border border-orange-500/30 rounded-xl p-5 flex flex-col gap-4" data-enabled="true" data-severity="warning" data-asset-type="rule" data-rule-id="prefer-const">
+              <div class="flex items-start justify-between">
+                <div class="icon-tile bg-orange-500/15 border border-orange-500/30">
+                  <i data-lucide="shield-alert" class="w-6 h-6 text-orange-400" aria-hidden="true"></i>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <span class="badge badge-orange text-[10px]">WARNING</span>
+                  <span class="badge badge-orange text-[10px]">Rule</span>
+                </div>
+              </div>
+              <div>
+                <h3 class="text-white font-medium">Rule: 优先使用 const</h3>
+                <p class="text-zinc-500 text-sm mt-1.5 leading-relaxed line-clamp-2">变量不会被重新赋值时必须使用 const 而不是 let。</p>
+              </div>
+              <div class="flex items-center justify-between mt-auto pt-3 border-t border-line-soft">
+                <div class="text-zinc-500 text-xs flex items-center gap-3">
+                  <span class="flex items-center gap-1"><i data-lucide="hard-drive" class="w-3 h-3" aria-hidden="true"></i>0.4KB</span>
+                  <span>v1.0.0</span>
+                </div>
+                <button class="toggle" data-state="on" role="switch" aria-checked="true" aria-label="启用 Rule: 优先使用 const"><span></span></button>
+              </div>
+            </div>
+
+            <!-- Card: Rule no-magic-numbers (severity: warning) -->
+            <div class="skill-card rule-card bg-ink-900 border border-orange-500/30 rounded-xl p-5 flex flex-col gap-4" data-enabled="false" data-severity="warning" data-asset-type="rule" data-rule-id="no-magic-numbers">
+              <div class="flex items-start justify-between">
+                <div class="icon-tile bg-orange-500/15 border border-orange-500/30">
+                  <i data-lucide="shield-alert" class="w-6 h-6 text-orange-400" aria-hidden="true"></i>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <span class="badge badge-orange text-[10px]">WARNING</span>
+                  <span class="badge badge-orange text-[10px]">Rule</span>
+                </div>
+              </div>
+              <div>
+                <h3 class="text-white font-medium">Rule: 禁止魔法数字</h3>
+                <p class="text-zinc-500 text-sm mt-1.5 leading-relaxed line-clamp-2">所有数字字面量必须提取为命名常量。常量名应清晰表达其含义。</p>
+              </div>
+              <div class="flex items-center justify-between mt-auto pt-3 border-t border-line-soft">
+                <div class="text-zinc-500 text-xs flex items-center gap-3">
+                  <span class="flex items-center gap-1"><i data-lucide="hard-drive" class="w-3 h-3" aria-hidden="true"></i>0.8KB</span>
+                  <span>v1.1.0</span>
+                </div>
+                <button class="toggle" data-state="off" role="switch" aria-checked="false" aria-label="启用 Rule: 禁止魔法数字"><span></span></button>
+              </div>
+            </div>
+
+            <!-- Card: Rule comment-required-public (severity: info) -->
+            <div class="skill-card rule-card bg-ink-900 border border-blue-500/30 rounded-xl p-5 flex flex-col gap-4" data-enabled="true" data-severity="info" data-asset-type="rule" data-rule-id="comment-required-public">
+              <div class="flex items-start justify-between">
+                <div class="icon-tile bg-blue-500/15 border border-blue-500/30">
+                  <i data-lucide="shield-alert" class="w-6 h-6 text-blue-400" aria-hidden="true"></i>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <span class="badge badge-blue text-[10px]">INFO</span>
+                  <span class="badge badge-orange text-[10px]">Rule</span>
+                </div>
+              </div>
+              <div>
+                <h3 class="text-white font-medium">Rule: 公开 API 必须有 JSDoc</h3>
+                <p class="text-zinc-500 text-sm mt-1.5 leading-relaxed line-clamp-2">所有 export 的函数、类、方法必须有 JSDoc 注释,说明用途、参数、返回值。</p>
+              </div>
+              <div class="flex items-center justify-between mt-auto pt-3 border-t border-line-soft">
+                <div class="text-zinc-500 text-xs flex items-center gap-3">
+                  <span class="flex items-center gap-1"><i data-lucide="hard-drive" class="w-3 h-3" aria-hidden="true"></i>0.5KB</span>
+                  <span>v1.0.0</span>
+                </div>
+                <button class="toggle" data-state="on" role="switch" aria-checked="true" aria-label="启用 Rule: 公开 API 必须有 JSDoc"><span></span></button>
+              </div>
+            </div>
+
+            <!-- Card: AGENTS.md default-agents-md -->
+            <div class="skill-card agents-md-card bg-ink-900 border border-purple-500/30 rounded-xl p-5 flex flex-col gap-4" data-enabled="true" data-asset-type="agents-md" data-agent-file-id="default-agents-md">
+              <div class="flex items-start justify-between">
+                <div class="icon-tile bg-purple-500/15 border border-purple-500/30">
+                  <i data-lucide="file-text" class="w-6 h-6 text-purple-400" aria-hidden="true"></i>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <span class="badge badge-purple text-[10px]">AGENTS.md</span>
+                </div>
+              </div>
+              <div>
+                <h3 class="text-white font-medium">Project Agent 协作规则</h3>
+                <p class="text-zinc-500 text-sm mt-1.5 leading-relaxed line-clamp-2">默认的项目级 Agent 协作规则模板,定义工作准则、约束、提交规范。</p>
+              </div>
+              <div class="flex items-center justify-between mt-auto pt-3 border-t border-line-soft">
+                <div class="text-zinc-500 text-xs flex items-center gap-3">
+                  <span class="flex items-center gap-1"><i data-lucide="hard-drive" class="w-3 h-3" aria-hidden="true"></i>2.1KB</span>
+                  <span>v1.0.0</span>
+                </div>
+                <button class="toggle" data-state="on" role="switch" aria-checked="true" aria-label="启用 AGENTS.md"><span></span></button>
               </div>
             </div>
           </div>
@@ -1410,44 +1833,159 @@
         </div>
       </section>
       <section data-view="scenarios" class="view hidden">
-        <div class="p-8">
-          <h1 class="text-xl font-semibold text-white">场景</h1>
-          <p class="text-zinc-500 mt-2 text-sm">管理预设场景组合</p>
-        </div>
-      </section>
-      <section data-view="default-scenario" class="view hidden">
-        <div class="h-16 px-8 flex items-center gap-3 border-b border-line-soft">
-          <i data-lucide="sparkles" class="w-5 h-5 text-emerald-400"></i>
-          <h1 class="text-xl font-semibold text-white" data-i18n="nav.defaultScenario">默认场景</h1>
-        </div>
-        <div class="p-8 max-w-3xl">
-          <div class="bg-ink-900 border border-line rounded-xl p-6">
-            <div class="flex items-center gap-2 mb-3">
-              <span class="w-1 h-4 bg-emerald-500 rounded"></span>
-              <h2 class="text-white font-medium" data-i18n="scenario.builtIn">内置默认场景</h2>
+        <div class="px-8 pt-6 pb-10 max-w-6xl">
+          <header class="flex items-center justify-between mb-6">
+            <div>
+              <h1 class="text-2xl font-semibold text-white">场景</h1>
+              <p class="text-zinc-500 mt-1 text-sm">预设的资产 + Agent 组合,创建项目时直接选用</p>
             </div>
-            <p class="text-zinc-400 text-sm leading-relaxed mb-5" data-i18n="scenario.builtInDesc">默认场景是AgentDock 内置的开箱即用配置。包含12 个常用Skills 与OpenCode 作为默认 Agent</p>
-            <div class="grid grid-cols-3 gap-3">
-              <div class="bg-ink-950 border border-line rounded-lg p-3">
-                <div class="text-zinc-500 text-xs mb-1" data-i18n="scenario.skills">Skills</div>
-                <div class="text-white text-lg font-semibold">12</div>
-              </div>
-              <div class="bg-ink-950 border border-line rounded-lg p-3">
-                <div class="text-zinc-500 text-xs mb-1" data-i18n="scenario.rules">Rules</div>
-                <div class="text-zinc-500 text-lg font-semibold">—<span class="text-xs font-normal" data-i18n="overview.rulesPending">待定</span></div>
-              </div>
-              <div class="bg-ink-950 border border-line rounded-lg p-3">
-                <div class="text-zinc-500 text-xs mb-1" data-i18n="scenario.agent">Agent</div>
-                <div class="text-white text-lg font-semibold">OpenCode</div>
-              </div>
-            </div>
-          </div>
+            <button class="btn btn-primary" data-action="new-scenario">
+              <i data-lucide="plus" class="w-4 h-4" aria-hidden="true"></i>
+              <span data-i18n="action.newScenario">新增场景</span>
+            </button>
+          </header>
+          <div id="scenarios-list" class="grid grid-cols-2 gap-4"></div>
         </div>
       </section>
       <section data-view="projects" class="view hidden">
         <div class="p-8">
           <h1 class="text-xl font-semibold text-white">关联项目</h1>
           <p class="text-zinc-500 mt-2 text-sm">绑定到你的项目仓库</p>
+        </div>
+      </section>
+
+      <!-- ============ Scenario Detail Page (full-width main view) ============ -->
+      <section data-view="scenario-detail" class="view hidden" id="scenario-detail-view">
+        <div class="px-8 pt-6 pb-10 max-w-6xl">
+          <nav class="flex items-center gap-2 text-sm text-zinc-500 mb-4" aria-label="面包屑">
+            <button class="hover:text-zinc-200 transition-colors flex items-center gap-1" data-action="scenario-back-to-scenarios">场景</button>
+            <i data-lucide="chevron-right" class="w-3.5 h-3.5" aria-hidden="true"></i>
+            <span class="text-zinc-300" id="scenario-crumb-name">—</span>
+          </nav>
+
+          <header class="flex items-start justify-between gap-6 mb-6 pb-6 border-b border-line">
+            <div class="flex items-start gap-4 flex-1 min-w-0">
+              <div id="scenario-hero-icon" class="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0" style="background: rgba(34,197,94,.15); color: #22c55e">
+                <i data-lucide="sparkles" class="w-7 h-7" aria-hidden="true"></i>
+              </div>
+              <div class="min-w-0 flex-1">
+                <h1 class="text-2xl font-semibold text-white truncate" id="scenario-hero-title">—</h1>
+                <div class="flex items-center gap-3 mt-1.5 text-sm">
+                  <span id="scenario-hero-id" class="font-mono text-xs text-zinc-500">—</span>
+                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs" style="background: rgba(34,197,94,.10); color: #22c55e">场景</span>
+                </div>
+                <p class="text-zinc-400 mt-3 leading-relaxed max-w-3xl" id="scenario-hero-desc">—</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 flex-shrink-0">
+              <button class="btn btn-secondary btn-sm" data-action="scenario-edit">编辑场景</button>
+              <button class="btn btn-danger btn-sm" data-action="scenario-detail-delete">删除场景</button>
+            </div>
+          </header>
+
+          <div class="grid grid-cols-4 gap-3 mb-8">
+            <div class="overview-stat-card">
+              <div class="overview-stat-label">
+                <i data-lucide="package" class="w-3.5 h-3.5 text-blue-400" aria-hidden="true"></i>
+                <span>技能</span>
+              </div>
+              <div class="overview-stat-value" id="scenario-stat-skills">0</div>
+            </div>
+            <div class="overview-stat-card">
+              <div class="overview-stat-label">
+                <i data-lucide="shield" class="w-3.5 h-3.5 text-orange-400" aria-hidden="true"></i>
+                <span>规则</span>
+              </div>
+              <div class="overview-stat-value" id="scenario-stat-rules">0</div>
+            </div>
+            <div class="overview-stat-card">
+              <div class="overview-stat-label">
+                <i data-lucide="file-text" class="w-3.5 h-3.5 text-purple-400" aria-hidden="true"></i>
+                <span>Agent 文件</span>
+              </div>
+              <div class="overview-stat-value" id="scenario-stat-agentfiles">0</div>
+            </div>
+            <div class="overview-stat-card">
+              <div class="overview-stat-label">
+                <i data-lucide="cpu" class="w-3.5 h-3.5 text-emerald-400" aria-hidden="true"></i>
+                <span>Agent</span>
+              </div>
+              <div class="overview-stat-value" id="scenario-stat-agents">0</div>
+            </div>
+          </div>
+
+          <section class="left-card mb-6">
+            <header class="left-card-header scenario-section-header" data-asset-field="skills">
+              <h3 class="flex items-center gap-2">
+                <i data-lucide="package" class="w-4 h-4 text-blue-400" aria-hidden="true"></i>
+                使用的技能
+              </h3>
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-zinc-500" id="scenario-skills-count">0</span>
+                <button class="scenario-section-add" data-action="scenario-add-skill" aria-label="添加技能" title="添加技能"><i data-lucide="plus" class="w-3.5 h-3.5" aria-hidden="true"></i></button>
+              </div>
+            </header>
+            <div id="scenario-skills-list" class="left-card-body skill-mini-grid-cols-3"></div>
+          </section>
+
+          <section class="left-card mb-6">
+            <header class="left-card-header scenario-section-header" data-asset-field="rules">
+              <h3 class="flex items-center gap-2">
+                <i data-lucide="shield" class="w-4 h-4 text-orange-400" aria-hidden="true"></i>
+                应用的规则
+              </h3>
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-zinc-500" id="scenario-rules-count">0</span>
+                <button class="scenario-section-add" data-action="scenario-add-rule" aria-label="添加规则" title="添加规则"><i data-lucide="plus" class="w-3.5 h-3.5" aria-hidden="true"></i></button>
+              </div>
+            </header>
+            <div id="scenario-rules-list" class="left-card-body skill-mini-grid-cols-2"></div>
+          </section>
+
+          <section class="left-card mb-6">
+            <header class="left-card-header scenario-section-header" data-asset-field="agentFiles">
+              <h3 class="flex items-center gap-2">
+                <i data-lucide="file-text" class="w-4 h-4 text-purple-400" aria-hidden="true"></i>
+                Agent 文件(AGENTS.md)
+              </h3>
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-zinc-500" id="scenario-agentfiles-count">0</span>
+                <button class="scenario-section-add" data-action="scenario-add-agentfile" aria-label="添加 Agent 文件" title="添加 Agent 文件"><i data-lucide="plus" class="w-3.5 h-3.5" aria-hidden="true"></i></button>
+              </div>
+            </header>
+            <div id="scenario-agentfiles-list" class="left-card-body skill-mini-grid-cols-2"></div>
+          </section>
+
+          <section class="left-card mb-8">
+            <header class="left-card-header scenario-section-header" data-asset-field="agents">
+              <h3 class="flex items-center gap-2">
+                <i data-lucide="cpu" class="w-4 h-4 text-emerald-400" aria-hidden="true"></i>
+                关联 Agent
+              </h3>
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-zinc-500" id="scenario-agents-count">0</span>
+                <button class="scenario-section-add" data-action="scenario-add-agent" aria-label="添加 Agent" title="添加 Agent"><i data-lucide="plus" class="w-3.5 h-3.5" aria-hidden="true"></i></button>
+              </div>
+            </header>
+            <div id="scenario-agents-list" class="left-card-body flex flex-col gap-2"></div>
+          </section>
+
+          <section class="left-card mb-8">
+            <header class="left-card-header">
+              <h3>关联项目</h3>
+              <span class="text-xs text-zinc-500" id="scenario-projects-count">0</span>
+            </header>
+            <div id="scenario-projects-list" class="left-card-body flex flex-col"></div>
+          </section>
+
+          <section class="left-card">
+            <header class="left-card-header">
+              <h3>最近活动</h3>
+            </header>
+            <div class="left-card-body text-sm text-zinc-500 leading-relaxed">
+              场景变更后,关联的项目会在下次同步时被重新计算。如果项目处于"已同步"状态,需要先在项目中点"未同步"才会重新应用。
+            </div>
+          </section>
         </div>
       </section>
 
@@ -1517,6 +2055,14 @@
         'action.newScenario': '新增场景',
         'action.newProject': '新增项目',
         'skills.title': '技能',
+        'assets.title': '资产',
+        'assets.unit': '项',
+        'assets.filter.all': '全部类型',
+        'assets.filter.skill': 'Skill',
+        'assets.filter.rule': 'Rule',
+        'assets.filter.agentsMd': 'AGENTS.md',
+        'assets.editMode': '编辑场景',
+        'assets.editModeDone': '完成编辑',
         'skills.backup': '开始备份',
         'skills.checkAll': '检查全部',
         'skills.updateAll': '全部更新',
@@ -1631,12 +2177,14 @@
 
         // === New scenario ===
         'newScenario.title': '新建场景',
-        'newScenario.help': '场景是一组预设配置(默认 Agent + 启用哪些技能)。创建后可在项目里选择使用某个场景。',
+        'newScenario.help': '场景是一组预设配置(关联的 Agent + 启用的技能)。一个 Agent 可被多个场景共用。',
         'newScenario.name': '场景名称',
         'newScenario.iconColor': '图标颜色',
         'newScenario.desc': '描述(可选)',
-        'newScenario.defaultAgent': '默认 Agent',
+        'newScenario.agents': '关联 Agent(可多选)',
         'newScenario.includedSkills': '包入的技能(点击切换)',
+        'newScenario.rules': '规则(可多选)',
+        'newScenario.agentFiles': 'Agent 文件(可多选)',
         'newScenario.preview': '预览',
         'newScenario.previewHint': '场景创建后会出现在侧栏"场景"分类下。',
         'newScenario.create': '创建',
@@ -1651,6 +2199,7 @@
         'newProject.pathHint': 'Agent 启动时会扫描此目录下的 .agentdock/ 与 AGENTS.md',
         'newProject.browse': '浏览',
         'newProject.desc': '描述(可选)',
+        'newProject.agents': '关联 Agent(可多选)',
         'newProject.scenario': '默认场景',
         'newProject.scenarioNone': '(暂不选择)',
         'newProject.scenarioDefault': '默认场景 (内置)',
@@ -1701,6 +2250,14 @@
         'action.newScenario': 'New scenario',
         'action.newProject': 'New project',
         'skills.title': 'Skills',
+        'assets.title': 'Assets',
+        'assets.unit': 'items',
+        'assets.filter.all': 'All Types',
+        'assets.filter.skill': 'Skill',
+        'assets.filter.rule': 'Rule',
+        'assets.filter.agentsMd': 'AGENTS.md',
+        'assets.editMode': 'Edit Scenario',
+        'assets.editModeDone': 'Done',
         'skills.backup': 'Backup now',
         'skills.checkAll': 'Check all',
         'skills.updateAll': 'Update all',
@@ -1981,40 +2538,26 @@
       });
     });
 
-    // ===== Tab switcher (skills) =====
-    document.querySelectorAll('.tab-btn').forEach(btn => {
+    // ===== Tab switcher (skills: enabled/disabled filter) =====
+    // Scoped to [data-tab] so it doesn't fight the type-filter group.
+    document.querySelectorAll('.tab-btn[data-tab]').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('.tab-btn').forEach(b => {
+        const group = btn.parentElement;
+        group.querySelectorAll('.tab-btn').forEach(b => {
           b.classList.remove('active');
           b.setAttribute('aria-selected', 'false');
         });
         btn.classList.add('active');
         btn.setAttribute('aria-selected', 'true');
-        const tab = btn.getAttribute('data-tab');
-        const grid = document.getElementById('skills-grid');
-        if (!grid) return;
-        grid.querySelectorAll('.skill-card').forEach(card => {
-          const enabled = card.getAttribute('data-enabled') === 'true';
-          let show = true;
-          if (tab === 'enabled') show = enabled;
-          if (tab === 'disabled') show = !enabled;
-          card.style.display = show ? '' : 'none';
-        });
+        currentEnableFilter = btn.getAttribute('data-tab') || 'all';
+        applyAssetFilters();
       });
     });
 
-    // ===== Toggle switcher =====
-    document.querySelectorAll('.toggle').forEach(t => {
-      t.addEventListener('click', () => {
-        const cur = t.getAttribute('data-state');
-        const next = cur === 'on' ? 'off' : 'on';
-        t.setAttribute('data-state', next);
-        t.setAttribute('aria-checked', next === 'on' ? 'true' : 'false');
-        // sync skill card data-enabled
-        const card = t.closest('.skill-card');
-        if (card) card.setAttribute('data-enabled', next === 'on');
-      });
-    });
+    // ===== Toggle switcher (handlers attached in wireCardEvents) =====
+    // Note: previously had a global handler here, but it caused double-firing
+    // when combined with wireCardEvents — state would flip twice and effectively
+    // not change. Now toggle handlers live only in wireCardEvents.
 
     // ===== Init lucide icons =====
     lucide.createIcons();
@@ -2040,10 +2583,16 @@
           </span>
         </div>
       </div>
-      <button class="panel-close" data-action="panel-close" aria-label="关闭面板">
-        <i data-lucide="x" class="w-4 h-4" aria-hidden="true"></i>
-      </button>
+      <div class="flex items-center gap-1">
+        <button class="modal-maximize-btn" data-action="panel-maximize" aria-label="最大化">
+          <i data-lucide="maximize-2" class="w-4 h-4" aria-hidden="true"></i>
+        </button>
+        <button class="panel-close" data-action="panel-close" aria-label="关闭面板">
+          <i data-lucide="x" class="w-4 h-4" aria-hidden="true"></i>
+        </button>
+      </div>
     </header>
+    <div class="modal-resize-handle" aria-label="拖拽调整大小"></div>
 
     <nav role="tablist" aria-label="资产视图">
       <button class="panel-tab active" role="tab" data-pane="overview" aria-selected="true" data-i18n="panel.tab.overview">概览</button>
@@ -2123,10 +2672,16 @@
     <div class="modal modal-lg" role="dialog" aria-modal="true" aria-labelledby="new-asset-title">
       <header>
         <h2 id="new-asset-title" data-i18n="newAsset.title">新建资产</h2>
-        <button class="modal-close" data-action="new-asset-close" aria-label="关闭">
-          <i data-lucide="x" class="w-4 h-4" aria-hidden="true"></i>
-        </button>
+        <div class="flex items-center gap-1">
+          <button class="modal-maximize-btn" data-action="new-asset-maximize" aria-label="最大化">
+            <i data-lucide="maximize-2" class="w-4 h-4" aria-hidden="true"></i>
+          </button>
+          <button class="modal-close" data-action="new-asset-close" aria-label="关闭">
+            <i data-lucide="x" class="w-4 h-4" aria-hidden="true"></i>
+          </button>
+        </div>
       </header>
+      <div class="modal-resize-handle" aria-label="拖拽调整大小"></div>
       <div class="modal-body modal-body-stack">
         <!-- Type picker (segmented, top) -->
         <div>
@@ -2227,10 +2782,16 @@
     <div class="modal modal-lg" role="dialog" aria-modal="true" aria-labelledby="new-scenario-title">
       <header>
         <h2 id="new-scenario-title" data-i18n="newScenario.title">新建场景</h2>
-        <button class="modal-close" data-action="new-scenario-close" aria-label="关闭">
-          <i data-lucide="x" class="w-4 h-4" aria-hidden="true"></i>
-        </button>
+        <div class="flex items-center gap-1">
+          <button class="modal-maximize-btn" data-action="new-scenario-maximize" aria-label="最大化">
+            <i data-lucide="maximize-2" class="w-4 h-4" aria-hidden="true"></i>
+          </button>
+          <button class="modal-close" data-action="new-scenario-close" aria-label="关闭">
+            <i data-lucide="x" class="w-4 h-4" aria-hidden="true"></i>
+          </button>
+        </div>
       </header>
+      <div class="modal-resize-handle" aria-label="拖拽调整大小"></div>
       <div class="modal-body modal-body-stack">
         <!-- Description strip -->
         <p class="modal-help-text" data-i18n="newScenario.help">
@@ -2260,20 +2821,22 @@
               <textarea id="ns-desc" rows="2" placeholder="为某个使用场景预设一份默认配置"></textarea>
             </div>
             <div class="field" style="margin-bottom: 0;">
-              <label for="ns-agent" data-i18n="newScenario.defaultAgent">默认 Agent</label>
-              <select id="ns-agent">
-                <option value="opencode">OpenCode</option>
-                <option value="claude-code">Claude Code</option>
-                <option value="gemini-cli">Gemini CLI</option>
-                <option value="windsurf">Windsurf</option>
-                <option value="codebuddy">CodeBuddy</option>
-                <option value="cursor-cli">Cursor CLI</option>
-                <option value="copilot-cli">Copilot CLI</option>
-              </select>
+              <label data-i18n="newScenario.agents">关联 Agent(可多选)</label>
+              <div class="skill-pick-list" id="ns-agent-list" role="group" aria-label="关联 Agent"></div>
             </div>
             <div class="field" style="margin-bottom: 0; flex: 1; min-height: 0;">
               <label data-i18n="newScenario.includedSkills">包入的技能(点击切换)</label>
               <div class="skill-pick-list" id="ns-skill-list" role="group" aria-label="可用技能"></div>
+            </div>
+            <div class="field-row">
+              <div class="field" style="margin-bottom: 0;">
+                <label data-i18n="newScenario.rules">规则(可多选)</label>
+                <div class="skill-pick-list" id="ns-rule-list" role="group" aria-label="规则"></div>
+              </div>
+              <div class="field" style="margin-bottom: 0;">
+                <label data-i18n="newScenario.agentFiles">Agent 文件(可多选)</label>
+                <div class="skill-pick-list" id="ns-agentfile-list" role="group" aria-label="Agent 文件"></div>
+              </div>
             </div>
           </form>
           <aside class="flex flex-col gap-2 min-w-0">
@@ -2284,7 +2847,7 @@
               </div>
               <div class="scenario-preview-body">
                 <div class="scenario-preview-title" id="ns-preview-title">新场景</div>
-                <div class="scenario-preview-meta" id="ns-preview-meta">0 个技能 · OpenCode</div>
+                <div class="scenario-preview-meta" id="ns-preview-meta">0 个技能 · 0 个 Agent</div>
               </div>
             </div>
             <div class="preview-hint" data-i18n="newScenario.previewHint">场景创建后会出现在侧栏"场景"分类下。</div>
@@ -2309,10 +2872,16 @@
     <div class="modal modal-lg" role="dialog" aria-modal="true" aria-labelledby="new-project-title">
       <header>
         <h2 id="new-project-title" data-i18n="newProject.title">新建项目</h2>
-        <button class="modal-close" data-action="new-project-close" aria-label="关闭">
-          <i data-lucide="x" class="w-4 h-4" aria-hidden="true"></i>
-        </button>
+        <div class="flex items-center gap-1">
+          <button class="modal-maximize-btn" data-action="new-project-maximize" aria-label="最大化">
+            <i data-lucide="maximize-2" class="w-4 h-4" aria-hidden="true"></i>
+          </button>
+          <button class="modal-close" data-action="new-project-close" aria-label="关闭">
+            <i data-lucide="x" class="w-4 h-4" aria-hidden="true"></i>
+          </button>
+        </div>
       </header>
+      <div class="modal-resize-handle" aria-label="拖拽调整大小"></div>
       <div class="modal-body modal-body-stack">
         <p class="modal-help-text" data-i18n="newProject.help">
           项目是 Agent 的一个同步目标目录。把项目关联到 Agent 后,Agent 启动时会自动加载项目级别的 Skills / Rules / AGENTS.md。
@@ -2343,6 +2912,10 @@
             <div class="field" style="margin-bottom: 0;">
               <label for="np-desc" data-i18n="newProject.desc">描述(可选)</label>
               <textarea id="np-desc" rows="2"></textarea>
+            </div>
+            <div class="field" style="margin-bottom: 0;">
+              <label data-i18n="newProject.agents">关联 Agent(可多选)</label>
+              <div class="skill-pick-list" id="np-agent-list" role="group" aria-label="关联 Agent"></div>
             </div>
             <div class="field" style="margin-bottom: 0;">
               <label data-i18n="newProject.syncMode">同步模式</label>
@@ -2408,6 +2981,49 @@
     </div>
   </div>
 
+  <!-- ============ Version Diff Modal ============ -->
+  <div id="version-diff-modal" class="modal-backdrop" hidden>
+    <div class="modal modal-xl" role="dialog" aria-modal="true" aria-labelledby="version-diff-title">
+      <header>
+        <h2 id="version-diff-title">版本对比</h2>
+        <button class="modal-maximize-btn" data-action="version-diff-maximize" aria-label="最大化">▢</button>
+        <button class="modal-close" data-action="version-diff-close" aria-label="关闭">×</button>
+      </header>
+      <div class="modal-resize-handle" aria-label="拖拽调整大小"></div>
+      <div class="modal-body">
+        <div class="flex items-center gap-3 mb-4 flex-wrap">
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-zinc-500">左侧:</span>
+            <select id="vd-left-select" class="bg-ink-900 border border-line rounded-md text-sm h-8 px-2 focus:outline-none focus:border-zinc-600"></select>
+          </div>
+          <button class="h-8 w-8 rounded-md border border-line bg-ink-850 text-zinc-400 hover:text-white flex items-center justify-center" data-action="vd-swap" aria-label="交换两侧" title="交换左右">
+            <i data-lucide="arrow-left-right" class="w-3.5 h-3.5" aria-hidden="true"></i>
+          </button>
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-zinc-500">右侧:</span>
+            <select id="vd-right-select" class="bg-ink-900 border border-line rounded-md text-sm h-8 px-2 focus:outline-none focus:border-zinc-600"></select>
+          </div>
+          <div class="flex-1"></div>
+          <div class="flex items-center gap-3 text-xs" id="vd-stats">
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-emerald-500"></span>新增 <span id="vd-stat-add">0</span></span>
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-red-500"></span>删除 <span id="vd-stat-del">0</span></span>
+            <span class="text-zinc-500">共 <span id="vd-stat-total">0</span> 行</span>
+          </div>
+        </div>
+        <div id="vd-pane" class="diff-pane">
+          <div class="diff-side diff-side-left">
+            <div class="diff-side-header">左 <span id="vd-left-meta" class="text-zinc-500 font-normal"></span></div>
+            <pre id="vd-left-content" class="diff-content"></pre>
+          </div>
+          <div class="diff-side diff-side-right">
+            <div class="diff-side-header">右 <span id="vd-right-meta" class="text-zinc-500 font-normal"></span></div>
+            <pre id="vd-right-content" class="diff-content"></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ============ Toast container ============ -->
   <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
 
@@ -2420,6 +3036,7 @@
     // Each asset has: snapshots[] (newest first), content (current text)
     const ASSETS_EXTRA = {
       'auto-gpt-assistant': {
+        type: 'skill', name: 'Auto-GPT Assistant', enabled: true,
         snapshots: [
           { id: '2026-06-01-103000', at: '2026-06-01 10:30', version: '2.1.0', size: '4.2KB', note: '新增长记忆策略', isCurrent: true },
           { id: '2026-05-25-140200', at: '2026-05-25 14:02', version: '2.0.4', size: '4.0KB', note: '修复 token 溢出' },
@@ -2446,6 +3063,7 @@
 `
       },
       'system-monitor-pro': {
+        type: 'skill', name: 'System Monitor Pro', enabled: true,
         snapshots: [
           { id: '2026-05-20-220000', at: '2026-05-20 22:00', version: '1.4.5', size: '2.1KB', note: '修复 macOS 内存采集', isCurrent: true },
           { id: '2026-05-08-153000', at: '2026-05-08 15:30', version: '1.4.0', size: '2.0KB', note: '新增磁盘 IO' },
@@ -2460,6 +3078,7 @@
 `
       },
       'tailwind-ui-kit': {
+        type: 'skill', name: 'Tailwind UI Kit', enabled: true,
         snapshots: [
           { id: '2026-04-15-110000', at: '2026-04-15 11:00', version: '3.0.1', size: '1.8KB', note: '新增空状态组件', isCurrent: true },
         ],
@@ -2472,6 +3091,7 @@ Button / Modal / Drawer / Tabs / Toast / Form fields
 `
       },
       'git-flow-helper': {
+        type: 'skill', name: 'Git Flow Helper', enabled: true,
         snapshots: [
           { id: '2026-05-30-093000', at: '2026-05-30 09:30', version: '1.2.0', size: '1.2KB', note: '优化冲突预警文案', isCurrent: true },
           { id: '2026-05-10-170000', at: '2026-05-10 17:00', version: '1.1.0', size: '1.0KB' },
@@ -2482,6 +3102,7 @@ Button / Modal / Drawer / Tabs / Toast / Form fields
 `
       },
       'smart-linter': {
+        type: 'skill', name: 'Smart Linter', enabled: true,
         snapshots: [
           { id: '2026-06-02-080000', at: '2026-06-02 08:00', version: '2.0.4', size: '2.5KB', note: '新增 Go / Rust 支持', isCurrent: true },
           { id: '2026-05-22-140000', at: '2026-05-22 14:00', version: '2.0.0', size: '2.2KB' },
@@ -2492,6 +3113,7 @@ Button / Modal / Drawer / Tabs / Toast / Form fields
 `
       },
       'rapid-api-tester': {
+        type: 'skill', name: 'Rapid API Tester', enabled: true,
         snapshots: [
           { id: '2026-05-18-160000', at: '2026-05-18 16:00', version: '0.9.8', size: '3.0KB', note: 'GraphQL 补全', isCurrent: true },
         ],
@@ -2501,6 +3123,7 @@ Button / Modal / Drawer / Tabs / Toast / Form fields
 `
       },
       'db-explorer': {
+        type: 'skill', name: 'DB Explorer', enabled: true,
         snapshots: [
           { id: '2026-05-28-120000', at: '2026-05-28 12:00', version: '4.2.1', size: '5.1KB', note: '新增 PostgreSQL 支持', isCurrent: true },
           { id: '2026-05-15-100000', at: '2026-05-15 10:00', version: '4.2.0', size: '4.8KB' },
@@ -2511,6 +3134,7 @@ Button / Modal / Drawer / Tabs / Toast / Form fields
 `
       },
       'cloud-sync-engine': {
+        type: 'skill', name: 'Cloud Sync Engine', enabled: true,
         snapshots: [
           { id: '2026-06-01-150000', at: '2026-06-01 15:00', version: '1.0.0', size: '1.5KB', note: '首发', isCurrent: true },
         ],
@@ -2520,6 +3144,7 @@ Button / Modal / Drawer / Tabs / Toast / Form fields
 `
       },
       'optiimage': {
+        type: 'skill', name: 'OptiImage', enabled: false,
         snapshots: [
           { id: '2026-05-25-110000', at: '2026-05-25 11:00', version: '2.3.0', size: '0.9KB', note: 'WebP 优化提速 3x', isCurrent: true },
         ],
@@ -2528,6 +3153,107 @@ Button / Modal / Drawer / Tabs / Toast / Form fields
 无损图片压缩与格式转换。
 `
       },
+      // === Rules ===
+      'no-console-log': {
+        type: 'rule', name: '禁止 console.log', severity: 'error', enabled: true,
+        snapshots: [
+          { id: '2026-05-12-100000', at: '2026-05-12 10:00', version: '1.2.0', size: '0.6KB', note: '初始规则', isCurrent: true },
+        ],
+        content: `# Rule: 禁止 console.log
+
+在生产代码中只允许 debug 级别的 console 输出。所有临时的 console.log 必须在提交前移除。
+`
+      },
+      'prefer-const': {
+        type: 'rule', name: '优先使用 const', severity: 'warning', enabled: true,
+        snapshots: [
+          { id: '2026-04-22-150000', at: '2026-04-22 15:00', version: '1.0.0', size: '0.4KB', note: '初始版本', isCurrent: true },
+        ],
+        content: `# Rule: 优先使用 const
+
+变量不会被重新赋值时必须使用 const 而不是 let。
+`
+      },
+      'no-magic-numbers': {
+        type: 'rule', name: '禁止魔法数字', severity: 'warning', enabled: false,
+        snapshots: [
+          { id: '2026-03-15-110000', at: '2026-03-15 11:00', version: '1.1.0', size: '0.8KB', note: '补充示例', isCurrent: true },
+        ],
+        content: `# Rule: 禁止魔法数字
+
+所有数字字面量必须提取为命名常量。常量名应清晰表达其含义。
+`
+      },
+      'comment-required-public': {
+        type: 'rule', name: '公开 API 必须有 JSDoc', severity: 'info', enabled: true,
+        snapshots: [
+          { id: '2026-02-08-090000', at: '2026-02-08 09:00', version: '1.0.0', size: '0.5KB', note: '初始规则', isCurrent: true },
+        ],
+        content: `# Rule: 公开 API 必须有 JSDoc
+
+所有 export 的函数、类、方法必须有 JSDoc 注释,说明用途、参数、返回值。
+`
+      },
+      // === Agents.md (Agent file) ===
+      'default-agents-md': {
+        type: 'agents-md', name: 'Project Agent 协作规则', enabled: true,
+        snapshots: [
+          { id: '2026-06-01-120000', at: '2026-06-01 12:00', version: '1.0.0', size: '2.1KB', note: '默认模板', isCurrent: true,
+            content: `# Project Agent 协作规则
+
+## 工作准则
+- 优先使用类型安全的 API
+- 任何新文件必须先在 README 中记录
+- 提交前必须运行 lint + test
+- 新模块必须有单元测试,覆盖率 ≥ 80%
+
+## 约束
+- 不允许直接修改 \`node_modules\`
+- 不允许在 commit 中包含 .env 文件
+- PR 必须有至少 1 个 reviewer 通过
+- 涉及数据库 schema 变更需要 ADR
+` },
+          { id: '2026-05-15-100000', at: '2026-05-15 10:00', version: '0.9.0', size: '1.8KB', note: '初版规则',
+            content: `# Project Agent 协作规则
+
+## 工作准则
+- 优先使用类型安全的 API
+- 任何新文件必须先在 README 中记录
+
+## 约束
+- 不允许直接修改 \`node_modules\`
+- 不允许在 commit 中包含 .env 文件
+` },
+          { id: '2026-04-20-140000', at: '2026-04-20 14:00', version: '0.5.0', size: '0.9KB', note: '首版',
+            content: `# Agent Rules
+
+## 通用
+- 优先使用类型安全的 API
+- 不允许直接修改 \`node_modules\`
+` },
+        ],
+        content: `# Project Agent 协作规则
+
+## 工作准则
+- 优先使用类型安全的 API
+- 任何新文件必须先在 README 中记录
+- 提交前必须运行 lint + test
+- 新模块必须有单元测试,覆盖率 ≥ 80%
+
+## 约束
+- 不允许直接修改 \`node_modules\`
+- 不允许在 commit 中包含 .env 文件
+- PR 必须有至少 1 个 reviewer 通过
+- 涉及数据库 schema 变更需要 ADR
+`
+      },
+    };
+
+    // Asset type → display label / icon / color
+    const ASSET_TYPE_META = {
+      skill:      { label: 'Skill',     icon: 'package',  color: 'blue'    },
+      'agents-md':{ label: 'AGENTS.md', icon: 'file-text',color: 'purple' },
+      rule:       { label: 'Rule',      icon: 'shield',  color: 'orange'  },
     };
 
     // Default empty snapshot set for newly created assets
@@ -2804,6 +3530,9 @@ Button / Modal / Drawer / Tabs / Toast / Form fields
             </div>
           </div>
           <div class="snapshot-actions">
+            <button type="button" class="btn btn-secondary btn-sm" data-diff-against-current="${s.id}" title="与此版本对比当前内容" aria-label="对比版本">
+              <i data-lucide="git-compare" class="w-3.5 h-3.5" aria-hidden="true"></i>${t('snapshot.compare')}
+            </button>
             <button type="button" class="btn btn-secondary btn-sm" data-rollback="${s.id}" ${s.isCurrent ? 'disabled' : ''}>
               <i data-lucide="rotate-ccw" class="w-3.5 h-3.5" aria-hidden="true"></i>${t('snapshot.rollback')}
             </button>
@@ -2814,6 +3543,16 @@ Button / Modal / Drawer / Tabs / Toast / Form fields
       // Wire rollback
       list.querySelectorAll('[data-rollback]').forEach(btn => {
         btn.addEventListener('click', () => rollbackSnapshot(btn.getAttribute('data-rollback')));
+      });
+      // Wire diff button (per-row: this snapshot vs current)
+      list.querySelectorAll('[data-diff-against-current]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (!panelState.assetId) return;
+          const sid = btn.getAttribute('data-diff-against-current');
+          const extra = ASSETS_EXTRA[panelState.assetId];
+          const current = extra?.snapshots?.find(s => s.isCurrent);
+          openVersionDiff(panelState.assetId, sid, current?.id);
+        });
       });
       if (window.lucide) lucide.createIcons();
     }
@@ -2838,6 +3577,89 @@ Button / Modal / Drawer / Tabs / Toast / Form fields
       if (window.lucide) lucide.createIcons();
     }
     function collectTags() { return [..._tags]; }
+
+    // ---------- Resizable + maximizable modals ----------
+    // All .modal elements get drag-to-resize via .modal-resize-handle, plus
+    // a maximize toggle in the header. Sizes are persisted per-modal to localStorage.
+    (function initModalResizer() {
+      const SIZE_KEY_PREFIX = 'agentdock-modal-size-';
+      const MAXIMIZED_KEY = 'agentdock-modal-maximized-';
+
+      function applyStoredSize(modalId, modal) {
+        try {
+          const w = localStorage.getItem(SIZE_KEY_PREFIX + modalId);
+          const h = localStorage.getItem(SIZE_KEY_PREFIX + modalId + '-h');
+          const wasMaximized = localStorage.getItem(MAXIMIZED_KEY + modalId) === '1';
+          if (wasMaximized) {
+            modal.classList.add('is-maximized');
+          } else if (w) {
+            modal.style.width = w + 'px';
+            modal.classList.add('is-resized');
+          }
+          if (h && !wasMaximized) {
+            modal.style.height = h + 'px';
+            modal.style.maxHeight = '92vh';
+          }
+        } catch (e) {}
+      }
+
+      function bindResize(modal) {
+        const handle = modal.querySelector('.modal-resize-handle');
+        if (!handle) return;
+        const id = modal.closest('[id]')?.id;
+        if (id) applyStoredSize(id, modal);
+        let startX, startY, startW, startH;
+        let isMaxBeforeDrag = false;
+        const onDown = (e) => {
+          e.preventDefault();
+          isMaxBeforeDrag = modal.classList.contains('is-maximized');
+          if (isMaxBeforeDrag) modal.classList.remove('is-maximized');
+          startX = e.clientX; startY = e.clientY;
+          const rect = modal.getBoundingClientRect();
+          startW = rect.width; startH = rect.height;
+          document.addEventListener('mousemove', onMove);
+          document.addEventListener('mouseup', onUp);
+        };
+        const onMove = (e) => {
+          const w = Math.max(480, startW + (e.clientX - startX));
+          const h = Math.max(320, startH + (e.clientY - startY));
+          modal.style.width = w + 'px';
+          modal.style.height = h + 'px';
+          modal.style.maxHeight = '92vh';
+          modal.classList.add('is-resized');
+        };
+        const onUp = () => {
+          document.removeEventListener('mousemove', onMove);
+          document.removeEventListener('mouseup', onUp);
+          if (id) {
+            try {
+              localStorage.setItem(SIZE_KEY_PREFIX + id, Math.round(modal.getBoundingClientRect().width));
+              localStorage.setItem(SIZE_KEY_PREFIX + id + '-h', Math.round(modal.getBoundingClientRect().height));
+              localStorage.setItem(MAXIMIZED_KEY + id, '0');
+            } catch (e) {}
+          }
+        };
+        handle.addEventListener('mousedown', onDown);
+      }
+
+      function bindMaximize(modal, btn) {
+        const id = modal.closest('[id]')?.id;
+        if (!id) return;
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const isMax = modal.classList.toggle('is-maximized');
+          try { localStorage.setItem(MAXIMIZED_KEY + id, isMax ? '1' : '0'); } catch (e) {}
+        });
+      }
+
+      document.querySelectorAll('.modal').forEach(modal => {
+        bindResize(modal);
+      });
+      document.querySelectorAll('.modal-maximize-btn').forEach(btn => {
+        const modal = btn.closest('.modal');
+        if (modal) bindMaximize(modal, btn);
+      });
+    })();
 
     // ---------- New asset modal ----------
     function openNewAssetModal() {
@@ -2936,16 +3758,645 @@ Button / Modal / Drawer / Tabs / Toast / Form fields
       toast(t('toast.created', { name: title }), 'success');
     }
 
+    // ---------- navigateToView: switch the main area view ----------
+    function navigateToView(view) {
+      document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+      const target = document.querySelector('[data-view="' + view + '"]');
+      if (target) target.classList.remove('hidden');
+      document.querySelectorAll('.nav-item, .nav-sub-item').forEach(el => el.classList.remove('active'));
+      const navLink = document.querySelector('.nav-item[data-nav="' + view + '"]');
+      if (navLink) navLink.classList.add('active');
+      // Refresh scenario list when showing the scenarios landing
+      if (view === 'scenarios') renderScenariosList();
+    }
+
+    // Render the scenarios list (default + user-created)
+    function renderScenariosList() {
+      const list = document.getElementById('scenarios-list');
+      if (!list) return;
+      const all = [DEFAULT_SCENARIO, ...SCENARIOS_STORE];
+      if (all.length === 0) {
+        list.innerHTML = '<div class="col-span-2 text-sm text-zinc-500 py-8 text-center">尚无场景,点击右上角"新增场景"创建</div>';
+        return;
+      }
+      list.replaceChildren(...all.map(s => {
+        const colorHex = SCENARIO_TYPE_HEX[s.color] || '#22c55e';
+        const skillCount = (s.skills || []).length;
+        const ruleCount = (s.rules || []).length;
+        const agentFileCount = (s.agentFiles || []).length;
+        const agentCount = (s.agents || []).length;
+        const card = document.createElement('div');
+        card.className = 'left-card';
+        card.style.cursor = 'pointer';
+        card.style.transition = 'all .15s';
+        card.setAttribute('role', 'button');
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('data-open-scenario', s.id);
+        card.innerHTML = '<header class="left-card-header"><div class="flex items-center gap-2 min-w-0"><div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background: ' + colorHex + '22; color: ' + colorHex + '"><i data-lucide="sparkles" class="w-4 h-4" aria-hidden="true"></i></div><h3 class="truncate">' + escapeHtml(s.name) + '</h3>' + (s.isBuiltIn ? '<span class="badge badge-blue text-[10px]">内置</span>' : '') + '</div></header><div class="left-card-body"><p class="text-xs text-zinc-500 leading-relaxed mb-3 line-clamp-2">' + escapeHtml(s.desc || '(无描述)') + '</p><div class="flex items-center gap-3 text-xs text-zinc-500"><span class="flex items-center gap-1"><i data-lucide="package" class="w-3 h-3 text-blue-400" aria-hidden="true"></i>' + skillCount + ' 技能</span><span class="flex items-center gap-1"><i data-lucide="shield" class="w-3 h-3 text-orange-400" aria-hidden="true"></i>' + ruleCount + ' 规则</span><span class="flex items-center gap-1"><i data-lucide="file-text" class="w-3 h-3 text-purple-400" aria-hidden="true"></i>' + agentFileCount + ' 文件</span><span class="flex items-center gap-1"><i data-lucide="cpu" class="w-3 h-3 text-emerald-400" aria-hidden="true"></i>' + agentCount + ' Agent</span></div></div>';
+        card.addEventListener('click', () => openScenarioDetail(s.id));
+        card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.click(); } });
+        return card;
+      }));
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // ---------- Scenario detail page ----------
+    // Built-in default scenario
+    const DEFAULT_SCENARIO = {
+      id: 'default',
+      name: '默认场景',
+      desc: 'AgentDock 内置的开箱即用配置。包含 9 个常用 Skills、4 个代码规范 Rules、1 个默认 AGENTS.md 模板与 OpenCode 作为默认 Agent。',
+      color: 'emerald',
+      skills: ['smart-linter', 'git-flow-helper', 'auto-gpt-assistant'],
+      rules: ['no-console-log', 'prefer-const', 'no-magic-numbers', 'comment-required-public'],
+      agentFiles: ['default-agents-md'],
+      agents: ['opencode'],
+      isBuiltIn: true,
+    };
+    function getScenario(id) {
+      if (id === 'default') return DEFAULT_SCENARIO;
+      return SCENARIOS_STORE.find(s => s.id === id);
+    }
+    let currentScenarioId = null;
+
+    // Color palette for asset type tile backgrounds
+    const ASSET_TILE_HEX = {
+      blue: '#60a5fa', orange: '#fb923c', purple: '#c084fc', emerald: '#22c55e',
+      cyan: '#22d3ee', red: '#f87171', yellow: '#fbbf24', pink: '#f472b6', indigo: '#818cf8',
+    };
+    const SCENARIO_TYPE_HEX = { ...ASSET_TILE_HEX, emerald: '#22c55e', blue: '#60a5fa' };
+
+    // Build a mini card for an asset (used in scenario page)
+    function renderAssetMiniCard(assetId) {
+      const card = document.querySelector('[data-asset-id="' + assetId + '"]');
+      const extra = ASSETS_EXTRA[assetId];
+      const type = (card?.getAttribute('data-asset-type')) || (extra?.type) || 'skill';
+      const meta = ASSET_TYPE_META[type] || { label: 'Asset', icon: 'package', color: 'blue' };
+      const cardName = card?.querySelector('h3')?.textContent;
+      const desc = card?.querySelector('p')?.textContent || '';
+      const color = card?.querySelector('.icon-tile')?.className.match(/bg-(\w+)-500/)?.[1] || meta.color;
+      const tileHex = ASSET_TILE_HEX[color] || ASSET_TILE_HEX[meta.color] || '#60a5fa';
+      const iconName = meta.icon;
+      // For text-only assets (no card in grid), derive name + description from the file body
+      let name, displayDesc;
+      if (cardName) {
+        name = cardName;
+        displayDesc = desc;
+      } else {
+        // Use the first heading-like line as the name (start with #); fall back to note
+        const lines = (extra?.content || '').split('\n').map(l => l.trim()).filter(Boolean);
+        const heading = lines.find(l => l.startsWith('#')) || '';
+        name = heading.replace(/^#+\s*/, '').slice(0, 40) || extra?.snapshots?.[0]?.note || assetId;
+        const firstBodyLine = lines.find(l => !l.startsWith('#'));
+        displayDesc = firstBodyLine || '';
+      }
+      const mini = document.createElement('div');
+      mini.className = 'skill-mini';
+      mini.setAttribute('role', 'button');
+      mini.setAttribute('tabindex', '0');
+      mini.setAttribute('data-asset-mini-type', type);
+      mini.setAttribute('title', name + ' · ' + meta.label);
+      mini.innerHTML = '<div class="skill-mini-icon" style="background: ' + tileHex + '22; color: ' + tileHex + '"><i data-lucide="' + iconName + '" class="w-4 h-4" aria-hidden="true"></i></div><div class="skill-mini-body"><div class="skill-mini-title">' + escapeHtml(name) + '</div><div class="skill-mini-meta">' + escapeHtml(displayDesc.slice(0, 60)) + (displayDesc.length > 60 ? '…' : '') + '</div></div><button class="skill-mini-remove" data-action="mini-remove" aria-label="从场景移除 ' + escapeHtml(name) + '" title="从场景移除"><i data-lucide="x" class="w-3 h-3" aria-hidden="true"></i></button>';
+      mini.addEventListener('click', (e) => {
+        // If in edit mode and × clicked, remove instead of open detail
+        const rm = e.target.closest('[data-action="mini-remove"]');
+        if (rm && scenarioEditMode) {
+          e.stopPropagation();
+          // Determine which field by walking up to the section
+          const section = mini.closest('.left-card');
+          const header = section?.querySelector('.scenario-section-header');
+          const field = header?.getAttribute('data-asset-field');
+          if (field) removeAssetFromCurrentScenario(field, assetId);
+          return;
+        }
+        openDetailPanel(assetId);
+      });
+      mini.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); mini.click(); } });
+      return mini;
+    }
+    // Empty-state placeholder for a list section
+    function renderMiniEmpty(message) {
+      const div = document.createElement('div');
+      div.className = 'text-xs text-zinc-500 py-6 text-center';
+      div.textContent = message;
+      return div;
+    }
+    // Empty-state with "add" chip (shown in edit mode)
+    function renderMiniEmptyWithAdd(field) {
+      const div = document.createElement('div');
+      div.className = 'scenario-empty-add';
+      const actionMap = {
+        skills: 'scenario-add-skill',
+        rules: 'scenario-add-rule',
+        agentFiles: 'scenario-add-agentfile',
+        agents: 'scenario-add-agent',
+      };
+      div.innerHTML = '<div class="text-xs text-zinc-500">此场景尚未包含此类型</div><button class="scenario-empty-chip" data-action="' + (actionMap[field] || 'scenario-add-skill') + '"><i data-lucide="plus" class="w-3 h-3" aria-hidden="true"></i> 添加第一个' + (field === 'skills' ? '技能' : field === 'rules' ? '规则' : field === 'agentFiles' ? 'AGENTS.md' : 'Agent') + '</button>';
+      const chip = div.querySelector('.scenario-empty-chip');
+      chip.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openScenarioAssetPicker(field);
+      });
+      return div;
+    }
+    // Render a categorized section (skills / rules / agent files) using mini cards
+    function renderMiniSection(listId, countId, ids, emptyMessage, gridClass, field) {
+      const list = document.getElementById(listId);
+      const count = document.getElementById(countId);
+      if (!list) return;
+      if (count) count.textContent = ids.length + ' 项';
+      if (ids.length === 0) {
+        list.className = 'left-card-body';
+        // In edit mode, show an actionable "add first" chip instead of plain text
+        if (scenarioEditMode && field) {
+          list.replaceChildren(renderMiniEmptyWithAdd(field));
+        } else {
+          list.replaceChildren(renderMiniEmpty(emptyMessage));
+        }
+        return;
+      }
+      list.className = 'left-card-body ' + (gridClass || 'skill-mini-grid-cols-2');
+      list.replaceChildren(...ids.map(id => renderAssetMiniCard(id)));
+    }
+
+    function openScenarioDetail(scenarioId) {
+      const s = getScenario(scenarioId);
+      if (!s) { toast('场景不存在', 'error'); return; }
+      currentScenarioId = s.id;
+      const colorHex = SCENARIO_TYPE_HEX[s.color] || '#22c55e';
+      document.getElementById('scenario-hero-title').textContent = s.name;
+      document.getElementById('scenario-hero-id').textContent = '#' + s.id;
+      document.getElementById('scenario-crumb-name').textContent = s.name;
+      document.getElementById('scenario-hero-desc').textContent = s.desc || '(无描述)';
+      const heroIcon = document.getElementById('scenario-hero-icon');
+      heroIcon.style.background = colorHex + '22';
+      heroIcon.style.color = colorHex;
+      heroIcon.innerHTML = '<i data-lucide="sparkles" class="w-7 h-7" style="color: ' + colorHex + '" aria-hidden="true"></i>';
+      const skills = s.skills || [];
+      // Only show enabled rules (rule.enabled === false hides from scenario)
+      const rules = (s.rules || []).filter(rid => ASSETS_EXTRA[rid]?.enabled !== false);
+      const agentFiles = s.agentFiles || [];
+      const agents = s.agents || [];
+      const projects = PROJECTS_STORE.filter(p => p.scenario === s.id);
+      // Stats (4 cards)
+      document.getElementById('scenario-stat-skills').textContent = skills.length;
+      document.getElementById('scenario-stat-rules').textContent = rules.length;
+      document.getElementById('scenario-stat-agentfiles').textContent = agentFiles.length;
+      document.getElementById('scenario-stat-agents').textContent = agents.length;
+      // === Skills list ===
+      renderMiniSection('scenario-skills-list', 'scenario-skills-count', skills, '此场景尚未包入任何技能', 'skill-mini-grid-cols-3', 'skills');
+      // === Rules list ===
+      renderMiniSection('scenario-rules-list', 'scenario-rules-count', rules, '此场景尚未指定任何规则', 'skill-mini-grid-cols-2', 'rules');
+      // === Agent files (AGENTS.md) list ===
+      renderMiniSection('scenario-agentfiles-list', 'scenario-agentfiles-count', agentFiles, '此场景尚未使用任何 AGENTS.md 模板', 'skill-mini-grid-cols-2', 'agentFiles');
+      // === Agents list (different visual: pills or rows) ===
+      const agentsList = document.getElementById('scenario-agents-list');
+      document.getElementById('scenario-agents-count').textContent = agents.length + ' 项';
+      if (agents.length === 0) {
+        if (scenarioEditMode) {
+          agentsList.className = 'left-card-body flex flex-col gap-2';
+          agentsList.replaceChildren(renderMiniEmptyWithAdd('agents'));
+        } else {
+          agentsList.replaceChildren(renderMiniEmpty('此场景尚未关联任何 Agent'));
+        }
+      } else {
+        agentsList.replaceChildren(...agents.map(aid => {
+          const agent = AGENTS_CATALOG.find(a => a.id === aid);
+          if (!agent) return null;
+          const row = document.createElement('div');
+          row.className = 'detail-row';
+          row.innerHTML = '<div class="detail-row-icon" style="background: rgba(168,85,247,.15); color: #c084fc"><i data-lucide="cpu" class="w-4 h-4" aria-hidden="true"></i></div><div class="detail-row-body"><div class="detail-row-title">' + escapeHtml(agent.name) + '</div><div class="detail-row-meta">' + agent.id + '</div></div><button class="skill-mini-remove" data-action="agent-remove" data-agent-id="' + agent.id + '" style="position: static;" aria-label="移除 Agent ' + escapeHtml(agent.name) + '" title="移除"><i data-lucide="x" class="w-3 h-3" aria-hidden="true"></i></button>';
+          if (scenarioEditMode) {
+            row.querySelector('[data-action="agent-remove"]').addEventListener('click', (e) => {
+              e.stopPropagation();
+              removeAssetFromCurrentScenario('agents', aid);
+            });
+          } else {
+            const rm = row.querySelector('[data-action="agent-remove"]');
+            if (rm) rm.style.display = 'none';
+          }
+          return row;
+        }).filter(Boolean));
+      }
+      // Projects
+      const projectsList = document.getElementById('scenario-projects-list');
+      document.getElementById('scenario-projects-count').textContent = projects.length + ' 项';
+      if (projects.length === 0) {
+        projectsList.innerHTML = '<div class="text-xs text-zinc-500 py-6 text-center">尚无项目使用此场景</div>';
+      } else {
+        projectsList.replaceChildren(...projects.map(p => {
+          const row = document.createElement('div');
+          row.className = 'detail-row';
+          row.innerHTML = '<div class="detail-row-icon" style="background: rgba(59,130,246,.12); color: #60a5fa"><i data-lucide="folder" class="w-4 h-4" aria-hidden="true"></i></div><div class="detail-row-body"><div class="detail-row-title">' + escapeHtml(p.name) + '</div><div class="detail-row-meta">' + escapeHtml(p.path) + '</div></div><span class="badge ' + (p.syncMode === 'merge' ? 'badge-orange' : 'badge-blue') + '" style="font-size: 10px;">' + p.syncMode + '</span>';
+          return row;
+        }));
+      }
+      // Hide built-in delete button for default scenario
+      const delBtn = document.querySelector('[data-action="scenario-detail-delete"]');
+      if (delBtn) delBtn.style.display = (s.id === 'default') ? 'none' : '';
+      navigateToView('scenario-detail');
+      document.querySelectorAll('.nav-sub-item').forEach(el => el.classList.remove('active'));
+      const link = document.querySelector('[data-scenario-id="' + s.id + '"]');
+      if (link) link.classList.add('active');
+      if (window.lucide) lucide.createIcons();
+    }
+    function closeScenarioDetail() {
+      navigateToView('scenarios');
+      currentScenarioId = null;
+    }
+    async function deleteCurrentScenario() {
+      if (!currentScenarioId || currentScenarioId === 'default') {
+        toast(t('toast.cannotDeleteBuiltIn'), 'error');
+        return;
+      }
+      const idx = SCENARIOS_STORE.findIndex(s => s.id === currentScenarioId);
+      if (idx < 0) return;
+      const s = SCENARIOS_STORE[idx];
+      const ok = await confirmDialog({
+        title: t('confirm.deleteScenarioTitle'),
+        message: t('confirm.deleteScenarioMsg', { name: s.name }),
+        okText: t('confirm.deleteOk'),
+        okDanger: true,
+      });
+      if (!ok) return;
+      SCENARIOS_STORE.splice(idx, 1);
+      const link = document.querySelector('[data-scenario-id="' + currentScenarioId + '"]');
+      link?.remove();
+      PROJECTS_STORE.forEach(p => { if (p.scenario === currentScenarioId) p.scenario = ''; });
+      refreshProjectScenarioOptions();
+      closeScenarioDetail();
+      toast(t('toast.deleted', { name: s.name }), 'warn');
+    }
+    // Wire scenario page actions
+    document.querySelectorAll('[data-action="scenario-back-to-scenarios"]').forEach(b => b.addEventListener('click', closeScenarioDetail));
+    document.querySelector('[data-action="scenario-detail-delete"]')?.addEventListener('click', deleteCurrentScenario);
+
+    // ===== Scenario edit mode =====
+    let scenarioEditMode = false;
+    let openScenarioPickerField = null;
+    function setScenarioEditMode(on) {
+      scenarioEditMode = !!on;
+      const view = document.getElementById('scenario-detail-view');
+      if (view) view.classList.toggle('scenario-edit-mode', scenarioEditMode);
+      const editBtn = document.querySelector('[data-action="scenario-edit"]');
+      if (editBtn) {
+        editBtn.classList.toggle('btn-primary', scenarioEditMode);
+        editBtn.classList.toggle('btn-secondary', !scenarioEditMode);
+        editBtn.textContent = scenarioEditMode ? '完成编辑' : '编辑场景';
+      }
+      // If leaving edit mode, close any open picker
+      if (!scenarioEditMode) closeScenarioPicker();
+      // Re-render sections so × buttons / empty-state chips show
+      if (currentScenarioId) openScenarioDetail(currentScenarioId);
+    }
+    function closeScenarioPicker() {
+      document.querySelectorAll('.scenario-asset-picker').forEach(el => el.remove());
+      openScenarioPickerField = null;
+    }
+
+    function openScenarioAssetPicker(field) {
+      closeScenarioPicker();
+      const header = document.querySelector('.scenario-section-header[data-asset-field="' + field + '"]');
+      if (!header) return;
+      openScenarioPickerField = field;
+      const picker = document.createElement('div');
+      picker.className = 'scenario-asset-picker';
+      const scenario = getScenario(currentScenarioId);
+      const included = (scenario && scenario[field]) || [];
+      // Build candidate list
+      let candidates = [];
+      if (field === 'skills') {
+        candidates = Object.entries(ASSETS_EXTRA)
+          .filter(([id, a]) => a.type === 'skill')
+          .map(([id, a]) => ({ id, name: a.name || id, enabled: isAssetEnabledInGrid(id) }));
+      } else if (field === 'rules') {
+        candidates = Object.entries(ASSETS_EXTRA)
+          .filter(([id, a]) => a.type === 'rule')
+          .map(([id, a]) => ({ id, name: a.name || id, enabled: isAssetEnabledInGrid(id), severity: a.severity }));
+      } else if (field === 'agentFiles') {
+        candidates = Object.entries(ASSETS_EXTRA)
+          .filter(([id, a]) => a.type === 'agents-md')
+          .map(([id, a]) => ({ id, name: a.name || id, enabled: isAssetEnabledInGrid(id) }));
+      } else if (field === 'agents') {
+        candidates = AGENTS_CATALOG.map(a => ({ id: a.id, name: a.name, desc: a.desc }));
+      }
+      // Filter out already-included
+      const remaining = candidates.filter(c => !included.includes(c.id));
+      if (remaining.length === 0) {
+        picker.innerHTML = '<div class="scenario-asset-picker-empty">已添加此类型下的所有' + (field === 'agents' ? 'Agent' : '资产') + ' · ' + candidates.length + '/' + candidates.length + '</div>';
+      } else {
+        const header = document.createElement('div');
+        header.className = 'px-2 py-1.5 text-[11px] text-zinc-500 uppercase tracking-wide';
+        header.textContent = candidates.length + ' 项可用,点击添加';
+        picker.appendChild(header);
+        remaining.forEach(c => {
+          const item = document.createElement('button');
+          item.className = 'scenario-asset-picker-item';
+          const sevBadge = c.severity ? ' <span class="badge badge-' + (c.severity === 'error' ? 'red' : c.severity === 'warning' ? 'orange' : 'blue') + '" style="font-size: 9px;">' + c.severity.toUpperCase() + '</span>' : '';
+          const dimBadge = c.enabled === false ? ' <span class="badge" style="font-size: 9px; background: rgba(113,113,122,.15); color: #a1a1aa;">已禁用</span>' : '';
+          item.innerHTML = '<i data-lucide="' + (field === 'agents' ? 'cpu' : field === 'rules' ? 'shield-alert' : field === 'agentFiles' ? 'file-text' : 'package') + '" class="w-3.5 h-3.5" aria-hidden="true"></i><span class="flex-1 truncate">' + escapeHtml(c.name) + '</span>' + sevBadge + dimBadge;
+          item.addEventListener('click', () => {
+            addAssetToCurrentScenario(field, c.id);
+            closeScenarioPicker();
+          });
+          picker.appendChild(item);
+        });
+        if (candidates.length > remaining.length) {
+          const footer = document.createElement('div');
+          footer.className = 'px-2 py-1.5 text-[11px] text-zinc-500';
+          footer.textContent = '已包含 ' + (candidates.length - remaining.length) + ' 项';
+          picker.appendChild(footer);
+        }
+      }
+      // Place picker — anchor to the + button's parent
+      const addBtn = header.querySelector('.scenario-section-add');
+      if (addBtn) {
+        addBtn.parentElement.style.position = 'relative';
+        addBtn.parentElement.appendChild(picker);
+      } else {
+        header.appendChild(picker);
+      }
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function isAssetEnabledInGrid(id) {
+      const card = document.querySelector('[data-asset-id="' + id + '"]');
+      if (!card) return true;
+      return card.getAttribute('data-enabled') !== 'false';
+    }
+
+    function addAssetToCurrentScenario(field, assetId) {
+      const s = getScenario(currentScenarioId);
+      if (!s) return;
+      if (!s[field]) s[field] = [];
+      if (s[field].includes(assetId)) return;
+      s[field].push(assetId);
+      toast('已添加 · ' + getAssetName(assetId), 'success');
+      openScenarioDetail(currentScenarioId);
+    }
+
+    function removeAssetFromCurrentScenario(field, assetId) {
+      const s = getScenario(currentScenarioId);
+      if (!s || !s[field]) return;
+      s[field] = s[field].filter(id => id !== assetId);
+      toast('已移除 · ' + getAssetName(assetId), 'success');
+      openScenarioDetail(currentScenarioId);
+    }
+
+    function getAssetName(assetId) {
+      const card = document.querySelector('[data-asset-id="' + assetId + '"]');
+      return card?.querySelector('h3')?.textContent || ASSETS_EXTRA[assetId]?.name || AGENTS_CATALOG.find(a => a.id === assetId)?.name || assetId;
+    }
+
+    // Wire edit button
+    document.querySelector('[data-action="scenario-edit"]')?.addEventListener('click', () => {
+      setScenarioEditMode(!scenarioEditMode);
+    });
+    // Wire + buttons on each section
+    document.querySelectorAll('.scenario-section-add').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const action = btn.getAttribute('data-action') || '';
+        const fieldMap = {
+          'scenario-add-skill': 'skills',
+          'scenario-add-rule': 'rules',
+          'scenario-add-agentfile': 'agentFiles',
+          'scenario-add-agent': 'agents',
+        };
+        const field = fieldMap[action];
+        if (field) openScenarioAssetPicker(field);
+      });
+    });
+    // Close picker on outside click / Esc
+    document.addEventListener('click', (e) => {
+      if (openScenarioPickerField && !e.target.closest('.scenario-asset-picker') && !e.target.closest('.scenario-section-add')) {
+        closeScenarioPicker();
+      }
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && openScenarioPickerField) closeScenarioPicker();
+    });
+
+    // ===== Version Diff (LCS line-based) =====
+    function diffLines(leftText, rightText) {
+      const a = (leftText || '').split('\n');
+      const b = (rightText || '').split('\n');
+      const m = a.length, n = b.length;
+      // Build LCS table
+      const dp = Array.from({ length: m + 1 }, () => new Int32Array(n + 1));
+      for (let i = 1; i <= m; i++) {
+        for (let j = 1; j <= n; j++) {
+          if (a[i-1] === b[j-1]) dp[i][j] = dp[i-1][j-1] + 1;
+          else dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);
+        }
+      }
+      // Walk back to produce ops
+      const ops = [];
+      let i = m, j = n;
+      while (i > 0 && j > 0) {
+        if (a[i-1] === b[j-1]) { ops.unshift({ op: 'same', left: a[i-1], right: b[j-1], li: i, ri: j }); i--; j--; }
+        else if (dp[i-1][j] >= dp[i][j-1]) { ops.unshift({ op: 'del', left: a[i-1], li: i }); i--; }
+        else { ops.unshift({ op: 'add', right: b[j-1], ri: j }); j--; }
+      }
+      while (i > 0) { ops.unshift({ op: 'del', left: a[i-1], li: i }); i--; }
+      while (j > 0) { ops.unshift({ op: 'add', right: b[j-1], ri: j }); j--; }
+      return ops;
+    }
+    function renderDiffToHTML(ops, side) {
+      // side = 'left' shows 'same' + 'del' lines (with placeholders for 'add')
+      // side = 'right' shows 'same' + 'add' lines (with placeholders for 'del')
+      let lnL = 0, lnR = 0;
+      const frag = [];
+      for (const o of ops) {
+        if (side === 'left') {
+          if (o.op === 'add') {
+            lnL++;
+            frag.push(`<div class="diff-line placeholder"><span class="ln"></span><span class="marker"></span><span>\\u00a0</span></div>`);
+          } else {
+            lnL = o.li || (lnL + 1);
+            const cls = o.op === 'same' ? 'same' : 'del';
+            const marker = o.op === 'same' ? '\\u00a0' : '-';
+            const text = o.op === 'del' ? o.left : o.left;
+            frag.push(`<div class="diff-line ${cls}"><span class="ln">${lnL}</span><span class="marker">${marker}</span><span>${escapeHtml(text)}</span></div>`);
+          }
+        } else {
+          if (o.op === 'del') {
+            lnR++;
+            frag.push(`<div class="diff-line placeholder"><span class="ln"></span><span class="marker"></span><span>\\u00a0</span></div>`);
+          } else {
+            lnR = o.ri || (lnR + 1);
+            const cls = o.op === 'same' ? 'same' : 'add';
+            const marker = o.op === 'same' ? '\\u00a0' : '+';
+            const text = o.op === 'add' ? o.right : o.right;
+            frag.push(`<div class="diff-line ${cls}"><span class="ln">${lnR}</span><span class="marker">${marker}</span><span>${escapeHtml(text)}</span></div>`);
+          }
+        }
+      }
+      return frag.join('');
+    }
+    function openVersionDiff(assetId, defaultLeftId, defaultRightId) {
+      const extra = ASSETS_EXTRA[assetId];
+      if (!extra) return;
+      const snapshots = extra.snapshots || [];
+      if (snapshots.length < 2) { toast('需要至少 2 个快照才能对比', 'error'); return; }
+      const leftSel = document.getElementById('vd-left-select');
+      const rightSel = document.getElementById('vd-right-select');
+      leftSel.replaceChildren(...snapshots.map(s => {
+        const opt = document.createElement('option');
+        opt.value = s.id;
+        opt.textContent = `${s.at}  v${s.version}${s.isCurrent ? ' · 当前' : ''}`;
+        return opt;
+      }));
+      rightSel.replaceChildren(...snapshots.map(s => {
+        const opt = document.createElement('option');
+        opt.value = s.id;
+        opt.textContent = `${s.at}  v${s.version}${s.isCurrent ? ' · 当前' : ''}`;
+        return opt;
+      }));
+      // Defaults: user-picked left vs current right
+      const current = snapshots.find(s => s.isCurrent);
+      leftSel.value = defaultLeftId || snapshots[1].id;
+      rightSel.value = defaultRightId || (current ? current.id : snapshots[0].id);
+      function refresh() {
+        const left = snapshots.find(s => s.id === leftSel.value);
+        const right = snapshots.find(s => s.id === rightSel.value);
+        if (!left || !right) return;
+        // Use snapshot.content if available; otherwise fall back to current content
+        const currentId = extra.snapshots.find(s => s.isCurrent)?.id;
+        const leftText = left.content || (left.id === currentId ? extra.content : '');
+        const rightText = right.content || (right.id === currentId ? extra.content : '');
+        const ops = diffLines(leftText, rightText);
+        document.getElementById('vd-left-content').innerHTML = renderDiffToHTML(ops, 'left');
+        document.getElementById('vd-right-content').innerHTML = renderDiffToHTML(ops, 'right');
+        document.getElementById('vd-left-meta').textContent = `${left.at} · v${left.version}${left.isCurrent ? ' · 当前' : ''}`;
+        document.getElementById('vd-right-meta').textContent = `${right.at} · v${right.version}${right.isCurrent ? ' · 当前' : ''}`;
+        const adds = ops.filter(o => o.op === 'add').length;
+        const dels = ops.filter(o => o.op === 'del').length;
+        document.getElementById('vd-stat-add').textContent = adds;
+        document.getElementById('vd-stat-del').textContent = dels;
+        document.getElementById('vd-stat-total').textContent = ops.length;
+      }
+      leftSel.onchange = refresh;
+      rightSel.onchange = refresh;
+      document.querySelector('[data-action="vd-swap"]').onclick = () => {
+        const tmp = leftSel.value; leftSel.value = rightSel.value; rightSel.value = tmp;
+        refresh();
+      };
+      refresh();
+      showModal('version-diff-modal');
+    }
+    function closeVersionDiff() {
+      hideModal('version-diff-modal');
+    }
+    document.querySelector('[data-action="version-diff-close"]')?.addEventListener('click', closeVersionDiff);
+    document.getElementById('version-diff-modal')?.addEventListener('click', (e) => {
+      if (e.target.id === 'version-diff-modal') closeVersionDiff();
+    });
+    // Wire sidebar scenario links to open the page
+    document.querySelectorAll('[data-action="open-scenario-default"], [data-scenario-id]').forEach(el => {
+      el.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const sid = el.getAttribute('data-scenario-id');
+        if (sid) openScenarioDetail(sid);
+      });
+    });
+    // Click on the "场景" category label → show the scenarios list
+    document.querySelectorAll('[data-action="show-scenarios"]').forEach(el => {
+      el.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        navigateToView('scenarios');
+      });
+    });
+
     // ---------- New scenario modal ----------
     const SCENARIOS_STORE = []; // in-memory list of created scenarios
+    const AGENTS_CATALOG = [
+      { id: 'opencode',    name: 'OpenCode' },
+      { id: 'claude-code', name: 'Claude Code' },
+      { id: 'gemini-cli',  name: 'Gemini CLI' },
+      { id: 'windsurf',    name: 'Windsurf' },
+      { id: 'codebuddy',   name: 'CodeBuddy' },
+      { id: 'cursor-cli',  name: 'Cursor CLI' },
+      { id: 'copilot-cli', name: 'Copilot CLI' },
+    ];
+    // Render the agent multi-select chip list into a container
+    function renderAgentList(containerId, selectedIds) {
+      const list = document.getElementById(containerId);
+      if (!list) return;
+      list.replaceChildren(...AGENTS_CATALOG.map(a => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'skill-pick' + (selectedIds.includes(a.id) ? ' active' : '');
+        btn.setAttribute('data-agent-id', a.id);
+        btn.setAttribute('role', 'checkbox');
+        btn.setAttribute('aria-checked', selectedIds.includes(a.id) ? 'true' : 'false');
+        btn.innerHTML = '<i data-lucide="cpu" class="w-3.5 h-3.5 flex-shrink-0" aria-hidden="true"></i><span class="truncate">' + escapeHtml(a.name) + '</span><i data-lucide="check" class="w-3.5 h-3.5 skill-pick-check" aria-hidden="true"></i>';
+        btn.addEventListener('click', () => {
+          btn.classList.toggle('active');
+          btn.setAttribute('aria-checked', btn.classList.contains('active') ? 'true' : 'false');
+          if (containerId === 'ns-agent-list') updateScenarioPreview();
+          else if (containerId === 'np-agent-list') updateProjectPreview();
+        });
+        return btn;
+      }));
+      if (window.lucide) lucide.createIcons();
+    }
+    function getSelectedAgents(containerId) {
+      return Array.from(document.querySelectorAll('#' + containerId + ' .skill-pick.active'))
+        .map(b => b.getAttribute('data-agent-id'));
+    }
+    // Render a list of asset ids (rules / agentFiles) as multi-select chip buttons
+    function renderAssetPickList(containerId, assetIds, selectedIds, dataAttr) {
+      const list = document.getElementById(containerId);
+      if (!list) return;
+      list.replaceChildren(...assetIds.map(id => {
+        const extra = ASSETS_EXTRA[id];
+        const type = extra?.type || 'skill';
+        const meta = ASSET_TYPE_META[type] || { label: 'Asset', icon: 'package', color: 'blue' };
+        const name = extra?.snapshots?.[0]?.note || id;
+        // For better display, use a human-friendly name from the first line of content
+        const firstLine = (extra?.content || '').split('\n').find(l => l.trim());
+        const displayName = (firstLine || name).replace(/^#\s*/, '').slice(0, 24);
+        const isActive = selectedIds.includes(id);
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'skill-pick' + (isActive ? ' active' : '');
+        btn.setAttribute(dataAttr, id);
+        btn.setAttribute('role', 'checkbox');
+        btn.setAttribute('aria-checked', isActive ? 'true' : 'false');
+        btn.title = displayName + ' · ' + meta.label;
+        btn.innerHTML = '<i data-lucide="' + meta.icon + '" class="w-3.5 h-3.5 flex-shrink-0" aria-hidden="true"></i><span class="truncate">' + escapeHtml(displayName) + '</span><i data-lucide="check" class="w-3.5 h-3.5 skill-pick-check" aria-hidden="true"></i>';
+        btn.addEventListener('click', () => {
+          btn.classList.toggle('active');
+          btn.setAttribute('aria-checked', btn.classList.contains('active') ? 'true' : 'false');
+          updateScenarioPreview();
+        });
+        return btn;
+      }));
+      if (window.lucide) lucide.createIcons();
+    }
+    // Get all asset ids of a given type from ASSETS_EXTRA
+    function getAssetsByType(type) {
+      return Object.keys(ASSETS_EXTRA).filter(id => (ASSETS_EXTRA[id]?.type || 'skill') === type);
+    }
+    function getSelectedAssetIds(containerId) {
+      return Array.from(document.querySelectorAll('#' + containerId + ' .skill-pick.active'))
+        .map(b => b.getAttribute('data-asset-id'));
+    }
     function openNewScenarioModal() {
       const m = document.getElementById('new-scenario-modal');
       // Reset
       document.getElementById('ns-name').value = '';
       document.getElementById('ns-desc').value = '';
-      document.getElementById('ns-agent').value = 'opencode';
+      // Render multi-agent pick list (none selected by default)
+      renderAgentList('ns-agent-list', []);
       // Render skill pick list from all current skills
       renderScenarioSkillList([]);
+      // Render rules + agent files pick lists
+      renderAssetPickList('ns-rule-list', getAssetsByType('rule'), [], 'data-asset-id');
+      renderAssetPickList('ns-agentfile-list', getAssetsByType('agents-md'), [], 'data-asset-id');
       // Reset color
       document.querySelectorAll('#new-scenario-modal .color-dot').forEach(b => {
         const isActive = b.getAttribute('data-color') === 'emerald';
@@ -2994,8 +4445,10 @@ Button / Modal / Drawer / Tabs / Toast / Form fields
     function updateScenarioPreview() {
       const name = document.getElementById('ns-name').value.trim() || (currentLang === 'en' ? 'New scenario' : '新场景');
       const color = document.querySelector('#new-scenario-modal .color-dot.active')?.getAttribute('data-color') || 'emerald';
-      const agent = document.getElementById('ns-agent').value;
       const skillCount = getSelectedScenarioSkills().length;
+      const ruleCount = getSelectedAssetIds('ns-rule-list').length;
+      const agentFileCount = getSelectedAssetIds('ns-agentfile-list').length;
+      const agentCount = getSelectedAgents('ns-agent-list').length;
       const colorHex = { emerald: '#22c55e', blue: '#60a5fa', purple: '#c084fc', orange: '#fb923c', pink: '#f472b6', cyan: '#22d3ee' }[color];
       const iconWrap = document.getElementById('ns-preview-icon');
       if (iconWrap) {
@@ -3007,17 +4460,20 @@ Button / Modal / Drawer / Tabs / Toast / Form fields
       const titleEl = document.getElementById('ns-preview-title');
       if (titleEl) titleEl.textContent = name;
       const metaEl = document.getElementById('ns-preview-meta');
-      if (metaEl) metaEl.textContent = `${skillCount} 个技能 · ${agent}`;
+      if (metaEl) metaEl.textContent = `${skillCount} 技能 · ${ruleCount} 规则 · ${agentFileCount} Agent 文件 · ${agentCount} Agent`;
       if (window.lucide) lucide.createIcons();
     }
     function createScenario() {
       const name = document.getElementById('ns-name').value.trim();
       const desc = document.getElementById('ns-desc').value.trim();
-      const agent = document.getElementById('ns-agent').value;
       const color = document.querySelector('#new-scenario-modal .color-dot.active')?.getAttribute('data-color') || 'emerald';
       const skills = getSelectedScenarioSkills();
+      const rules = getSelectedAssetIds('ns-rule-list');
+      const agentFiles = getSelectedAssetIds('ns-agentfile-list');
+      const agents = getSelectedAgents('ns-agent-list');
       if (!name) { toast(t('toast.scenarioNameRequired'), 'error'); document.getElementById('ns-name').focus(); return; }
-      const scenario = { id: autoGenId(name), name, desc, color, agent, skills };
+      if (agents.length === 0) { toast('请至少选择一个 Agent', 'error'); return; }
+      const scenario = { id: autoGenId(name), name, desc, color, skills, rules, agentFiles, agents };
       SCENARIOS_STORE.push(scenario);
       // Insert into sidebar
       insertScenarioIntoSidebar(scenario);
@@ -3068,6 +4524,8 @@ Button / Modal / Drawer / Tabs / Toast / Form fields
       document.getElementById('np-path').value = '';
       document.getElementById('np-desc').value = '';
       document.getElementById('np-scenario').value = '';
+      // Render agent multi-select (empty selection by default)
+      renderAgentList('np-agent-list', []);
       // Reset sync mode
       document.querySelectorAll('#new-project-modal .type-pick').forEach(b => {
         const isCopy = b.getAttribute('data-sync') === 'copy';
@@ -3089,19 +4547,23 @@ Button / Modal / Drawer / Tabs / Toast / Form fields
     function updateProjectPreview() {
       const name = document.getElementById('np-name').value.trim() || (currentLang === 'en' ? 'New project' : '新项目');
       const path = document.getElementById('np-path').value.trim() || (currentLang === 'en' ? 'No path selected' : '未选择路径');
+      const agentCount = getSelectedAgents('np-agent-list').length;
       document.getElementById('np-preview-title').textContent = name;
-      document.getElementById('np-preview-meta').textContent = path;
+      let meta = path;
+      if (agentCount > 0) meta += ' · ' + agentCount + ' 个 Agent';
+      document.getElementById('np-preview-meta').textContent = meta;
     }
     function createProject() {
       const name = document.getElementById('np-name').value.trim();
       const path = document.getElementById('np-path').value.trim();
       const desc = document.getElementById('np-desc').value.trim();
       const scenario = document.getElementById('np-scenario').value;
+      const agents = getSelectedAgents('np-agent-list');
       const syncMode = document.querySelector('#new-project-modal .type-pick.active')?.getAttribute('data-sync') || 'copy';
       if (!name) { toast(t('toast.projectNameRequired'), 'error'); document.getElementById('np-name').focus(); return; }
       if (!path) { toast(t('toast.projectPathRequired'), 'error'); document.getElementById('np-path').focus(); return; }
       if (PROJECTS_STORE.find(p => p.id === autoGenId(name))) { toast(t('toast.idDuplicate'), 'error'); return; }
-      const project = { id: autoGenId(name), name, path, desc, scenario, syncMode };
+      const project = { id: autoGenId(name), name, path, desc, scenario, syncMode, agents };
       PROJECTS_STORE.push(project);
       insertProjectIntoSidebar(project);
       closeNewProjectModal();
@@ -3132,12 +4594,15 @@ Button / Modal / Drawer / Tabs / Toast / Form fields
 
     // Auto-generate id from title
     function autoGenId(title) {
-      return title.toLowerCase().trim()
+      const ascii = title.toLowerCase().trim()
         .replace(/[^a-z0-9\s-]/g, '')
         .replace(/\s+/g, '-')
         .replace(/-+/g, '-')
         .replace(/^-|-$/g, '')
         .slice(0, 40);
+      // For CJK-only or otherwise non-ASCII titles, fall back to timestamp suffix
+      if (!ascii) return 's-' + Date.now().toString(36);
+      return ascii;
     }
 
     // ---------- Asset / card sync ----------
@@ -3146,6 +4611,15 @@ Button / Modal / Drawer / Tabs / Toast / Form fields
       const card = document.querySelector(`[data-asset-id="${id}"]`);
       if (!card) return null;
       return readCardMeta(card);
+    }
+    // Get asset meta from ASSETS_EXTRA (covers skill/rule/agents-md that may not have a card in the grid)
+    function getAssetExtra(id) {
+      return ASSETS_EXTRA[id] || null;
+    }
+    function getAssetType(id) {
+      const card = document.querySelector(`[data-asset-id="${id}"]`);
+      if (card) return card.getAttribute('data-asset-type') || 'skill';
+      return ASSETS_EXTRA[id]?.type || 'skill';
     }
     function readCardMeta(card) {
       return {
@@ -3283,6 +4757,73 @@ Button / Modal / Drawer / Tabs / Toast / Form fields
       }
     });
 
+    // ---------- Wire rule + agents-md cards (data-asset-id + click handler) ----------
+    document.querySelectorAll('#skills-grid .rule-card').forEach(card => {
+      const ruleId = card.getAttribute('data-rule-id');
+      if (ruleId) {
+        card.setAttribute('data-asset-id', ruleId);
+        card.setAttribute('data-sync', card.getAttribute('data-sync') || 'synced');
+        wireCardEvents(card);
+      }
+    });
+    document.querySelectorAll('#skills-grid .agents-md-card').forEach(card => {
+      const afId = card.getAttribute('data-agent-file-id');
+      if (afId) {
+        card.setAttribute('data-asset-id', afId);
+        card.setAttribute('data-sync', card.getAttribute('data-sync') || 'synced');
+        wireCardEvents(card);
+      }
+    });
+
+    // ---------- Asset Type filter (Skill / Rule / AGENTS.md) ----------
+    let currentTypeFilter = 'all';
+    let currentEnableFilter = 'all';
+    function applyAssetFilters() {
+      let visibleCount = 0;
+      const cards = document.querySelectorAll('#skills-grid .skill-card');
+      cards.forEach(card => {
+        const type = card.getAttribute('data-asset-type') || 'skill';
+        const enabled = card.getAttribute('data-enabled') !== 'false';
+        const typeOk = currentTypeFilter === 'all' || type === currentTypeFilter;
+        const enableOk = currentEnableFilter === 'all'
+          || (currentEnableFilter === 'enabled' && enabled)
+          || (currentEnableFilter === 'disabled' && !enabled);
+        const show = typeOk && enableOk;
+        card.classList.toggle('hidden-by-filter', !show);
+        if (show) visibleCount++;
+      });
+      const counter = document.getElementById('asset-visible-count');
+      const total = document.getElementById('asset-total-count');
+      if (counter) counter.textContent = visibleCount;
+      if (total) total.textContent = cards.length;
+    }
+    document.querySelectorAll('.type-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.type-tab').forEach(t => {
+          t.classList.remove('active');
+          t.setAttribute('aria-selected', 'false');
+        });
+        tab.classList.add('active');
+        tab.setAttribute('aria-selected', 'true');
+        currentTypeFilter = tab.getAttribute('data-type-filter') || 'all';
+        applyAssetFilters();
+      });
+    });
+    // Hook the original enable filter (data-tab) so it doesn't get bypassed
+    // (handled by the dedicated data-tab handler above; no capture-phase hook needed)
+
+    // Re-apply filter when toggle changes a card
+    const grid = document.getElementById('skills-grid');
+    if (grid) {
+      grid.addEventListener('click', (e) => {
+        if (e.target.closest('.toggle')) {
+          // Wait for the delegated toggle handler to update data-enabled
+          setTimeout(applyAssetFilters, 0);
+        }
+      });
+    }
+    applyAssetFilters();
+
     // ---------- Wire panel / modal / confirm events ----------
     document.getElementById('panel-backdrop').addEventListener('click', closeDetailPanel);
     document.querySelectorAll('.panel-tab').forEach(tab => {
@@ -3340,7 +4881,6 @@ Button / Modal / Drawer / Tabs / Toast / Form fields
     document.querySelectorAll('[data-action="new-scenario-close"]').forEach(b => b.addEventListener('click', closeNewScenarioModal));
     document.querySelector('[data-action="new-scenario-create"]').addEventListener('click', createScenario);
     document.getElementById('ns-name').addEventListener('input', updateScenarioPreview);
-    document.getElementById('ns-agent').addEventListener('change', updateScenarioPreview);
     document.querySelectorAll('#new-scenario-modal .color-dot').forEach(b => {
       b.addEventListener('click', () => {
         document.querySelectorAll('#new-scenario-modal .color-dot').forEach(x => {
