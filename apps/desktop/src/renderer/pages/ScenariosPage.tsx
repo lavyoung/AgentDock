@@ -7,6 +7,30 @@ import "./Pages.css";
 
 // --- Helper sub-components ---
 
+type AvailableAgent = {
+    id: string;
+    name: string;
+    description: string;
+};
+
+const AVAILABLE_AGENTS: AvailableAgent[] = [
+    {
+        id: "opencode",
+        name: "OpenCode Agent",
+        description: "Default local coding agent used by the Phase 1 prototype.",
+    },
+    {
+        id: "codex",
+        name: "Codex Agent",
+        description: "Project-oriented coding workflow with local sync preview.",
+    },
+    {
+        id: "claude-code",
+        name: "Claude Code Agent",
+        description: "Code review and documentation oriented project companion.",
+    },
+];
+
 function ScenarioCard({
     scenario,
     onClick,
@@ -125,7 +149,19 @@ function SeverityMini({
     );
 }
 
-function AgentMini({name, desc}: {name: string; desc: string}): JSX.Element {
+function AgentMini({
+    name,
+    desc,
+    onRemove,
+    showRemove,
+}: {
+    name: string;
+    desc: string;
+    onRemove?: () => void;
+    showRemove?: boolean;
+}): JSX.Element {
+    const {t} = useI18n();
+
     return (
         <div className="detail-row">
             <div className="detail-row-icon" style={{background: "rgba(52,211,153,.15)", color: "#34d399"}}>
@@ -137,11 +173,25 @@ function AgentMini({name, desc}: {name: string; desc: string}): JSX.Element {
                 <div className="detail-row-title">{name}</div>
                 <div className="detail-row-meta">{desc}</div>
             </div>
-            <div className="detail-row-arrow">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="9 18 15 12 9 6"/>
-                </svg>
-            </div>
+            {showRemove && onRemove ? (
+                <button
+                    type="button"
+                    className="skill-mini-remove"
+                    onClick={onRemove}
+                    aria-label={t("scenarioRemoveAsset")}
+                >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            ) : (
+                <div className="detail-row-arrow">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="9 18 15 12 9 6"/>
+                    </svg>
+                </div>
+            )}
         </div>
     );
 }
@@ -287,6 +337,77 @@ function AssetPicker({
     );
 }
 
+function AgentPicker({onClose}: {onClose: () => void}): JSX.Element {
+    const {t} = useI18n();
+    const selectedScenario = useAppStore((s) => s.selectedScenario);
+    const addAgentAppToScenario = useAppStore((s) => s.addAgentAppToScenario);
+    const selectedIds = selectedScenario?.agentAppIds ?? [];
+
+    return (
+        <div className="asset-picker">
+            <div className="asset-picker-backdrop" onClick={onClose} />
+            <div className="asset-picker-panel">
+                <div className="asset-picker-header">
+                    <span className="asset-picker-title">{t("scenarioAgentPickerTitle")}</span>
+                    <button className="icon-btn" onClick={onClose} aria-label={t("close")}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </button>
+                </div>
+                <div className="asset-picker-body">
+                    <p className="form-hint" style={{marginBottom: 12}}>{t("scenarioAgentPickerHint")}</p>
+                    {AVAILABLE_AGENTS.map((agent) => {
+                        const isAlready = selectedIds.includes(agent.id);
+                        return (
+                            <div
+                                key={agent.id}
+                                className={`asset-picker-item ${isAlready ? "is-already" : ""}`}
+                                onClick={() => {
+                                    if (!isAlready) {
+                                        void addAgentAppToScenario(agent.id);
+                                        onClose();
+                                    }
+                                }}
+                            >
+                                <div style={{
+                                    width: 32,
+                                    height: 32,
+                                    borderRadius: 6,
+                                    background: "rgba(52,211,153,.15)",
+                                    color: "#34d399",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    flexShrink: 0,
+                                }}>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                                        <line x1="8" y1="21" x2="16" y2="21"/>
+                                        <line x1="12" y1="17" x2="12" y2="21"/>
+                                    </svg>
+                                </div>
+                                <div style={{minWidth: 0, flex: 1}}>
+                                    <div style={{fontSize: 13, fontWeight: 500, color: "var(--fg-primary)"}}>
+                                        {agent.name}
+                                    </div>
+                                    <div style={{fontSize: 11, color: "var(--fg-muted)"}}>
+                                        {agent.description}
+                                    </div>
+                                </div>
+                                {isAlready ? (
+                                    <span style={{fontSize: 11, color: "#22c55e"}}>{t("assetPickerAlreadyAdded")}</span>
+                                ) : null}
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+        </div>
+    );
+}
+
 // --- Scenario Detail View ---
 function ScenarioDetail(): JSX.Element {
     const {t} = useI18n();
@@ -294,9 +415,12 @@ function ScenarioDetail(): JSX.Element {
     const scenarioDetailView = useAppStore((s) => s.scenarioDetailView);
     const assets = useAppStore((s) => s.assets);
     const rules = useAppStore((s) => s.rules);
+    const projects = useAppStore((s) => s.projects);
     const setView = useAppStore((s) => s.setView);
+    const openProject = useAppStore((s) => s.openProject);
     const setScenarioDetailView = useAppStore((s) => s.setScenarioDetailView);
     const removeAssetFromScenario = useAppStore((s) => s.removeAssetFromScenario);
+    const removeAgentAppFromScenario = useAppStore((s) => s.removeAgentAppFromScenario);
     const openAssetPicker = useAppStore((s) => s.openAssetPicker);
     const saveScenario = useAppStore((s) => s.saveScenario);
     const deleteScenario = useAppStore((s) => s.deleteScenario);
@@ -304,12 +428,15 @@ function ScenarioDetail(): JSX.Element {
     const scenarioDescription = useAppStore((s) => s.scenarioDescription);
     const setScenarioName = useAppStore((s) => s.setScenarioName);
     const setScenarioDescription = useAppStore((s) => s.setScenarioDescription);
+    const [showAgentPicker, setShowAgentPicker] = useState(false);
 
     if (!selectedScenario) return <div className="page-body"><p>{t("scenarioNotFound")}</p></div>;
 
     const skillAssets = assets.filter((a) => a.type === "skill" && selectedScenario.skillIds.includes(a.id));
     const ruleAssets = rules.filter((r) => selectedScenario.ruleIds.includes(r.id));
     const agentFileAssets = assets.filter((a) => a.type === "agents-md" && selectedScenario.agentFileIds.includes(a.id));
+    const linkedProjects = projects.filter((project) => selectedScenario.projectIds.includes(project.id));
+    const linkedAgents = AVAILABLE_AGENTS.filter((agent) => selectedScenario.agentAppIds.includes(agent.id));
 
     const isEdit = scenarioDetailView === "edit";
 
@@ -550,7 +677,7 @@ function ScenarioDetail(): JSX.Element {
                         </h3>
                         <div style={{display: "flex", alignItems: "center", gap: 8}}>
                             <span style={{fontSize: 11, color: "var(--fg-muted)"}}>{selectedScenario.agentAppIds.length}</span>
-                            <button className="scenario-section-add" title={t("scenarioAddAgent")}>
+                            <button className="scenario-section-add" title={t("scenarioAddAgent")} onClick={() => setShowAgentPicker(true)}>
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
                                 </svg>
@@ -558,11 +685,19 @@ function ScenarioDetail(): JSX.Element {
                         </div>
                     </header>
                     <div className="left-card-body" style={{display: "flex", flexDirection: "column", gap: 8}}>
-                        {selectedScenario.agentAppIds.length > 0 ? (
-                            selectedScenario.agentAppIds.map((appId) => (
-                                <AgentMini key={appId} name={appId} desc="OpenCode Agent" />
+                        {linkedAgents.length > 0 ? (
+                            linkedAgents.map((agent) => (
+                                <AgentMini
+                                    key={agent.id}
+                                    name={agent.name}
+                                    desc={agent.description}
+                                    showRemove={isEdit}
+                                    onRemove={() => { void removeAgentAppFromScenario(agent.id); }}
+                                />
                             ))
-                        ) : null}
+                        ) : (
+                            <div style={{fontSize: 13, color: "var(--fg-muted)"}}>{t("scenarioNoAgents")}</div>
+                        )}
                     </div>
                 </section>
 
@@ -570,10 +705,35 @@ function ScenarioDetail(): JSX.Element {
                 <section className="left-card">
                     <header className="left-card-header">
                         <h3>{t("scenarioProjects")}</h3>
-                        <span style={{fontSize: 11, color: "var(--fg-muted)"}}>{selectedScenario.projectIds.length}</span>
+                        <span style={{fontSize: 11, color: "var(--fg-muted)"}}>{linkedProjects.length}</span>
                     </header>
-                    <div className="left-card-body" style={{fontSize: 13, color: "var(--fg-muted)"}}>
-                        {selectedScenario.projectIds.length === 0 ? t("scenarioNoProjects") : null}
+                    <div className="left-card-body" style={{display: "flex", flexDirection: "column", gap: 8}}>
+                        {linkedProjects.length === 0 ? (
+                            <div style={{fontSize: 13, color: "var(--fg-muted)"}}>{t("scenarioNoProjects")}</div>
+                        ) : (
+                            linkedProjects.map((project) => (
+                                <div key={project.id} className="detail-row">
+                                    <div className="detail-row-icon" style={{background: "rgba(59,130,246,.15)", color: "#3b82f6"}}>
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M3 7l9-4 9 4-9 4-9-4z"/>
+                                            <path d="M3 17l9 4 9-4"/>
+                                            <path d="M3 12l9 4 9-4"/>
+                                        </svg>
+                                    </div>
+                                    <div className="detail-row-body">
+                                        <div className="detail-row-title">{project.name}</div>
+                                        <div className="detail-row-meta">{project.path}</div>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        className="btn btn-ghost btn-sm"
+                                        onClick={() => openProject(project.id)}
+                                    >
+                                        {t("scenarioOpenProject")}
+                                    </button>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </section>
 
@@ -587,6 +747,10 @@ function ScenarioDetail(): JSX.Element {
                     </div>
                 </section>
             </div>
+
+            {showAgentPicker ? (
+                <AgentPicker onClose={() => setShowAgentPicker(false)} />
+            ) : null}
         </div>
     );
 }
@@ -647,7 +811,7 @@ export function ScenariosPage(): JSX.Element {
             <div className="page-body">
                 {scenarios.length === 0 ? (
                     <div className="placeholder" style={{padding: "48px 0"}}>
-                        <div className="placeholder-icon">◎</div>
+                        <div className="placeholder-icon">O</div>
                         <h3>{t("scenariosTitle")}</h3>
                         <p className="empty">{t("scenariosEmpty")}</p>
                         <p className="hint" style={{maxWidth: 400, textAlign: "center", color: "var(--fg-muted)"}}>

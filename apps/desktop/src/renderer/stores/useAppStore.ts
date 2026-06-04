@@ -260,6 +260,8 @@ type Actions = {
     closeAssetPicker(): void;
     addAssetToScenario(field: "skillIds" | "ruleIds" | "agentFileIds", assetId: string): Promise<void>;
     removeAssetFromScenario(field: "skillIds" | "ruleIds" | "agentFileIds", assetId: string): Promise<void>;
+    addAgentAppToScenario(agentId: string): Promise<void>;
+    removeAgentAppFromScenario(agentId: string): Promise<void>;
 
     openProject(id: string): void;
     createProject(): Promise<ProjectRecord>;
@@ -633,6 +635,29 @@ export const useAppStore = create<AppStore>((set, get) => ({
         const {selectedScenario} = get();
         if (!selectedScenario) return;
         await agentdockClient.scenarios.removeAsset(selectedScenario.id, field, assetId);
+        await get().openScenario(selectedScenario.id);
+        await get().refreshScenarios();
+    },
+
+    async addAgentAppToScenario(agentId) {
+        const {selectedScenario} = get();
+        if (!selectedScenario) return;
+        if (selectedScenario.agentAppIds.includes(agentId)) return;
+
+        await agentdockClient.scenarios.update(selectedScenario.id, {
+            agentAppIds: [...selectedScenario.agentAppIds, agentId],
+        });
+        await get().openScenario(selectedScenario.id);
+        await get().refreshScenarios();
+    },
+
+    async removeAgentAppFromScenario(agentId) {
+        const {selectedScenario} = get();
+        if (!selectedScenario) return;
+
+        await agentdockClient.scenarios.update(selectedScenario.id, {
+            agentAppIds: selectedScenario.agentAppIds.filter((id) => id !== agentId),
+        });
         await get().openScenario(selectedScenario.id);
         await get().refreshScenarios();
     },

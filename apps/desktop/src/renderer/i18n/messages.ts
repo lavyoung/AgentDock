@@ -161,6 +161,10 @@ type MessageCatalog = {
     scenarioDeleteScenario: string;
     scenarioListSubtitle: string;
     scenarioRemoveAsset: string;
+    scenarioNoAgents: string;
+    scenarioAgentPickerTitle: string;
+    scenarioAgentPickerHint: string;
+    scenarioOpenProject: string;
     scenarioBackToScenarios: string;
     newScenarioTitle: string;
     newScenarioHelp: string;
@@ -399,6 +403,10 @@ export const messages: Record<Locale, Catalog> = {
         scenarioDeleteScenario: "\u5220\u9664\u573a\u666f",
         scenarioListSubtitle: "\u9884\u8bbe\u7684\u8d44\u4ea7 + Agent \u7ec4\u5408\uff0c\u521b\u5efa\u9879\u76ee\u65f6\u53ef\u76f4\u63a5\u9009\u7528",
         scenarioRemoveAsset: "\u79fb\u9664",
+        scenarioNoAgents: "\u8fd8\u672a\u9009\u62e9 Agent",
+        scenarioAgentPickerTitle: "\u9009\u62e9 Agent",
+        scenarioAgentPickerHint: "\u7b2c\u4e00\u9636\u6bb5\u5148\u63d0\u4f9b\u53ef\u7528 Agent \u5217\u8868\uff0c\u540e\u7eed\u518d\u63a5\u5165\u5b8c\u6574\u9002\u914d\u5668\u3002",
+        scenarioOpenProject: "\u6253\u5f00\u9879\u76ee",
         scenarioBackToScenarios: "\u573a\u666f",
         newScenarioTitle: "\u65b0\u5efa\u573a\u666f",
         newScenarioHelp: "\u573a\u666f\u662f\u4e00\u7ec4\u9884\u8bbe\u914d\u7f6e\uff08\u5173\u8054\u7684 Agent + \u542f\u7528\u7684\u6280\u80fd\uff09\u3002\u4e00\u4e2a Agent \u53ef\u88ab\u591a\u4e2a\u573a\u666f\u5171\u7528\u3002",
@@ -633,6 +641,10 @@ export const messages: Record<Locale, Catalog> = {
         scenarioDeleteScenario: "Delete scenario",
         scenarioListSubtitle: "Preset asset and Agent combinations that can be selected directly when creating a project.",
         scenarioRemoveAsset: "Remove",
+        scenarioNoAgents: "No agents selected yet",
+        scenarioAgentPickerTitle: "Choose agent",
+        scenarioAgentPickerHint: "Phase 1 provides a lightweight list of available Agents; the full adapter picker will come later.",
+        scenarioOpenProject: "Open project",
         scenarioBackToScenarios: "Scenarios",
         newScenarioTitle: "New scenario",
         newScenarioHelp: "A scenario is a preset bundle (default Agent + which skills to enable). After creation, you can attach it to a project.",
