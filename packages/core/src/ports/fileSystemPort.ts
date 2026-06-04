@@ -5,4 +5,5 @@ export interface FileSystemPort {
     ensureDir(path: string): Promise<void>;
     copyDir(from: string, to: string): Promise<void>;
     emptyDir(path: string): Promise<void>;
+    remove(path: string): Promise<void>;
 }

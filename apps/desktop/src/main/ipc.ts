@@ -85,6 +85,14 @@ export function registerIpc() {
         return assetService.setAssetStatus(id, status);
     });
 
+    ipcMain.handle("assets:delete", async (_event, id: string) => {
+        await assetService.deleteAsset(id);
+        return {
+            deleted: true,
+            asset_id: id,
+        };
+    });
+
     ipcMain.handle("snapshots:list", async (_event, assetId: string) => {
         return snapshotService.listSnapshots(assetId);
     });

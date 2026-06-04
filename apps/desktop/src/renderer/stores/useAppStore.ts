@@ -11,6 +11,7 @@ import type {
     AssetRecord,
     AssetStatus,
     AssetType,
+    CreateAssetInput,
     RuleRecord,
     RuleSeverity,
     ScenarioRecord,
@@ -130,6 +131,8 @@ type Actions = {
     refreshAssets(): Promise<void>;
     openAsset(id: string): Promise<void>;
     saveAsset(): Promise<void>;
+    createAsset(input: CreateAssetInput): Promise<AssetRecord>;
+    deleteAsset(): Promise<void>;
     createDemoSkill(): Promise<void>;
     createDemoAgentsMd(): Promise<void>;
     restoreSelectedSnapshot(snapshotId: string): Promise<void>;
@@ -317,6 +320,30 @@ export const useAppStore = create<AppStore>((set, get) => ({
         await get().refreshAssets();
         const snapshots = await agentdockClient.snapshots.list(selectedAsset.id);
         set({snapshots});
+    },
+
+    async createAsset(input) {
+        const created = await agentdockClient.assets.create(input);
+        await get().refreshAssets();
+        await get().openAsset(created.id);
+        set({detailPanelOpen: true, detailPanelTab: "overview"});
+        return created;
+    },
+
+    async deleteAsset() {
+        const {selectedAsset} = get();
+        if (!selectedAsset) return;
+        await agentdockClient.assets.delete(selectedAsset.id);
+        await get().refreshAssets();
+        set({
+            selectedAsset: null,
+            editorTitle: "",
+            editorDescription: "",
+            editorContent: "",
+            snapshots: [],
+            detailPanelOpen: false,
+            detailPanelTab: "overview",
+        });
     },
 
     async createDemoSkill() {

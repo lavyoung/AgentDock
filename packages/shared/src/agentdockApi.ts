@@ -27,6 +27,7 @@ export interface AgentdockApi {
         create(input: CreateAssetInput): Promise<AssetRecord>;
         update(id: string, input: UpdateAssetInput): Promise<AssetDetail | null>;
         setStatus(id: string, status: AssetStatus): Promise<AssetRecord | null>;
+        delete(id: string): Promise<{deleted: true; asset_id: string}>;
     };
     rules: {
         list(): Promise<RuleRecord[]>;

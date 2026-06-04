@@ -696,6 +696,30 @@
     padding-top: 8px;
 }
 
+.panel-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--bd-soft);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-shrink: 0;
+    background: var(--bg-panel);
+}
+
+.panel-footer-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.panel-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
 .editor-meta {
     display: flex;
     align-items: center;
@@ -804,6 +828,21 @@
     min-height: 80px;
 }
 
+.field-readonly {
+    width: 100%;
+    min-height: 39px;
+    padding: 8px 12px;
+    font-size: 13px;
+    color: var(--fg-secondary);
+    background: var(--bg-soft);
+    border: 1px solid var(--bd-soft);
+    border-radius: 6px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    word-break: break-all;
+}
+
 .field .field-hint {
     font-size: 11px;
     color: var(--fg-faint);
@@ -813,6 +852,191 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
+}
+
+/* === New asset modal === */
+.new-asset-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: 20px;
+    min-height: 520px;
+}
+
+.new-asset-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
+}
+
+.new-asset-section-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--fg-muted);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.new-asset-type-picker {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.new-asset-type-card {
+    background: var(--bg-card);
+    border: 1px solid var(--bd);
+    border-radius: 12px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    text-align: left;
+    color: var(--fg-secondary);
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+
+.new-asset-type-card:hover {
+    border-color: var(--fg-faint);
+    background: var(--bg-hover);
+}
+
+.new-asset-type-card.active {
+    border-color: var(--accent);
+    background: var(--accent-bg);
+    box-shadow: 0 0 0 1px var(--accent-bg-strong) inset;
+}
+
+.new-asset-type-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.new-asset-type-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--fg-primary);
+}
+
+.new-asset-type-desc {
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--fg-muted);
+    margin: 0;
+}
+
+.new-asset-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.new-asset-editor-field {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.new-asset-editor-label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.new-asset-preview-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.new-asset-preview-card {
+    background: var(--bg-card);
+    border: 1px solid var(--bd);
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.new-asset-preview-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.new-asset-preview-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.new-asset-preview-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--fg-primary);
+    line-height: 1.4;
+}
+
+.new-asset-preview-desc {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--fg-muted);
+}
+
+.new-asset-preview-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--bd-soft);
+    font-size: 12px;
+    color: var(--fg-faint);
+}
+
+.new-asset-preview-id {
+    font-family: ui-monospace, monospace;
+    font-size: 12px;
+    color: var(--fg-faint);
+    background: var(--bg-soft);
+    border: 1px solid var(--bd-soft);
+    border-radius: 8px;
+    padding: 8px 10px;
+}
+
+@media (max-width: 980px) {
+    .new-asset-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .new-asset-form-grid,
+    .new-asset-type-picker {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 720px) {
+    .panel-meta-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .panel-footer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .panel-footer-actions {
+        justify-content: stretch;
+    }
+
+    .panel-footer .btn {
+        width: 100%;
+    }
 }
 
 /* === Left card (scenarios) === */

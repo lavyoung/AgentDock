@@ -12,6 +12,7 @@ type MessageCatalog = {
     save: string;
     restore: string;
     close: string;
+    cancel: string;
     toggleEnabled: string;
     assetsTitle: string;
     assetsUnit: string;
@@ -94,6 +95,23 @@ type MessageCatalog = {
     actionNewProject: string;
     skillsBackup: string;
     skillsNewAsset: string;
+    newAssetTitle: string;
+    newAssetType: string;
+    newAssetTypeSkillDesc: string;
+    newAssetTypeAgentsMdDesc: string;
+    newAssetTitleLabel: string;
+    newAssetIdLabel: string;
+    newAssetDescLabel: string;
+    newAssetContentLabel: string;
+    newAssetContentHint: string;
+    newAssetResetTemplate: string;
+    newAssetPreview: string;
+    newAssetPreviewHint: string;
+    newAssetCreate: string;
+    newAssetValidationTitle: string;
+    newAssetValidationId: string;
+    newAssetValidationContent: string;
+    newAssetCreated: string;
     installTitle: string;
     installSubtitle: string;
     projectsTitle: string;
@@ -152,14 +170,26 @@ type MessageCatalog = {
     panelTabOverview: string;
     panelTabContent: string;
     panelTabHistory: string;
+    panelFieldId: string;
+    panelFieldType: string;
+    panelFieldVersion: string;
+    panelFieldTags: string;
+    panelFieldPath: string;
     panelFieldTitle: string;
     panelFieldDescription: string;
+    panelNoTags: string;
     assetContent: string;
+    panelContentStats: string;
     panelHistoryDesc: string;
     noSnapshotsYet: string;
     snapshotMessageBeforeAssetUpdate: string;
     snapshotRestored: string;
     snapshotRestoreFailed: string;
+    deleteAsset: string;
+    confirmDeleteAsset: string;
+    assetDeleted: string;
+    assetDeleteFailed: string;
+    saveAndSnapshot: string;
     targetList: string;
     newTarget: string;
     enabledYes: string;
@@ -193,6 +223,7 @@ export const messages: Record<Locale, Catalog> = {
         save: "\u4fdd\u5b58",
         restore: "\u6062\u590d",
         close: "\u5173\u95ed",
+        cancel: "\u53d6\u6d88",
         toggleEnabled: "\u5207\u6362\u542f\u7528\u72b6\u6001",
         assetsTitle: "\u8d44\u4ea7",
         assetsUnit: "\u9879",
@@ -275,6 +306,23 @@ export const messages: Record<Locale, Catalog> = {
         actionNewProject: "\u65b0\u589e\u9879\u76ee",
         skillsBackup: "\u5f00\u59cb\u5907\u4efd",
         skillsNewAsset: "\u65b0\u5efa\u8d44\u4ea7",
+        newAssetTitle: "\u65b0\u5efa\u8d44\u4ea7",
+        newAssetType: "\u8d44\u4ea7\u7c7b\u578b",
+        newAssetTypeSkillDesc: "\u9762\u5411\u5177\u4f53\u80fd\u529b\u7684 Skill\uff0c\u540c\u6b65\u5230 .agentdock/skills/<id>/SKILL.md",
+        newAssetTypeAgentsMdDesc: "\u9879\u76ee\u7ea7 AGENTS.md \u8d44\u4ea7\uff0c\u540c\u6b65\u65f6\u5408\u5e76\u5230\u76ee\u6807 AGENTS.md",
+        newAssetTitleLabel: "\u6807\u9898",
+        newAssetIdLabel: "\u8d44\u4ea7 ID",
+        newAssetDescLabel: "\u63cf\u8ff0",
+        newAssetContentLabel: "\u521d\u59cb\u5185\u5bb9",
+        newAssetContentHint: "\u8fd9\u4f1a\u6210\u4e3a\u8d44\u4ea7\u521b\u5efa\u65f6\u7684\u521d\u59cb\u6587\u4ef6\u5185\u5bb9\u3002",
+        newAssetResetTemplate: "\u6062\u590d\u9ed8\u8ba4\u6a21\u677f",
+        newAssetPreview: "\u9884\u89c8",
+        newAssetPreviewHint: "\u521b\u5efa\u540e\u4f1a\u51fa\u73b0\u5728\u8d44\u4ea7\u5217\u8868\u9876\u90e8\uff0c\u5e76\u81ea\u52a8\u6253\u5f00\u8be6\u60c5\u62bd\u5c49\u3002",
+        newAssetCreate: "\u521b\u5efa\u8d44\u4ea7",
+        newAssetValidationTitle: "\u8bf7\u586b\u5199\u8d44\u4ea7\u6807\u9898",
+        newAssetValidationId: "\u8d44\u4ea7 ID \u53ea\u80fd\u4f7f\u7528\u5c0f\u5199\u5b57\u6bcd\u3001\u6570\u5b57\u548c\u8fde\u5b57\u7b26",
+        newAssetValidationContent: "\u8bf7\u586b\u5199\u521d\u59cb\u5185\u5bb9",
+        newAssetCreated: "\u8d44\u4ea7\u201c{name}\u201d\u5df2\u521b\u5efa",
         installTitle: "\u5b89\u88c5\u6280\u80fd",
         installSubtitle: "\u4ece\u4ed3\u5e93\u6d4f\u89c8\u5e76\u5b89\u88c5\u65b0\u6280\u80fd",
         projectsTitle: "\u5173\u8054\u9879\u76ee",
@@ -333,14 +381,26 @@ export const messages: Record<Locale, Catalog> = {
         panelTabOverview: "\u6982\u89c8",
         panelTabContent: "\u5185\u5bb9",
         panelTabHistory: "\u5386\u53f2",
+        panelFieldId: "ID",
+        panelFieldType: "\u7c7b\u578b",
+        panelFieldVersion: "\u7248\u672c",
+        panelFieldTags: "\u6807\u7b7e",
+        panelFieldPath: "\u8def\u5f84",
         panelFieldTitle: "\u6807\u9898",
         panelFieldDescription: "\u63cf\u8ff0",
+        panelNoTags: "\u6682\u672a\u652f\u6301\u6807\u7b7e",
         assetContent: "\u5185\u5bb9",
+        panelContentStats: "{fileName} \u00b7 {lines} \u884c \u00b7 {characters} \u5b57\u7b26",
         panelHistoryDesc: "\u6bcf\u6b21\u4fdd\u5b58\u90fd\u4f1a\u81ea\u52a8\u521b\u5efa\u672c\u5730\u5feb\u7167\uff0c\u53ef\u67e5\u770b\u4e0e\u56de\u6eda",
         noSnapshotsYet: "\u8fd8\u6ca1\u6709\u5feb\u7167",
         snapshotMessageBeforeAssetUpdate: "\u6bcf\u6b21\u4fdd\u5b58\u90fd\u4f1a\u81ea\u52a8\u521b\u5efa\u672c\u5730\u5feb\u7167",
         snapshotRestored: "\u5feb\u7167\u6062\u590d\u6210\u529f",
         snapshotRestoreFailed: "\u5feb\u7167\u6062\u590d\u5931\u8d25",
+        deleteAsset: "\u5220\u9664\u8d44\u4ea7",
+        confirmDeleteAsset: "\u786e\u5b9a\u8981\u5220\u9664\u6b64\u8d44\u4ea7\u5417\uff1f",
+        assetDeleted: "\u8d44\u4ea7\u5df2\u5220\u9664",
+        assetDeleteFailed: "\u8d44\u4ea7\u5220\u9664\u5931\u8d25",
+        saveAndSnapshot: "\u4fdd\u5b58\u5e76\u521b\u5efa\u5feb\u7167",
         targetList: "\u76ee\u6807\u5217\u8868",
         newTarget: "\u65b0\u5efa\u76ee\u6807",
         enabledYes: "\u5df2\u542f\u7528",
@@ -370,6 +430,7 @@ export const messages: Record<Locale, Catalog> = {
         save: "Save",
         restore: "Restore",
         close: "Close",
+        cancel: "Cancel",
         toggleEnabled: "Toggle enabled",
         assetsTitle: "Assets",
         assetsUnit: "items",
@@ -452,6 +513,23 @@ export const messages: Record<Locale, Catalog> = {
         actionNewProject: "New project",
         skillsBackup: "Backup now",
         skillsNewAsset: "New asset",
+        newAssetTitle: "New asset",
+        newAssetType: "Asset type",
+        newAssetTypeSkillDesc: "Capability-oriented Skill synced to .agentdock/skills/<id>/SKILL.md",
+        newAssetTypeAgentsMdDesc: "Project-level AGENTS.md asset merged into the target AGENTS.md",
+        newAssetTitleLabel: "Title",
+        newAssetIdLabel: "Asset ID",
+        newAssetDescLabel: "Description",
+        newAssetContentLabel: "Initial content",
+        newAssetContentHint: "This becomes the initial file content when the asset is created.",
+        newAssetResetTemplate: "Reset template",
+        newAssetPreview: "Preview",
+        newAssetPreviewHint: "After creation, the asset is inserted into the list and its detail panel opens automatically.",
+        newAssetCreate: "Create asset",
+        newAssetValidationTitle: "Please enter an asset title",
+        newAssetValidationId: "Asset ID may only contain lowercase letters, numbers, and hyphens",
+        newAssetValidationContent: "Please enter initial content",
+        newAssetCreated: 'Asset "{name}" created',
         installTitle: "Install Skills",
         installSubtitle: "Browse and install new skills from the registry",
         projectsTitle: "Linked Projects",
@@ -510,14 +588,26 @@ export const messages: Record<Locale, Catalog> = {
         panelTabOverview: "Overview",
         panelTabContent: "Content",
         panelTabHistory: "History",
+        panelFieldId: "ID",
+        panelFieldType: "Type",
+        panelFieldVersion: "Version",
+        panelFieldTags: "Tags",
+        panelFieldPath: "Path",
         panelFieldTitle: "Title",
         panelFieldDescription: "Description",
+        panelNoTags: "Tags are not available yet in Phase 1",
         assetContent: "Content",
+        panelContentStats: "{fileName} · {lines} lines · {characters} characters",
         panelHistoryDesc: "Each save creates a local snapshot automatically for review and rollback.",
         noSnapshotsYet: "No snapshots yet",
         snapshotMessageBeforeAssetUpdate: "Each save creates a local snapshot automatically.",
         snapshotRestored: "Snapshot restored successfully",
         snapshotRestoreFailed: "Failed to restore snapshot",
+        deleteAsset: "Delete asset",
+        confirmDeleteAsset: "Are you sure you want to delete this asset?",
+        assetDeleted: "Asset deleted",
+        assetDeleteFailed: "Failed to delete asset",
+        saveAndSnapshot: "Save and create snapshot",
         targetList: "Target list",
         newTarget: "New target",
         enabledYes: "Enabled",

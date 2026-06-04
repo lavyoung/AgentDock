@@ -11,14 +11,23 @@ type ModalProps = {
     width?: number;
 };
 
-export function Modal({open, title, onClose, children, footer, width = 520}: ModalProps): ReactNode {
+export function Modal({
+    open,
+    title,
+    onClose,
+    children,
+    footer,
+    width = 520,
+}: ModalProps): ReactNode {
     const dialogRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
         if (!open) return;
+
         function onKey(event: KeyboardEvent): void {
             if (event.key === "Escape") onClose();
         }
+
         window.addEventListener("keydown", onKey);
         return () => window.removeEventListener("keydown", onKey);
     }, [open, onClose]);
@@ -48,7 +57,7 @@ export function Modal({open, title, onClose, children, footer, width = 520}: Mod
                         aria-label="Close"
                         onClick={onClose}
                     >
-                        ×
+                        X
                     </button>
                 </header>
                 <div className="modal-body">{children}</div>

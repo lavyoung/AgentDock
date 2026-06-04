@@ -169,9 +169,39 @@ export function migrateDatabase(): void {
 
 class SqliteAssetRepository implements AssetRepository {
     private readonly database: Database.Database;
+    private readonly deleteAssetTransaction: (id: string) => void;
 
     constructor(database: Database.Database) {
         this.database = database;
+        this.deleteAssetTransaction = this.database.transaction((id: string) => {
+            this.database
+                .prepare(
+                    `
+                        DELETE
+                        FROM asset_targets
+                        WHERE asset_id = ?
+                    `
+                )
+                .run(id);
+            this.database
+                .prepare(
+                    `
+                        DELETE
+                        FROM snapshots
+                        WHERE asset_id = ?
+                    `
+                )
+                .run(id);
+            this.database
+                .prepare(
+                    `
+                        DELETE
+                        FROM assets
+                        WHERE id = ?
+                    `
+                )
+                .run(id);
+        });
     }
 
     list(): AssetRecord[] {
@@ -281,6 +311,10 @@ class SqliteAssetRepository implements AssetRepository {
                 id,
                 updated_at: updatedAt,
             });
+    }
+
+    delete(id: string): void {
+        this.deleteAssetTransaction(id);
     }
 }
 

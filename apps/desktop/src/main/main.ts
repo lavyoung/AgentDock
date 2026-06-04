@@ -34,6 +34,27 @@ function createWindow() {
         setMainWindow(win);
     });
 
+    // Safety net: show window after 2s even if ready-to-show hasn't fired
+    // (e.g. Vite HMR keeps the page loading forever).
+    setTimeout(() => {
+        if (!win.isDestroyed() && !win.isVisible()) {
+            // eslint-disable-next-line no-console
+            console.warn("[AgentDock] ready-to-show timeout — forcing window show");
+            win.show();
+            setMainWindow(win);
+        }
+    }, 2000);
+
+    win.webContents.on("did-fail-load", (_e, errorCode, errorDescription) => {
+        // eslint-disable-next-line no-console
+        console.error(`[AgentDock] did-fail-load: ${errorCode} ${errorDescription}`);
+    });
+
+    win.webContents.on("render-process-gone", (_e, details) => {
+        // eslint-disable-next-line no-console
+        console.error(`[AgentDock] render-process-gone: ${JSON.stringify(details)}`);
+    });
+
     if (isDev) {
         win.loadURL("http://localhost:5173");
     } else {

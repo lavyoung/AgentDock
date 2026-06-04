@@ -147,4 +147,18 @@ export class AssetService {
         if (!updated) return null;
         return this.assetRepository.findById(id);
     }
+
+    async deleteAsset(id: string): Promise<void> {
+        const asset = this.assetRepository.findById(id);
+
+        if (!asset) {
+            throw new Error(`Asset not found: ${id}`);
+        }
+
+        if (await this.fileSystem.exists(asset.path)) {
+            await this.fileSystem.remove(asset.path);
+        }
+
+        this.assetRepository.delete(id);
+    }
 }

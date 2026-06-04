@@ -95,6 +95,13 @@ const mockApi: AgentdockApi = {
             const {content: _c, ...rest} = mockAssets[idx];
             return rest;
         },
+        delete: async (id) => {
+            const idx = mockAssets.findIndex((a) => a.id === id);
+            if (idx >= 0) {
+                mockAssets.splice(idx, 1);
+            }
+            return {deleted: true, asset_id: id};
+        },
     },
     rules: {
         list: async () => [...mockRules],
@@ -296,7 +303,7 @@ export const agentdockClient: AgentdockApi = MOCK_MODE ? mockApi : new Proxy({} 
         if (!api) {
             return {
                 app: {name: "AgentDock"},
-                assets: {list: notReady, get: notReady, create: notReady, update: notReady, setStatus: notReady},
+                assets: {list: notReady, get: notReady, create: notReady, update: notReady, setStatus: notReady, delete: notReady},
                 rules: {list: notReady, get: notReady, create: notReady, update: notReady, delete: notReady},
                 snapshots: {list: notReady, restore: notReady},
                 targets: {list: notReady, get: notReady, create: notReady, update: notReady, delete: notReady},

@@ -1,9 +1,32 @@
-import {type JSX, useCallback, useEffect} from "react";
+import {type JSX, useCallback, useEffect, useMemo, useState} from "react";
 
+import {getAssetMainFileName} from "../../../../../packages/core/src/types/asset";
 import {Button} from "./Button";
 import {useI18n} from "../i18n/useI18n";
-import {useAppStore} from "../stores/useAppStore";
+import {getAssetTypeLabelKey, useAppStore} from "../stores/useAppStore";
 import "./Modal.css";
+
+function getLineCount(content: string): number {
+    if (content.length === 0) {
+        return 0;
+    }
+
+    return content.split(/\r?\n/).length;
+}
+
+type ReadonlyFieldProps = {
+    label: string;
+    value: string;
+};
+
+function ReadonlyField({label, value}: ReadonlyFieldProps): JSX.Element {
+    return (
+        <div className="field">
+            <label>{label}</label>
+            <div className="field-readonly">{value}</div>
+        </div>
+    );
+}
 
 export function DetailPanel(): JSX.Element {
     const open = useAppStore((s) => s.detailPanelOpen);
@@ -19,9 +42,12 @@ export function DetailPanel(): JSX.Element {
     const setEditorDescription = useAppStore((s) => s.setEditorDescription);
     const setEditorContent = useAppStore((s) => s.setEditorContent);
     const saveAsset = useAppStore((s) => s.saveAsset);
+    const deleteAsset = useAppStore((s) => s.deleteAsset);
     const restoreSelectedSnapshot = useAppStore((s) => s.restoreSelectedSnapshot);
     const pushToast = useAppStore((s) => s.pushToast);
     const {t, formatDateTime} = useI18n();
+    const [isSaving, setIsSaving] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const handleClose = useCallback(() => {
         closeDetailPanel();
@@ -29,33 +55,72 @@ export function DetailPanel(): JSX.Element {
 
     useEffect(() => {
         const handleKey = (e: KeyboardEvent) => {
-            if (e.key === "Escape" && open) handleClose();
+            if (e.key === "Escape" && open) {
+                handleClose();
+            }
         };
         window.addEventListener("keydown", handleKey);
         return () => window.removeEventListener("keydown", handleKey);
     }, [open, handleClose]);
 
-    const assetType = (selectedAsset?.type ?? "skill") as string;
+    const assetType = selectedAsset?.type ?? "skill";
     const assetTypeBadgeClass =
         assetType === "agents-md"
             ? "badge badge-purple"
             : assetType === "rule"
                 ? "badge badge-orange"
                 : "badge badge-blue";
+    const assetTypeLabel = t(getAssetTypeLabelKey(assetType));
+    const fileName = selectedAsset ? getAssetMainFileName(selectedAsset.type) : "SKILL.md";
+    const contentStats = useMemo(() => {
+        const template = t("panelContentStats");
+        return template
+            .replace("{fileName}", fileName)
+            .replace("{lines}", String(getLineCount(editorContent)))
+            .replace("{characters}", String(editorContent.length));
+    }, [editorContent, fileName, t]);
 
-    const assetTypeLabel =
-        assetType === "agents-md"
-            ? "AGENTS.md"
-            : assetType === "rule"
-                ? "Rule"
-                : "Skill";
+    const isDirty =
+        !!selectedAsset &&
+        (
+            editorTitle !== selectedAsset.title ||
+            editorDescription !== selectedAsset.description ||
+            editorContent !== selectedAsset.content
+        );
 
     async function handleSave() {
+        if (!selectedAsset || isSaving || !isDirty) {
+            return;
+        }
+
         try {
+            setIsSaving(true);
             await saveAsset();
             pushToast("success", t("savedSuccess"));
         } catch {
             pushToast("error", t("saveFailed"));
+        } finally {
+            setIsSaving(false);
+        }
+    }
+
+    async function handleDelete() {
+        if (!selectedAsset || isDeleting) {
+            return;
+        }
+
+        if (!window.confirm(t("confirmDeleteAsset"))) {
+            return;
+        }
+
+        try {
+            setIsDeleting(true);
+            await deleteAsset();
+            pushToast("success", t("assetDeleted"));
+        } catch {
+            pushToast("error", t("assetDeleteFailed"));
+        } finally {
+            setIsDeleting(false);
         }
     }
 
@@ -84,7 +149,7 @@ export function DetailPanel(): JSX.Element {
                                     <span className="text-white font-medium">
                                         {selectedAsset.version}
                                     </span>
-                                    <span className="text-zinc-600">·</span>
+                                    <span aria-hidden="true">·</span>
                                     <span className="sync-pill synced">
                                         <span className="pill-dot" />
                                         <span>{t("panelSynced")}</span>
@@ -144,6 +209,22 @@ export function DetailPanel(): JSX.Element {
                         <div className="panel-body">
                             {tab === "overview" && (
                                 <div className="panel-pane" role="tabpanel">
+                                    <div className="panel-meta-grid">
+                                        <ReadonlyField label={t("panelFieldId")} value={selectedAsset.id} />
+                                        <ReadonlyField label={t("panelFieldType")} value={assetTypeLabel} />
+                                        <ReadonlyField
+                                            label={t("panelFieldVersion")}
+                                            value={selectedAsset.version}
+                                        />
+                                        <ReadonlyField
+                                            label={t("panelFieldTags")}
+                                            value={t("panelNoTags")}
+                                        />
+                                    </div>
+                                    <ReadonlyField
+                                        label={t("panelFieldPath")}
+                                        value={`${selectedAsset.path}\\current\\${fileName}`}
+                                    />
                                     <div className="field">
                                         <label htmlFor="f-title">{t("panelFieldTitle")}</label>
                                         <input
@@ -162,20 +243,13 @@ export function DetailPanel(): JSX.Element {
                                             onChange={(e) => setEditorDescription(e.target.value)}
                                         />
                                     </div>
-                                    <div className="panel-actions">
-                                        <Button variant="primary" onClick={handleSave}>
-                                            {t("save")}
-                                        </Button>
-                                    </div>
                                 </div>
                             )}
                             {tab === "content" && (
                                 <div className="panel-pane" role="tabpanel">
-                                    <div className="editor-meta">
-                                        <span className="text-zinc-500 text-xs">
-                                            SKILL.md · {editorContent.split("\n").length} �?·{" "}
-                                            {editorContent.length} 字符
-                                        </span>
+                                    <div className={`editor-meta ${isDirty ? "dirty" : ""}`}>
+                                        <span className="dirty-dot" />
+                                        <span className="text-zinc-500 text-xs">{contentStats}</span>
                                     </div>
                                     <textarea
                                         className="editor"
@@ -184,11 +258,6 @@ export function DetailPanel(): JSX.Element {
                                         value={editorContent}
                                         onChange={(e) => setEditorContent(e.target.value)}
                                     />
-                                    <div className="panel-actions">
-                                        <Button variant="primary" onClick={handleSave}>
-                                            {t("save")}
-                                        </Button>
-                                    </div>
                                 </div>
                             )}
                             {tab === "history" && (
@@ -198,19 +267,23 @@ export function DetailPanel(): JSX.Element {
                                         <p className="text-zinc-500 text-sm">{t("noSnapshotsYet")}</p>
                                     ) : (
                                         <ul className="snapshot-list">
-                                            {snapshots.map((s) => (
-                                                <li key={s.id} className="snapshot-item">
+                                            {snapshots.map((snapshot) => (
+                                                <li key={snapshot.id} className="snapshot-item">
                                                     <div>
-                                                        <strong>{formatDateTime(s.created_at)}</strong>
+                                                        <strong>{formatDateTime(snapshot.created_at)}</strong>
                                                     </div>
-                                                    <div className="hint">{t("snapshotMessageBeforeAssetUpdate")}</div>
-                                                    <div className="hint mono">{s.snapshot_path}</div>
+                                                    <div className="hint">
+                                                        {t("snapshotMessageBeforeAssetUpdate")}
+                                                    </div>
+                                                    <div className="hint mono">
+                                                        {snapshot.snapshot_path}
+                                                    </div>
                                                     <div>
                                                         <Button
                                                             size="sm"
                                                             onClick={async () => {
                                                                 try {
-                                                                    await restoreSelectedSnapshot(s.id);
+                                                                    await restoreSelectedSnapshot(snapshot.id);
                                                                     pushToast("success", t("snapshotRestored"));
                                                                 } catch {
                                                                     pushToast("error", t("snapshotRestoreFailed"));
@@ -227,6 +300,32 @@ export function DetailPanel(): JSX.Element {
                                 </div>
                             )}
                         </div>
+
+                        <footer className="panel-footer">
+                            <Button
+                                variant="danger"
+                                onClick={handleDelete}
+                                disabled={isDeleting || isSaving}
+                            >
+                                {t("deleteAsset")}
+                            </Button>
+                            <div className="panel-footer-actions">
+                                <Button
+                                    variant="secondary"
+                                    onClick={handleClose}
+                                    disabled={isDeleting || isSaving}
+                                >
+                                    {t("cancel")}
+                                </Button>
+                                <Button
+                                    variant="primary"
+                                    onClick={handleSave}
+                                    disabled={!isDirty || isDeleting || isSaving}
+                                >
+                                    {t("saveAndSnapshot")}
+                                </Button>
+                            </div>
+                        </footer>
                     </>
                 )}
             </aside>

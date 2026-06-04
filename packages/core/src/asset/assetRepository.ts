@@ -9,4 +9,5 @@ export interface AssetRepository {
         changes: Pick<AssetRecord, "title" | "description" | "status" | "updated_at">
     ): void;
     touch(id: string, updatedAt: string): void;
+    delete(id: string): void;
 }

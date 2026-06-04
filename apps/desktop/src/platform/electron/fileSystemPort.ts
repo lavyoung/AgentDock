@@ -26,6 +26,9 @@ export const nodeFileSystemPort: FileSystemPort = {
     emptyDir(targetPath) {
         return fs.emptyDir(targetPath);
     },
+    remove(targetPath) {
+        return fs.remove(targetPath);
+    },
 };
 
 export const nodePathPort: PathPort = {

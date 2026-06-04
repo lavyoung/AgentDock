@@ -11,6 +11,7 @@ const agentdockApi: AgentdockApi = {
         create: (input) => ipcRenderer.invoke("assets:create", input),
         update: (id, input) => ipcRenderer.invoke("assets:update", id, input),
         setStatus: (id, status) => ipcRenderer.invoke("assets:setStatus", id, status),
+        delete: (id) => ipcRenderer.invoke("assets:delete", id),
     },
     snapshots: {
         list: (assetId) => ipcRenderer.invoke("snapshots:list", assetId),
