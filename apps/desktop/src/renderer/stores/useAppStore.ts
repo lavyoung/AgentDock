@@ -45,6 +45,20 @@ function applyTheme(theme: "dark" | "light" | "system"): void {
 export type ViewKey = "overview" | "assets" | "install" | "scenarios" | "targets" | "projects" | "settings";
 export type ScenarioDetailView = "view" | "edit";
 export type ThemeMode = "dark" | "light" | "system";
+export type ProjectSyncMode = "manual" | "preview-first";
+
+export type ProjectRecord = {
+    id: string;
+    name: string;
+    path: string;
+    defaultScenarioId: string | null;
+    syncMode: ProjectSyncMode;
+    agentLabel: string;
+    createdAt: string;
+    updatedAt: string;
+};
+
+const PROJECTS_STORAGE_KEY = "agentdock:projects";
 
 export type ToastKind = "info" | "success" | "error";
 
@@ -56,6 +70,72 @@ export type Toast = {
 
 export type AssetFilter = "all" | "enabled" | "disabled";
 export type AssetTypeFilter = "all" | AssetType;
+
+function createProjectId(name: string): string {
+    const base = name
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "");
+
+    if (base) {
+        return base;
+    }
+
+    return `project-${Date.now()}`;
+}
+
+function readStoredProjects(): ProjectRecord[] {
+    if (typeof window === "undefined") {
+        return [];
+    }
+
+    try {
+        const raw = window.localStorage.getItem(PROJECTS_STORAGE_KEY);
+        if (!raw) {
+            return [];
+        }
+
+        const parsed = JSON.parse(raw) as unknown;
+        if (!Array.isArray(parsed)) {
+            return [];
+        }
+
+        return parsed.filter((item): item is ProjectRecord => {
+            if (!item || typeof item !== "object") {
+                return false;
+            }
+
+            const candidate = item as Record<string, unknown>;
+            return (
+                typeof candidate.id === "string" &&
+                typeof candidate.name === "string" &&
+                typeof candidate.path === "string" &&
+                (typeof candidate.defaultScenarioId === "string" || candidate.defaultScenarioId === null) &&
+                (candidate.syncMode === "manual" || candidate.syncMode === "preview-first") &&
+                typeof candidate.agentLabel === "string" &&
+                typeof candidate.createdAt === "string" &&
+                typeof candidate.updatedAt === "string"
+            );
+        });
+    } catch {
+        return [];
+    }
+}
+
+function persistProjects(projects: ProjectRecord[]): void {
+    if (typeof window === "undefined") {
+        return;
+    }
+
+    try {
+        window.localStorage.setItem(PROJECTS_STORAGE_KEY, JSON.stringify(projects));
+    } catch {
+        /* ignore */
+    }
+}
 
 type State = {
     view: ViewKey;
@@ -93,6 +173,15 @@ type State = {
     scenarioName: string;
     scenarioTitle: string;
     scenarioDescription: string;
+
+    // projects
+    projects: ProjectRecord[];
+    selectedProjectId: string | null;
+    projectName: string;
+    projectPath: string;
+    projectDefaultScenarioId: string | null;
+    projectSyncMode: ProjectSyncMode;
+    projectAgentLabel: string;
 
     // asset picker (modal for adding to scenario)
     assetPickerOpen: boolean;
@@ -172,6 +261,15 @@ type Actions = {
     addAssetToScenario(field: "skillIds" | "ruleIds" | "agentFileIds", assetId: string): Promise<void>;
     removeAssetFromScenario(field: "skillIds" | "ruleIds" | "agentFileIds", assetId: string): Promise<void>;
 
+    openProject(id: string): void;
+    createProject(): Promise<ProjectRecord>;
+    resetProjectForm(): void;
+    setProjectName(value: string): void;
+    setProjectPath(value: string): void;
+    setProjectDefaultScenarioId(value: string | null): void;
+    setProjectSyncMode(value: ProjectSyncMode): void;
+    setProjectAgentLabel(value: string): void;
+
     refreshTargets(): Promise<void>;
     openTarget(id: string): Promise<void>;
     saveTarget(): Promise<void>;
@@ -230,6 +328,14 @@ const initialState: State = {
     scenarioName: "",
     scenarioTitle: "",
     scenarioDescription: "",
+
+    projects: readStoredProjects(),
+    selectedProjectId: null,
+    projectName: "",
+    projectPath: "",
+    projectDefaultScenarioId: "default",
+    projectSyncMode: "manual",
+    projectAgentLabel: "OpenCode Agent",
 
     assetPickerOpen: false,
     assetPickerField: null,
@@ -530,6 +636,98 @@ export const useAppStore = create<AppStore>((set, get) => ({
         await get().openScenario(selectedScenario.id);
         await get().refreshScenarios();
     },
+
+    openProject(id) {
+        const project = get().projects.find((item) => item.id === id);
+        if (!project) {
+            return;
+        }
+
+        set({
+            view: "projects",
+            selectedProjectId: project.id,
+            projectName: project.name,
+            projectPath: project.path,
+            projectDefaultScenarioId: project.defaultScenarioId,
+            projectSyncMode: project.syncMode,
+            projectAgentLabel: project.agentLabel,
+        });
+    },
+
+    async createProject() {
+        const {
+            projects,
+            scenarios,
+            projectName,
+            projectPath,
+            projectDefaultScenarioId,
+            projectSyncMode,
+            projectAgentLabel,
+        } = get();
+
+        const trimmedName = projectName.trim();
+        const trimmedPath = projectPath.trim();
+        const now = new Date().toISOString();
+        const idBase = createProjectId(trimmedName);
+        let nextId = idBase;
+        let duplicateIndex = 2;
+
+        while (projects.some((project) => project.id === nextId)) {
+            nextId = `${idBase}-${duplicateIndex}`;
+            duplicateIndex += 1;
+        }
+
+        if (projectDefaultScenarioId) {
+            const matchedScenario = scenarios.find((scenario) => scenario.id === projectDefaultScenarioId);
+            if (matchedScenario && !matchedScenario.projectIds.includes(nextId)) {
+                await agentdockClient.scenarios.update(matchedScenario.id, {
+                    projectIds: [...matchedScenario.projectIds, nextId],
+                });
+                if (get().selectedScenario?.id === matchedScenario.id) {
+                    await get().openScenario(matchedScenario.id);
+                }
+                await get().refreshScenarios();
+            }
+        }
+
+        const created: ProjectRecord = {
+            id: nextId,
+            name: trimmedName,
+            path: trimmedPath,
+            defaultScenarioId: projectDefaultScenarioId,
+            syncMode: projectSyncMode,
+            agentLabel: projectAgentLabel.trim() || "OpenCode Agent",
+            createdAt: now,
+            updatedAt: now,
+        };
+
+        const nextProjects = [created, ...projects];
+        persistProjects(nextProjects);
+        set({
+            projects: nextProjects,
+            selectedProjectId: created.id,
+            view: "projects",
+        });
+
+        return created;
+    },
+
+    resetProjectForm() {
+        set({
+            selectedProjectId: null,
+            projectName: "",
+            projectPath: "",
+            projectDefaultScenarioId: "default",
+            projectSyncMode: "manual",
+            projectAgentLabel: "OpenCode Agent",
+        });
+    },
+
+    setProjectName(value) { set({projectName: value}); },
+    setProjectPath(value) { set({projectPath: value}); },
+    setProjectDefaultScenarioId(value) { set({projectDefaultScenarioId: value}); },
+    setProjectSyncMode(value) { set({projectSyncMode: value}); },
+    setProjectAgentLabel(value) { set({projectAgentLabel: value}); },
 
     // ---------- targets ----------
     async refreshTargets() {

@@ -118,6 +118,26 @@ type MessageCatalog = {
     installSubtitle: string;
     projectsTitle: string;
     projectsSubtitle: string;
+    projectsEmpty: string;
+    newProjectTitle: string;
+    newProjectHelp: string;
+    projectNameLabel: string;
+    projectPathLabel: string;
+    projectPathHint: string;
+    projectScenarioLabel: string;
+    projectScenarioNone: string;
+    projectSyncModeLabel: string;
+    projectSyncModeManual: string;
+    projectSyncModePreviewFirst: string;
+    projectAgentLabel: string;
+    projectAgentHint: string;
+    projectPreview: string;
+    projectPreviewHint: string;
+    projectCreate: string;
+    projectValidationName: string;
+    projectValidationPath: string;
+    projectCreated: string;
+    projectOpen: string;
     scenariosTitle: string;
     scenariosEmpty: string;
     scenariosComingSoon: string;
@@ -336,6 +356,26 @@ export const messages: Record<Locale, Catalog> = {
         installSubtitle: "\u4ece\u4ed3\u5e93\u6d4f\u89c8\u5e76\u5b89\u88c5\u65b0\u6280\u80fd",
         projectsTitle: "\u5173\u8054\u9879\u76ee",
         projectsSubtitle: "\u7ed1\u5b9a\u5230\u4f60\u7684\u9879\u76ee\u4ed3\u5e93",
+        projectsEmpty: "\u8fd8\u6ca1\u6709\u9879\u76ee\uff0c\u5148\u521b\u5efa\u4e00\u4e2a\u5de5\u4f5c\u533a\u6765\u627f\u63a5\u573a\u666f\u548c\u76ee\u6807\u3002",
+        newProjectTitle: "\u65b0\u5efa\u9879\u76ee",
+        newProjectHelp: "\u9879\u76ee\u4f1a\u8bb0\u5f55\u672c\u5730\u8def\u5f84\u3001\u9ed8\u8ba4\u573a\u666f\u4e0e\u540c\u6b65\u6a21\u5f0f\uff0c\u65b9\u4fbf\u540e\u7eed\u9884\u89c8\u548c\u540c\u6b65\u3002",
+        projectNameLabel: "\u9879\u76ee\u540d\u79f0",
+        projectPathLabel: "\u672c\u5730\u8def\u5f84",
+        projectPathHint: "\u586b\u5199\u9879\u76ee\u6839\u76ee\u5f55\u7684\u7edd\u5bf9\u8def\u5f84",
+        projectScenarioLabel: "\u9ed8\u8ba4\u573a\u666f",
+        projectScenarioNone: "\u6682\u4e0d\u5173\u8054",
+        projectSyncModeLabel: "\u540c\u6b65\u6a21\u5f0f",
+        projectSyncModeManual: "\u624b\u52a8\u540c\u6b65",
+        projectSyncModePreviewFirst: "\u5148\u9884\u89c8\u518d\u540c\u6b65",
+        projectAgentLabel: "Agent",
+        projectAgentHint: "\u7b2c\u4e00\u9636\u6bb5\u5148\u4fdd\u7559 Agent \u4f4d\u7f6e\uff0c\u540e\u7eed\u518d\u63a5\u5165\u771f\u5b9e\u9009\u62e9\u5668\u3002",
+        projectPreview: "\u9884\u89c8",
+        projectPreviewHint: "\u521b\u5efa\u540e\u4f1a\u51fa\u73b0\u5728\u4fa7\u680f\u5de5\u4f5c\u533a\u548c Projects \u9875\u9762\u4e2d\u3002",
+        projectCreate: "\u521b\u5efa\u9879\u76ee",
+        projectValidationName: "\u8bf7\u586b\u5199\u9879\u76ee\u540d\u79f0",
+        projectValidationPath: "\u8bf7\u586b\u5199\u9879\u76ee\u8def\u5f84",
+        projectCreated: "\u9879\u76ee\u201c{name}\u201d\u5df2\u521b\u5efa",
+        projectOpen: "\u6253\u5f00",
         scenariosTitle: "\u573a\u666f",
         scenariosEmpty: "\u6682\u65e0\u573a\u666f\u3002",
         scenariosComingSoon: "\u573a\u666f\u8ba9\u4f60\u53ef\u4ee5\u5c06\u8d44\u4ea7\u5206\u7ec4\u5e76\u6309\u573a\u666f\u542f\u7528/\u7981\u7528\u3002\u8fd9\u662f\u7b2c\u4e8c\u9636\u6bb5\u7684\u529f\u80fd\u3002",
@@ -550,6 +590,26 @@ export const messages: Record<Locale, Catalog> = {
         installSubtitle: "Browse and install new skills from the registry",
         projectsTitle: "Linked Projects",
         projectsSubtitle: "Link to your project repositories",
+        projectsEmpty: "No projects yet. Create a workspace to connect scenarios and targets.",
+        newProjectTitle: "New project",
+        newProjectHelp: "Projects capture the local path, default scenario, and sync mode so we can preview and sync consistently later.",
+        projectNameLabel: "Project name",
+        projectPathLabel: "Local path",
+        projectPathHint: "Enter the absolute path to the project root",
+        projectScenarioLabel: "Default scenario",
+        projectScenarioNone: "Not linked yet",
+        projectSyncModeLabel: "Sync mode",
+        projectSyncModeManual: "Manual sync",
+        projectSyncModePreviewFirst: "Preview before sync",
+        projectAgentLabel: "Agent",
+        projectAgentHint: "Phase 1 keeps the Agent slot reserved; the real picker will be wired in later.",
+        projectPreview: "Preview",
+        projectPreviewHint: "After creation, the project appears in the workspace sidebar and the Projects page.",
+        projectCreate: "Create project",
+        projectValidationName: "Please enter a project name",
+        projectValidationPath: "Please enter a project path",
+        projectCreated: 'Project "{name}" created',
+        projectOpen: "Open",
         scenariosTitle: "Scenarios",
         scenariosEmpty: "No scenarios yet.",
         scenariosComingSoon: "Scenarios let you group assets and enable/disable them by scenario. This is a Phase 2 feature.",
