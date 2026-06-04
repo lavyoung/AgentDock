@@ -53,7 +53,10 @@ export function SettingsPage(): JSX.Element {
     const enabledLocationCount = locations.filter((location) => location.enabled).length;
     const customLocationCount = locations.filter((location) => location.source === "manual").length;
 
-    async function handleApplicationToggle(applicationId: typeof selectedApplicationId, nextEnabled: boolean): Promise<void> {
+    async function handleApplicationToggle(
+        applicationId: typeof selectedApplicationId,
+        nextEnabled: boolean
+    ): Promise<void> {
         if (!applicationId) {
             return;
         }
@@ -101,8 +104,7 @@ export function SettingsPage(): JSX.Element {
                     <button
                         type="button"
                         onClick={() => setView("assets")}
-                        className="text-zinc-400 text-sm flex items-center gap-1.5"
-                        style={{background: "transparent", border: "none", cursor: "pointer", padding: 0}}
+                        className="settings-back-button"
                     >
                         <svg
                             viewBox="0 0 24 24"
@@ -161,6 +163,7 @@ export function SettingsPage(): JSX.Element {
                                 </button>
                             </div>
                         </div>
+
                         <div className="settings-card-body-item">
                             <div className="settings-row-label">
                                 <svg
