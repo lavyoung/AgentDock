@@ -52,6 +52,25 @@ type MessageCatalog = {
     settingsThemeDark: string;
     settingsThemeLight: string;
     settingsThemeSystem: string;
+    settingsAgentTitle: string;
+    settingsAgentSummaryActive: string;
+    settingsAgentSummaryEnabled: string;
+    settingsAgentSummaryCustom: string;
+    settingsAgentSummarySupported: string;
+    settingsAgentActions: string;
+    settingsAgentRedetect: string;
+    settingsAgentList: string;
+    settingsAgentLocations: string;
+    settingsAgentLocationsHint: string;
+    settingsAgentNoApps: string;
+    settingsAgentNoLocations: string;
+    settingsAgentKindSkills: string;
+    settingsAgentKindAgentsMd: string;
+    settingsAgentScopeGlobal: string;
+    settingsAgentScopeProject: string;
+    settingsAgentExists: string;
+    settingsAgentMissing: string;
+    settingsAgentOpen: string;
     settingsData: string;
     settingsDataPath: string;
     settingsBrowse: string;
@@ -323,6 +342,25 @@ export const messages: Record<Locale, Catalog> = {
         settingsThemeDark: "\u9ed1\u591c\u6a21\u5f0f",
         settingsThemeLight: "\u767d\u5929\u6a21\u5f0f",
         settingsThemeSystem: "\u8ddf\u968f\u7cfb\u7edf",
+        settingsAgentTitle: "Agent \u7ba1\u7406",
+        settingsAgentSummaryActive: "\u5df2\u6fc0\u6d3b",
+        settingsAgentSummaryEnabled: "\u5df2\u542f\u7528\u4f4d\u7f6e",
+        settingsAgentSummaryCustom: "\u81ea\u5b9a\u4e49",
+        settingsAgentSummarySupported: "\u5df2\u63a5\u5165 Agent",
+        settingsAgentActions: "\u64cd\u4f5c",
+        settingsAgentRedetect: "\u91cd\u65b0\u68c0\u6d4b",
+        settingsAgentList: "Agent \u5217\u8868",
+        settingsAgentLocations: "\u6258\u7ba1\u4f4d\u7f6e",
+        settingsAgentLocationsHint: "\u57fa\u4e8e\u5f53\u524d\u76ee\u6807\u548c\u672c\u5730\u5de5\u4f5c\u533a\u626b\u63cf\u53ef\u6258\u7ba1\u7684 Skills / AGENTS.md \u8def\u5f84\u3002",
+        settingsAgentNoApps: "\u5f53\u524d\u8fd8\u6ca1\u6709\u53ef\u7ba1\u7406\u7684 Agent \u5e94\u7528\u3002",
+        settingsAgentNoLocations: "\u8fd8\u6ca1\u6709\u68c0\u6d4b\u5230\u4efb\u4f55\u6258\u7ba1\u4f4d\u7f6e\uff0c\u53ef\u4ee5\u5148\u70b9\u201c\u91cd\u65b0\u68c0\u6d4b\u201d\u3002",
+        settingsAgentKindSkills: "Skills",
+        settingsAgentKindAgentsMd: "AGENTS.md",
+        settingsAgentScopeGlobal: "\u5168\u5c40",
+        settingsAgentScopeProject: "\u9879\u76ee",
+        settingsAgentExists: "\u5df2\u5b58\u5728",
+        settingsAgentMissing: "\u5f85\u521b\u5efa",
+        settingsAgentOpen: "\u6253\u5f00",
         settingsData: "\u6570\u636e\u4e0e\u66f4\u65b0",
         settingsDataPath: "\u6570\u636e\u5b58\u50a8\u8def\u5f84",
         settingsBrowse: "\u6d4f\u89c8",
@@ -590,6 +628,25 @@ export const messages: Record<Locale, Catalog> = {
         settingsThemeDark: "Dark mode",
         settingsThemeLight: "Light mode",
         settingsThemeSystem: "Follow system",
+        settingsAgentTitle: "Agent management",
+        settingsAgentSummaryActive: "Active",
+        settingsAgentSummaryEnabled: "Enabled locations",
+        settingsAgentSummaryCustom: "Custom",
+        settingsAgentSummarySupported: "Integrated Agents",
+        settingsAgentActions: "Actions",
+        settingsAgentRedetect: "Re-detect",
+        settingsAgentList: "Agent list",
+        settingsAgentLocations: "Managed locations",
+        settingsAgentLocationsHint: "Scan the current targets and local workspace paths for manageable Skills and AGENTS.md locations.",
+        settingsAgentNoApps: "No manageable Agent applications are available yet.",
+        settingsAgentNoLocations: "No managed locations have been detected yet. Try re-detecting first.",
+        settingsAgentKindSkills: "Skills",
+        settingsAgentKindAgentsMd: "AGENTS.md",
+        settingsAgentScopeGlobal: "Global",
+        settingsAgentScopeProject: "Project",
+        settingsAgentExists: "Exists",
+        settingsAgentMissing: "Missing",
+        settingsAgentOpen: "Open",
         settingsData: "Data & updates",
         settingsDataPath: "Data path",
         settingsBrowse: "Browse",
