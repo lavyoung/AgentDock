@@ -2,7 +2,6 @@ import {type JSX, useEffect, useState} from "react";
 
 import {useI18n} from "../i18n/useI18n";
 import {useAppStore} from "../stores/useAppStore";
-import {getSeverityBg, getSeverityColor} from "../../../../../packages/core/src/types/asset";
 import "./Pages.css";
 
 // --- Helper sub-components ---
@@ -44,7 +43,7 @@ function ScenarioCard({
         <div className="scenario-card" onClick={onClick} role="button" tabIndex={0}
             onKeyDown={(e) => e.key === "Enter" && onClick()}>
             <div className="scenario-card-header">
-                <div className="scenario-card-icon" style={{background: "rgba(34,197,94,.15)", color: "#22c55e"}}>
+                <div className="scenario-card-icon scenario-card-icon--default">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M12 3l1.5 4.5H18l-3.75 2.73 1.43 4.41L12 12l-3.68 2.64 1.43-4.41L6 7.5h4.5L12 3z"/>
                     </svg>
@@ -58,19 +57,19 @@ function ScenarioCard({
                 <p className="scenario-card-desc">{scenario.description}</p>
             )}
             <div className="scenario-card-badges">
-                <span className="scenario-badge" style={{background: "rgba(34,197,94,.10)", color: "#22c55e"}}>
+                <span className="scenario-badge scenario-badge-skills">
                     {t("scenarioSkills")} {scenario.skillIds.length}
                 </span>
-                <span className="scenario-badge" style={{background: "rgba(245,158,11,.10)", color: "#f59e0b"}}>
+                <span className="scenario-badge scenario-badge-rules">
                     {t("scenarioRules")} {scenario.ruleIds.length}
                 </span>
-                <span className="scenario-badge" style={{background: "rgba(139,92,246,.10)", color: "#8b5cf6"}}>
+                <span className="scenario-badge scenario-badge-agent-files">
                     {t("scenarioAgentFiles")} {scenario.agentFileIds.length}
                 </span>
             </div>
             <div className="scenario-card-stat">
                 {t("newScenarioCountSuffix")} <strong>{total}</strong> {t("newScenarioItemSuffix")}
-                {scenario.isBuiltIn && <span style={{marginLeft: 8, color: "#22c55e"}}>{t("scenarioBuiltIn")}</span>}
+                {scenario.isBuiltIn && <span className="scenario-built-in-tag">{t("scenarioBuiltIn")}</span>}
             </div>
         </div>
     );
@@ -79,13 +78,13 @@ function ScenarioCard({
 function SkillMini({
     name,
     meta,
-    color,
+    tone,
     onRemove,
     showRemove,
 }: {
     name: string;
     meta: string;
-    color: string;
+    tone: "skill" | "agent-file";
     onRemove?: () => void;
     showRemove?: boolean;
 }): JSX.Element {
@@ -93,7 +92,7 @@ function SkillMini({
 
     return (
         <div className="skill-mini">
-            <div className="skill-mini-icon" style={{background: `${color}22`, color}}>
+            <div className={`skill-mini-icon ${tone === "skill" ? "skill-mini-icon-skill" : "skill-mini-icon-agent-file"}`}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
                 </svg>
@@ -125,18 +124,17 @@ function SeverityMini({
     showRemove?: boolean;
 }): JSX.Element {
     const {t} = useI18n();
-    const color = getSeverityColor(severity);
 
     return (
         <div className="skill-mini">
-            <div className="skill-mini-icon" style={{background: getSeverityBg(severity), color}}>
+            <div className={`skill-mini-icon severity-mini-icon severity-mini-icon-${severity}`}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                 </svg>
             </div>
             <div className="skill-mini-body">
                 <div className="skill-mini-title">{title}</div>
-                <div className="skill-mini-meta" style={{color}}>{severity}</div>
+                <div className={`skill-mini-meta severity-mini-meta severity-mini-meta-${severity}`}>{severity}</div>
             </div>
             {showRemove && onRemove && (
                 <button className="skill-mini-remove" onClick={(e) => { e.stopPropagation(); onRemove(); }} aria-label={t("scenarioRemoveAsset")}>
@@ -164,7 +162,7 @@ function AgentMini({
 
     return (
         <div className="detail-row">
-            <div className="detail-row-icon" style={{background: "rgba(52,211,153,.15)", color: "#34d399"}}>
+            <div className="detail-row-icon detail-row-icon-agent">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
                 </svg>
@@ -217,7 +215,7 @@ function NewScenarioModal({onClose, onCreate}: {onClose: () => void; onCreate: (
                     </button>
                 </div>
                 <div className="asset-picker-body">
-                    <p className="form-hint" style={{marginBottom: 12}}>{t("newScenarioHelp")}</p>
+                    <p className="form-hint form-hint-spaced">{t("newScenarioHelp")}</p>
                     <div className="new-scenario-form">
                         <div className="form-field">
                             <label className="form-label">{t("newScenarioName")}</label>
@@ -305,27 +303,17 @@ function AssetPicker({
                                         }
                                     }}
                                 >
-                                    <div style={{
-                                        width: 32,
-                                        height: 32,
-                                        borderRadius: 6,
-                                        background: field === "skillIds" ? "rgba(59,130,246,.15)" : field === "ruleIds" ? "rgba(245,158,11,.15)" : "rgba(139,92,246,.15)",
-                                        color: field === "skillIds" ? "#3b82f6" : field === "ruleIds" ? "#f59e0b" : "#8b5cf6",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        flexShrink: 0,
-                                    }}>
+                                    <div className={`picker-item-icon ${field === "skillIds" ? "picker-item-icon-skill" : field === "ruleIds" ? "picker-item-icon-rule" : "picker-item-icon-agent-file"}`}>
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                             <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
                                         </svg>
                                     </div>
-                                    <div style={{minWidth: 0, flex: 1}}>
-                                        <div style={{fontSize: 13, fontWeight: 500, color: "var(--fg-primary)"}}>{asset.title || asset.name}</div>
-                                        <div style={{fontSize: 11, color: "var(--fg-muted)"}}>{asset.name}</div>
+                                    <div className="picker-item-body">
+                                        <div className="picker-item-title">{asset.title || asset.name}</div>
+                                        <div className="picker-item-meta">{asset.name}</div>
                                     </div>
                                     {isAlready && (
-                                        <span style={{fontSize: 11, color: "#22c55e"}}>{t("assetPickerAlreadyAdded")}</span>
+                                        <span className="picker-item-added">{t("assetPickerAlreadyAdded")}</span>
                                     )}
                                 </div>
                             );
@@ -357,7 +345,7 @@ function AgentPicker({onClose}: {onClose: () => void}): JSX.Element {
                     </button>
                 </div>
                 <div className="asset-picker-body">
-                    <p className="form-hint" style={{marginBottom: 12}}>{t("scenarioAgentPickerHint")}</p>
+                    <p className="form-hint form-hint-spaced">{t("scenarioAgentPickerHint")}</p>
                     {AVAILABLE_AGENTS.map((agent) => {
                         const isAlready = selectedIds.includes(agent.id);
                         return (
@@ -371,33 +359,23 @@ function AgentPicker({onClose}: {onClose: () => void}): JSX.Element {
                                     }
                                 }}
                             >
-                                <div style={{
-                                    width: 32,
-                                    height: 32,
-                                    borderRadius: 6,
-                                    background: "rgba(52,211,153,.15)",
-                                    color: "#34d399",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    flexShrink: 0,
-                                }}>
+                                <div className="picker-item-icon picker-item-icon-agent">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                         <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
                                         <line x1="8" y1="21" x2="16" y2="21"/>
                                         <line x1="12" y1="17" x2="12" y2="21"/>
                                     </svg>
                                 </div>
-                                <div style={{minWidth: 0, flex: 1}}>
-                                    <div style={{fontSize: 13, fontWeight: 500, color: "var(--fg-primary)"}}>
+                                <div className="picker-item-body">
+                                    <div className="picker-item-title">
                                         {agent.name}
                                     </div>
-                                    <div style={{fontSize: 11, color: "var(--fg-muted)"}}>
+                                    <div className="picker-item-meta">
                                         {agent.description}
                                     </div>
                                 </div>
                                 {isAlready ? (
-                                    <span style={{fontSize: 11, color: "#22c55e"}}>{t("assetPickerAlreadyAdded")}</span>
+                                    <span className="picker-item-added">{t("assetPickerAlreadyAdded")}</span>
                                 ) : null}
                             </div>
                         );
@@ -448,12 +426,12 @@ function ScenarioDetail(): JSX.Element {
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="9 18 15 12 9 6"/>
                     </svg>
-                    <span style={{color: "var(--fg-secondary)"}}>{selectedScenario.title || selectedScenario.name}</span>
+                    <span className="scenario-breadcrumb-current">{selectedScenario.title || selectedScenario.name}</span>
                 </nav>
 
                 <header className="scenario-hero">
                     <div className="scenario-hero-left">
-                        <div className="scenario-hero-icon" style={{background: "rgba(34,197,94,.15)", color: "#22c55e"}}>
+                        <div className="scenario-hero-icon scenario-card-icon--default">
                             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M12 3l1.5 4.5H18l-3.75 2.73 1.43 4.41L12 12l-3.68 2.64 1.43-4.41L6 7.5h4.5L12 3z"/>
                             </svg>
@@ -464,16 +442,16 @@ function ScenarioDetail(): JSX.Element {
                                     className="form-input"
                                     value={scenarioName}
                                     onChange={(e) => setScenarioName(e.target.value)}
-                                    style={{fontSize: 24, fontWeight: 600, maxWidth: 400}}
+                                    className="form-input scenario-hero-input"
                                 />
                             ) : (
                                 <h1 className="scenario-hero-title">{selectedScenario.title || selectedScenario.name}</h1>
                             )}
                             <div className="scenario-hero-meta">
-                                <span style={{fontSize: 12, fontFamily: "monospace", color: "var(--fg-muted)"}}>{selectedScenario.id}</span>
-                                <span className="scenario-badge" style={{background: "rgba(34,197,94,.10)", color: "#22c55e"}}>{t("scenarioBadgeLabel")}</span>
+                                <span className="scenario-hero-id">{selectedScenario.id}</span>
+                                <span className="scenario-badge scenario-badge-skills">{t("scenarioBadgeLabel")}</span>
                                 {selectedScenario.isBuiltIn && (
-                                    <span style={{fontSize: 12, color: "#22c55e"}}>{t("scenarioBuiltIn")}</span>
+                                    <span className="scenario-built-in-label">{t("scenarioBuiltIn")}</span>
                                 )}
                             </div>
                             {isEdit ? (
@@ -483,7 +461,7 @@ function ScenarioDetail(): JSX.Element {
                                     onChange={(e) => setScenarioDescription(e.target.value)}
                                     placeholder={t("newScenarioDescPlaceholder")}
                                     rows={2}
-                                    style={{maxWidth: 500, marginTop: 12}}
+                                    className="form-textarea scenario-hero-textarea"
                                 />
                             ) : (
                                 selectedScenario.description && (
@@ -520,7 +498,7 @@ function ScenarioDetail(): JSX.Element {
 
             <div className="page-body">
                 {/* Stats row */}
-                <div className="stats-grid" style={{marginBottom: 24}}>
+                <div className="stats-grid scenario-stats-row">
                     <div className="scenario-stat-card">
                         <div className="scenario-stat-label">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -563,13 +541,13 @@ function ScenarioDetail(): JSX.Element {
                 <section className="left-card">
                     <header className="left-card-header">
                         <h3>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: 6, verticalAlign: "middle"}}>
+                            <svg className="scenario-section-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
                             </svg>
                             {t("scenarioUsedSkills")}
                         </h3>
-                        <div style={{display: "flex", alignItems: "center", gap: 8}}>
-                            <span style={{fontSize: 11, color: "var(--fg-muted)"}}>{selectedScenario.skillIds.length}</span>
+                        <div className="scenario-section-meta">
+                            <span className="scenario-section-count">{selectedScenario.skillIds.length}</span>
                             <button className="scenario-section-add" onClick={() => openAssetPicker("skillIds")} title={t("scenarioAddSkill")}>
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
@@ -585,7 +563,7 @@ function ScenarioDetail(): JSX.Element {
                                         key={asset.id}
                                         name={asset.title || asset.name}
                                         meta={asset.name}
-                                        color="#3b82f6"
+                                        tone="skill"
                                         showRemove={isEdit}
                                         onRemove={() => { void removeAssetFromScenario("skillIds", asset.id); }}
                                     />
@@ -599,13 +577,13 @@ function ScenarioDetail(): JSX.Element {
                 <section className="left-card">
                     <header className="left-card-header">
                         <h3>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: 6, verticalAlign: "middle"}}>
+                            <svg className="scenario-section-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                             </svg>
                             {t("scenarioAppliedRules")}
                         </h3>
-                        <div style={{display: "flex", alignItems: "center", gap: 8}}>
-                            <span style={{fontSize: 11, color: "var(--fg-muted)"}}>{selectedScenario.ruleIds.length}</span>
+                        <div className="scenario-section-meta">
+                            <span className="scenario-section-count">{selectedScenario.ruleIds.length}</span>
                             <button className="scenario-section-add" onClick={() => openAssetPicker("ruleIds")} title={t("scenarioAddRule")}>
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
@@ -634,13 +612,13 @@ function ScenarioDetail(): JSX.Element {
                 <section className="left-card">
                     <header className="left-card-header">
                         <h3>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: 6, verticalAlign: "middle"}}>
+                            <svg className="scenario-section-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
                             </svg>
                             {t("scenarioAgentFiles")}
                         </h3>
-                        <div style={{display: "flex", alignItems: "center", gap: 8}}>
-                            <span style={{fontSize: 11, color: "var(--fg-muted)"}}>{selectedScenario.agentFileIds.length}</span>
+                        <div className="scenario-section-meta">
+                            <span className="scenario-section-count">{selectedScenario.agentFileIds.length}</span>
                             <button className="scenario-section-add" onClick={() => openAssetPicker("agentFileIds")} title={t("scenarioAddAgentFile")}>
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
@@ -656,7 +634,7 @@ function ScenarioDetail(): JSX.Element {
                                         key={asset.id}
                                         name={asset.title || asset.name}
                                         meta={asset.name}
-                                        color="#8b5cf6"
+                                        tone="agent-file"
                                         showRemove={isEdit}
                                         onRemove={() => { void removeAssetFromScenario("agentFileIds", asset.id); }}
                                     />
@@ -670,13 +648,13 @@ function ScenarioDetail(): JSX.Element {
                 <section className="left-card">
                     <header className="left-card-header">
                         <h3>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: 6, verticalAlign: "middle"}}>
+                            <svg className="scenario-section-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
                             </svg>
                             {t("scenarioAgent")}
                         </h3>
-                        <div style={{display: "flex", alignItems: "center", gap: 8}}>
-                            <span style={{fontSize: 11, color: "var(--fg-muted)"}}>{selectedScenario.agentAppIds.length}</span>
+                        <div className="scenario-section-meta">
+                            <span className="scenario-section-count">{selectedScenario.agentAppIds.length}</span>
                             <button className="scenario-section-add" title={t("scenarioAddAgent")} onClick={() => setShowAgentPicker(true)}>
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
@@ -684,7 +662,7 @@ function ScenarioDetail(): JSX.Element {
                             </button>
                         </div>
                     </header>
-                    <div className="left-card-body" style={{display: "flex", flexDirection: "column", gap: 8}}>
+                    <div className="left-card-body scenario-section-stack">
                         {linkedAgents.length > 0 ? (
                             linkedAgents.map((agent) => (
                                 <AgentMini
@@ -696,7 +674,7 @@ function ScenarioDetail(): JSX.Element {
                                 />
                             ))
                         ) : (
-                            <div style={{fontSize: 13, color: "var(--fg-muted)"}}>{t("scenarioNoAgents")}</div>
+                            <div className="scenario-empty-copy">{t("scenarioNoAgents")}</div>
                         )}
                     </div>
                 </section>
@@ -705,15 +683,15 @@ function ScenarioDetail(): JSX.Element {
                 <section className="left-card">
                     <header className="left-card-header">
                         <h3>{t("scenarioProjects")}</h3>
-                        <span style={{fontSize: 11, color: "var(--fg-muted)"}}>{linkedProjects.length}</span>
+                        <span className="scenario-section-count">{linkedProjects.length}</span>
                     </header>
-                    <div className="left-card-body" style={{display: "flex", flexDirection: "column", gap: 8}}>
+                    <div className="left-card-body scenario-section-stack">
                         {linkedProjects.length === 0 ? (
-                            <div style={{fontSize: 13, color: "var(--fg-muted)"}}>{t("scenarioNoProjects")}</div>
+                            <div className="scenario-empty-copy">{t("scenarioNoProjects")}</div>
                         ) : (
                             linkedProjects.map((project) => (
                                 <div key={project.id} className="detail-row">
-                                    <div className="detail-row-icon" style={{background: "rgba(59,130,246,.15)", color: "#3b82f6"}}>
+                                    <div className="detail-row-icon detail-row-icon-project">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                             <path d="M3 7l9-4 9 4-9 4-9-4z"/>
                                             <path d="M3 17l9 4 9-4"/>
@@ -742,7 +720,7 @@ function ScenarioDetail(): JSX.Element {
                     <header className="left-card-header">
                         <h3>{t("scenarioRecentActivity")}</h3>
                     </header>
-                    <div className="left-card-body" style={{fontSize: 13, color: "var(--fg-muted)", lineHeight: 1.7}}>
+                    <div className="left-card-body scenario-activity-copy">
                         {t("scenarioActivityNote")}
                     </div>
                 </section>
@@ -790,11 +768,11 @@ export function ScenariosPage(): JSX.Element {
     // List view
     return (
         <div className="page page-scenarios-view">
-            <div className="page-header" style={{padding: "0 32px 24px", borderBottom: "1px solid var(--bd-soft)"}}>
-                <div style={{display: "flex", alignItems: "center", justifyContent: "space-between"}}>
+            <div className="page-header scenarios-list-header">
+                <div className="scenarios-list-header-row">
                     <div>
-                        <h1 style={{fontSize: 24, fontWeight: 600, color: "var(--fg-primary)"}}>{t("scenariosTitle")}</h1>
-                        <p style={{fontSize: 13, color: "var(--fg-muted)", marginTop: 4}}>{t("scenarioListSubtitle")}</p>
+                        <h1 className="scenarios-list-title">{t("scenariosTitle")}</h1>
+                        <p className="scenarios-list-subtitle">{t("scenarioListSubtitle")}</p>
                     </div>
                     <button className="btn btn-primary" onClick={() => {
                         resetScenarioForm();
@@ -810,11 +788,11 @@ export function ScenariosPage(): JSX.Element {
 
             <div className="page-body">
                 {scenarios.length === 0 ? (
-                    <div className="placeholder" style={{padding: "48px 0"}}>
+                    <div className="placeholder placeholder-spacious">
                         <div className="placeholder-icon">O</div>
                         <h3>{t("scenariosTitle")}</h3>
                         <p className="empty">{t("scenariosEmpty")}</p>
-                        <p className="hint" style={{maxWidth: 400, textAlign: "center", color: "var(--fg-muted)"}}>
+                        <p className="hint hint-centered">
                             {t("scenariosComingSoon")}
                         </p>
                     </div>

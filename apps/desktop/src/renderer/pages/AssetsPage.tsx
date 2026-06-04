@@ -1,6 +1,7 @@
 import {type JSX, useEffect, useMemo, useState} from "react";
 
 import type {AssetType, CreateAssetInput} from "../../../../../packages/core/src/types/asset";
+import {Button} from "../components/Button";
 import {DetailPanel} from "../components/DetailPanel";
 import {Modal} from "../components/Modal";
 import {useI18n} from "../i18n/useI18n";
@@ -225,35 +226,15 @@ export function AssetsPage(): JSX.Element {
             <div className="page-topbar">
                 <div className="page-topbar-left">
                     <h1 className="page-topbar-title">{t("assetsTitle")}</h1>
-                    <span
-                        className="page-topbar-count"
-                        style={{color: "var(--fg-faint)", fontSize: "14px"}}
-                        aria-label="Showing"
-                    >
+                    <span className="page-topbar-count" aria-label="Showing">
                         {visibleCount} / {totalCount} {t("assetsUnit")}
                     </span>
                 </div>
-                <div
-                    className="page-topbar-actions"
-                    style={{display: "flex", alignItems: "center", gap: "8px"}}
-                >
+                <div className="page-topbar-actions">
                     <button
                         type="button"
-                        className="btn btn-tool"
+                        className="btn btn-tool assets-toolbar-button"
                         aria-label={t("skillsBackup")}
-                        style={{
-                            height: "36px",
-                            padding: "0 14px",
-                            background: "var(--bg-card)",
-                            border: "1px solid var(--bd)",
-                            color: "var(--fg-muted)",
-                            borderRadius: "6px",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "6px",
-                            fontSize: "13px",
-                            cursor: "pointer",
-                        }}
                     >
                         <svg
                             viewBox="0 0 24 24"
@@ -270,22 +251,9 @@ export function AssetsPage(): JSX.Element {
                     </button>
                     <button
                         type="button"
-                        className="btn btn-tool"
+                        className="btn btn-tool assets-toolbar-button"
                         onClick={() => void refreshAssets()}
                         aria-label={t("skillsCheckAll")}
-                        style={{
-                            height: "36px",
-                            padding: "0 14px",
-                            background: "var(--bg-card)",
-                            border: "1px solid var(--bd)",
-                            color: "var(--fg-muted)",
-                            borderRadius: "6px",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "6px",
-                            fontSize: "13px",
-                            cursor: "pointer",
-                        }}
                     >
                         <svg
                             viewBox="0 0 24 24"
@@ -301,24 +269,11 @@ export function AssetsPage(): JSX.Element {
                         </svg>
                         <span>{t("skillsCheckAll")}</span>
                     </button>
-                    <button
+                    <Button
                         type="button"
-                        className="btn btn-primary"
+                        variant="primary"
+                        className="assets-toolbar-button"
                         aria-label={t("skillsNewAsset")}
-                        style={{
-                            height: "36px",
-                            padding: "0 14px",
-                            background: "var(--accent)",
-                            color: "#fff",
-                            borderRadius: "6px",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "6px",
-                            fontSize: "13px",
-                            fontWeight: 500,
-                            cursor: "pointer",
-                            border: "none",
-                        }}
                         onClick={openNewAssetModal}
                     >
                         <svg
@@ -333,24 +288,11 @@ export function AssetsPage(): JSX.Element {
                             <path d="M12 5v14M5 12h14" />
                         </svg>
                         <span>{t("skillsNewAsset")}</span>
-                    </button>
+                    </Button>
                     <button
                         type="button"
-                        className="btn btn-outline-emerald"
+                        className="btn btn-outline-emerald assets-toolbar-button"
                         aria-label={t("skillsUpdateAll")}
-                        style={{
-                            height: "36px",
-                            padding: "0 14px",
-                            border: "1px solid rgba(34,197,94,.40)",
-                            color: "var(--accent)",
-                            borderRadius: "6px",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "6px",
-                            fontSize: "13px",
-                            cursor: "pointer",
-                            background: "transparent",
-                        }}
                     >
                         <svg
                             viewBox="0 0 24 24"
@@ -548,7 +490,7 @@ export function AssetsPage(): JSX.Element {
                         </div>
 
                         <div className="new-asset-form-grid">
-                            <div className="field" style={{marginBottom: 0}}>
+                            <div className="field field-compact">
                                 <label htmlFor="new-asset-title">{t("newAssetTitleLabel")}</label>
                                 <input
                                     id="new-asset-title"
@@ -558,7 +500,7 @@ export function AssetsPage(): JSX.Element {
                                     autoFocus
                                 />
                             </div>
-                            <div className="field" style={{marginBottom: 0}}>
+                            <div className="field field-compact">
                                 <label htmlFor="new-asset-name">{t("newAssetIdLabel")}</label>
                                 <input
                                     id="new-asset-name"
@@ -572,7 +514,7 @@ export function AssetsPage(): JSX.Element {
                             </div>
                         </div>
 
-                        <div className="field" style={{marginBottom: 0}}>
+                        <div className="field field-compact">
                             <label htmlFor="new-asset-description">{t("newAssetDescLabel")}</label>
                             <textarea
                                 id="new-asset-description"
@@ -582,7 +524,7 @@ export function AssetsPage(): JSX.Element {
                             />
                         </div>
 
-                        <div className="field new-asset-editor-field" style={{marginBottom: 0}}>
+                        <div className="field field-compact new-asset-editor-field">
                             <div className="new-asset-editor-label-row">
                                 <label htmlFor="new-asset-content">{t("newAssetContentLabel")}</label>
                                 <button

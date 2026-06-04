@@ -622,6 +622,65 @@
     background: rgba(34, 197, 94, 0.10);
 }
 
+.assets-toolbar-button {
+    min-height: 36px;
+}
+
+.picker-item-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.picker-item-icon-skill {
+    background: rgba(59,130,246,.15);
+    color: #3b82f6;
+}
+
+.picker-item-icon-rule {
+    background: rgba(245,158,11,.15);
+    color: #f59e0b;
+}
+
+.picker-item-icon-agent-file {
+    background: rgba(139,92,246,.15);
+    color: #8b5cf6;
+}
+
+.picker-item-icon-agent {
+    background: rgba(52,211,153,.15);
+    color: #34d399;
+}
+
+.picker-item-body {
+    min-width: 0;
+    flex: 1;
+}
+
+.picker-item-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--fg-primary);
+}
+
+.picker-item-meta {
+    font-size: 11px;
+    color: var(--fg-muted);
+}
+
+.picker-item-added {
+    font-size: 11px;
+    color: #22c55e;
+}
+
+.form-hint-spaced {
+    margin-bottom: 12px;
+}
+
 .icon-sm {
     width: 16px;
     height: 16px;
@@ -947,6 +1006,10 @@
 .field textarea {
     resize: vertical;
     min-height: 80px;
+}
+
+.field-compact {
+    margin-bottom: 0;
 }
 
 .field-readonly {
@@ -2438,6 +2501,10 @@
     justify-content: center;
     flex-shrink: 0;
 }
+.scenario-card-icon--default {
+    background: rgba(34,197,94,.15);
+    color: #22c55e;
+}
 .scenario-card-body { flex: 1; min-width: 0; }
 .scenario-card-title {
     font-size: 14px;
@@ -2473,6 +2540,10 @@
     color: var(--fg-primary);
     font-weight: 600;
 }
+.scenario-built-in-tag {
+    margin-left: 8px;
+    color: #22c55e;
+}
 
 /* === Scenario detail view === */
 .scenario-detail-view .page-body {
@@ -2494,6 +2565,7 @@
     transition: color .15s;
 }
 .scenario-breadcrumb button:hover { color: var(--fg-primary); }
+.scenario-breadcrumb-current { color: var(--fg-secondary); }
 
 .scenario-hero {
     display: flex;
@@ -2541,6 +2613,24 @@
     margin-top: 12px;
     line-height: 1.6;
     max-width: 600px;
+}
+.scenario-hero-input {
+    font-size: 24px;
+    font-weight: 600;
+    max-width: 400px;
+}
+.scenario-hero-id {
+    font-size: 12px;
+    font-family: monospace;
+    color: var(--fg-muted);
+}
+.scenario-built-in-label {
+    font-size: 12px;
+    color: #22c55e;
+}
+.scenario-hero-textarea {
+    max-width: 500px;
+    margin-top: 12px;
 }
 .scenario-hero-actions {
     display: flex;
@@ -2611,6 +2701,14 @@
     justify-content: center;
     flex-shrink: 0;
 }
+.skill-mini-icon-skill {
+    background: rgba(59,130,246,.15);
+    color: #3b82f6;
+}
+.skill-mini-icon-agent-file {
+    background: rgba(139,92,246,.15);
+    color: #8b5cf6;
+}
 .skill-mini-body { min-width: 0; flex: 1; }
 .skill-mini-title {
     font-size: 13px;
@@ -2644,6 +2742,33 @@
 .skill-mini:hover .skill-mini-remove { opacity: 1; }
 .skill-mini-remove:hover { background: rgba(239,68,68,.2); color: #ef4444; }
 
+.severity-mini-icon-error {
+    background: rgba(239,68,68,.15);
+    color: #ef4444;
+}
+
+.severity-mini-icon-warning {
+    background: rgba(245,158,11,.15);
+    color: #f59e0b;
+}
+
+.severity-mini-icon-info {
+    background: rgba(59,130,246,.15);
+    color: #3b82f6;
+}
+
+.severity-mini-meta-error {
+    color: #ef4444;
+}
+
+.severity-mini-meta-warning {
+    color: #f59e0b;
+}
+
+.severity-mini-meta-info {
+    color: #3b82f6;
+}
+
 /* === Detail row (agent in scenario) === */
 .detail-row {
     display: flex;
@@ -2665,6 +2790,10 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+}
+.detail-row-icon-agent {
+    background: rgba(52,211,153,.15);
+    color: #34d399;
 }
 .detail-row-body { flex: 1; min-width: 0; }
 .detail-row-title { font-size: 13px; color: var(--fg-primary); font-weight: 500; }
@@ -2693,6 +2822,37 @@
     cursor: pointer;
 }
 .scenario-section-add:hover { background: rgba(59,130,246,.2); color: #3b82f6; }
+.scenario-section-icon {
+    margin-right: 6px;
+    vertical-align: middle;
+}
+.scenario-section-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.scenario-section-count {
+    font-size: 11px;
+    color: var(--fg-muted);
+}
+.scenario-section-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.scenario-empty-copy {
+    font-size: 13px;
+    color: var(--fg-muted);
+}
+.detail-row-icon-project {
+    background: rgba(59,130,246,.15);
+    color: #3b82f6;
+}
+.scenario-activity-copy {
+    font-size: 13px;
+    color: var(--fg-muted);
+    line-height: 1.7;
+}
 
 /* === Agent pill === */
 .agent-pill {
@@ -2724,6 +2884,18 @@
     border-radius: 6px;
     font-size: 11px;
     font-weight: 500;
+}
+.scenario-badge-skills {
+    background: rgba(34,197,94,.10);
+    color: #22c55e;
+}
+.scenario-badge-rules {
+    background: rgba(245,158,11,.10);
+    color: #f59e0b;
+}
+.scenario-badge-agent-files {
+    background: rgba(139,92,246,.10);
+    color: #8b5cf6;
 }
 
 /* === New scenario form === */
@@ -2840,6 +3012,46 @@
     text-align: center;
     color: var(--fg-muted);
     font-size: 14px;
+}
+
+.scenario-stats-row {
+    margin-bottom: 24px;
+}
+
+.scenarios-list-header {
+    padding: 0 32px 24px;
+    border-bottom: 1px solid var(--bd-soft);
+}
+
+.scenarios-list-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.scenarios-list-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--fg-primary);
+    margin: 0;
+}
+
+.scenarios-list-subtitle {
+    font-size: 13px;
+    color: var(--fg-muted);
+    margin-top: 4px;
+    margin-bottom: 0;
+}
+
+.placeholder-spacious {
+    padding: 48px 0;
+}
+
+.hint-centered {
+    max-width: 400px;
+    text-align: center;
+    color: var(--fg-muted);
 }
 
 /* === Scenario stat card === */
