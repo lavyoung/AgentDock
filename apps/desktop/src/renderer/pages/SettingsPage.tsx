@@ -1,6 +1,7 @@
 import {type JSX, useEffect} from "react";
 
 import type {ApplicationLocationRecord} from "../../../../../packages/core/src/types/application";
+import {agentdockClient} from "../client/agentdockClient";
 import {useI18n} from "../i18n/useI18n";
 import {useAppStore} from "../stores/useAppStore";
 import "./Pages.css";
@@ -116,6 +117,47 @@ export function SettingsPage(): JSX.Element {
         }
 
         try {
+            await saveApplicationLocation();
+        } catch (error) {
+            pushToast("error", String(error));
+        }
+    }
+
+    async function handleBrowseDataPath(): Promise<void> {
+        try {
+            const selectedPath = await agentdockClient.app.pickPath({
+                mode: "directory",
+                title: t("settingsDataPath"),
+                defaultPath: settingsDataPath,
+                buttonLabel: t("settingsBrowse"),
+            });
+            if (!selectedPath) {
+                return;
+            }
+
+            setSettingsDataPath(selectedPath);
+        } catch (error) {
+            pushToast("error", String(error));
+        }
+    }
+
+    async function handleBrowseSelectedLocation(): Promise<void> {
+        if (!selectedLocation) {
+            return;
+        }
+
+        try {
+            const selectedPath = await agentdockClient.app.pickPath({
+                mode: selectedLocation.kind === "agents-md" ? "agents-md-file" : "directory",
+                title: selectedLocation.name,
+                defaultPath: locationPath || selectedLocation.path,
+                buttonLabel: t("settingsBrowse"),
+            });
+            if (!selectedPath) {
+                return;
+            }
+
+            setLocationPath(selectedPath);
             await saveApplicationLocation();
         } catch (error) {
             pushToast("error", String(error));
@@ -410,13 +452,22 @@ export function SettingsPage(): JSX.Element {
                                                     </label>
                                                     <label className="form-field">
                                                         <span className="form-label">{t("targetsPath")}</span>
-                                                        <input
-                                                            type="text"
-                                                            className="settings-input"
-                                                            value={locationPath}
-                                                            onChange={(event) => setLocationPath(event.target.value)}
-                                                            onBlur={() => void handleSaveSelectedLocation()}
-                                                        />
+                                                        <div className="settings-input-row">
+                                                            <input
+                                                                type="text"
+                                                                className="settings-input"
+                                                                value={locationPath}
+                                                                onChange={(event) => setLocationPath(event.target.value)}
+                                                                onBlur={() => void handleSaveSelectedLocation()}
+                                                            />
+                                                            <button
+                                                                type="button"
+                                                                className="btn btn-secondary btn-sm"
+                                                                onClick={() => void handleBrowseSelectedLocation()}
+                                                            >
+                                                                {t("settingsBrowse")}
+                                                            </button>
+                                                        </div>
                                                     </label>
                                                 </div>
                                             </div>
@@ -438,7 +489,7 @@ export function SettingsPage(): JSX.Element {
                                 </svg>
                                 <span>{t("settingsDataPath")}</span>
                             </div>
-                            <div className="flex gap-2 w-full">
+                            <div className="settings-input-row settings-input-row--wide">
                                 <input
                                     type="text"
                                     className="settings-input"
@@ -446,7 +497,11 @@ export function SettingsPage(): JSX.Element {
                                     onChange={(event) => setSettingsDataPath(event.target.value)}
                                     aria-label={t("settingsDataPath")}
                                 />
-                                <button type="button" className="btn-text-emerald">
+                                <button
+                                    type="button"
+                                    className="btn btn-secondary btn-sm"
+                                    onClick={() => void handleBrowseDataPath()}
+                                >
                                     {t("settingsBrowse")}
                                 </button>
                             </div>

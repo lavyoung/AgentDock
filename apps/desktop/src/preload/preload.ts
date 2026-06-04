@@ -4,6 +4,7 @@ import type {AgentdockApi} from "../../../../packages/shared/src/agentdockApi";
 const agentdockApi: AgentdockApi = {
     app: {
         name: "AgentDock",
+        pickPath: (input) => ipcRenderer.invoke("app:pick-path", input),
     },
     assets: {
         list: () => ipcRenderer.invoke("assets:list"),

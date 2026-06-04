@@ -61,7 +61,16 @@ function initMockData() {
 }
 
 const mockApi: AgentdockApi = {
-    app: {name: "AgentDock (browser preview)"},
+    app: {
+        name: "AgentDock (browser preview)",
+        pickPath: async (input) => {
+            if (input.mode === "agents-md-file") {
+                return input.defaultPath?.trim() || "D:\\Mock\\Workspace\\AGENTS.md";
+            }
+
+            return input.defaultPath?.trim() || "D:\\Mock\\Workspace";
+        },
+    },
     assets: {
         list: async () => mockAssets.map(({content: _c, ...rest}) => rest),
         get: async (id) => mockAssets.find((a) => a.id === id) ?? null,
@@ -348,7 +357,7 @@ export const agentdockClient: AgentdockApi = MOCK_MODE ? mockApi : new Proxy({} 
         const api = getApi();
         if (!api) {
             return {
-                app: {name: "AgentDock"},
+                app: {name: "AgentDock", pickPath: notReady},
                 assets: {list: notReady, get: notReady, create: notReady, update: notReady, setStatus: notReady, delete: notReady},
                 rules: {list: notReady, get: notReady, create: notReady, update: notReady, delete: notReady},
                 snapshots: {list: notReady, restore: notReady},

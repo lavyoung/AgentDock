@@ -1,4 +1,6 @@
-import {BrowserWindow, ipcMain} from "electron";
+import path from "node:path";
+
+import {BrowserWindow, dialog, ipcMain, type OpenDialogOptions, type SaveDialogOptions} from "electron";
 import {ApplicationService} from "../../../../packages/core/src/application/applicationService";
 import {ApplicationSyncService} from "../../../../packages/core/src/application/applicationSyncService";
 import type {ApplicationId} from "../../../../packages/core/src/types/application";
@@ -21,6 +23,7 @@ import {
 } from "../platform/electron/database";
 import {nodeFileSystemPort, nodePathPort,} from "../platform/electron/fileSystemPort";
 import {getHomeDir, getRegistryAssetsDir} from "../platform/electron/paths";
+import type {PickPathInput} from "../../../../packages/shared/src/agentdockApi";
 
 let _mainWindow: BrowserWindow | null = null;
 const DARK_WINDOW_CHROME = "#0a0a0b";
@@ -73,6 +76,45 @@ export function registerIpc() {
     });
     const ruleService = new RuleService({
         ruleRepository,
+    });
+
+    ipcMain.handle("app:pick-path", async (event, input: PickPathInput) => {
+        const parentWindow = BrowserWindow.fromWebContents(event.sender) ?? _mainWindow ?? undefined;
+
+        if (input.mode === "directory") {
+            const options: OpenDialogOptions = {
+                title: input.title,
+                buttonLabel: input.buttonLabel,
+                defaultPath: input.defaultPath || undefined,
+                properties: ["openDirectory", "createDirectory"],
+            };
+            const result = parentWindow
+                ? await dialog.showOpenDialog(parentWindow, options)
+                : await dialog.showOpenDialog(options);
+
+            return result.canceled ? null : result.filePaths[0] ?? null;
+        }
+
+        const defaultFilePath = input.defaultPath?.trim()
+            ? input.defaultPath
+            : path.join(getHomeDir(), "AGENTS.md");
+        const options: SaveDialogOptions = {
+            title: input.title,
+            buttonLabel: input.buttonLabel,
+            defaultPath: defaultFilePath,
+            filters: [{name: "AGENTS.md", extensions: ["md"]}],
+        };
+        const result = parentWindow
+            ? await dialog.showSaveDialog(parentWindow, options)
+            : await dialog.showSaveDialog(options);
+
+        if (result.canceled || !result.filePath) {
+            return null;
+        }
+
+        return path.basename(result.filePath).toLowerCase() === "agents.md"
+            ? result.filePath
+            : path.join(path.dirname(result.filePath), "AGENTS.md");
     });
 
     ipcMain.handle("assets:list", async () => {

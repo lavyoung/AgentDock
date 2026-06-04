@@ -19,9 +19,19 @@ import type {
 import type {SnapshotRecord} from "../../core/src/types/snapshot";
 import type {CreateTargetInput, TargetRecord, UpdateTargetInput,} from "../../core/src/types/target";
 
+export type PickPathMode = "directory" | "agents-md-file";
+
+export type PickPathInput = {
+    mode: PickPathMode;
+    title?: string;
+    defaultPath?: string;
+    buttonLabel?: string;
+};
+
 export interface AgentdockApi {
     app: {
         name: string;
+        pickPath(input: PickPathInput): Promise<string | null>;
     };
     assets: {
         list(): Promise<AssetRecord[]>;
