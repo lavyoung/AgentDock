@@ -53,3 +53,6 @@ const agentdockApi: AgentdockApi = {
 };
 
 contextBridge.exposeInMainWorld("agentdock", agentdockApi);
+contextBridge.exposeInMainWorld("electron", {
+    setOverlay: (theme: "dark" | "light") => ipcRenderer.invoke("window:setOverlay", theme),
+});

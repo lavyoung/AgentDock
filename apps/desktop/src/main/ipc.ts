@@ -1,5 +1,4 @@
-import {ipcMain} from "electron";
-
+import {BrowserWindow, ipcMain} from "electron";
 import {ApplicationService} from "../../../../packages/core/src/application/applicationService";
 import {AssetService} from "../../../../packages/core/src/asset/assetService";
 import {type CreateRuleInput, RuleService, type UpdateRuleInput} from "../../../../packages/core/src/rules/ruleService";
@@ -20,6 +19,12 @@ import {
 } from "../platform/electron/database";
 import {nodeFileSystemPort, nodePathPort,} from "../platform/electron/fileSystemPort";
 import {getHomeDir, getRegistryAssetsDir} from "../platform/electron/paths";
+
+let _mainWindow: BrowserWindow | null = null;
+
+export function setMainWindow(win: BrowserWindow): void {
+    _mainWindow = win;
+}
 
 export function registerIpc() {
     const assetRepository = createAssetRepository();
@@ -197,5 +202,15 @@ export function registerIpc() {
     ipcMain.handle("rules:delete", async (_event, id: string) => {
         ruleService.deleteRule(id);
         return {deleted: true, rule_id: id};
+    });
+
+    // ---------- window controls ----------
+    ipcMain.handle("window:setOverlay", async (_event, theme: "dark" | "light") => {
+        if (!_mainWindow) return;
+        if (theme === "light") {
+            _mainWindow.setTitleBarOverlay({color: "#ffffff", symbolColor: "#52525b", height: 32});
+        } else {
+            _mainWindow.setTitleBarOverlay({color: "#0a0a0b", symbolColor: "#a1a1aa", height: 32});
+        }
     });
 }

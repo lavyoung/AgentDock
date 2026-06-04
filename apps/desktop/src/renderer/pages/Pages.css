@@ -62,7 +62,7 @@
 /* === Top bar (header) === */
 .page-topbar {
     min-height: 64px;
-    padding: 12px 32px;
+    padding: 20px 140px 12px 32px; /* right padding leaves room for window controls (—□×) */
     display: flex;
     align-items: center;
     flex-wrap: wrap;
@@ -126,6 +126,7 @@
     justify-self: end;
     margin-left: auto;
     min-width: 0;
+    max-width: 100%;
 }
 
 .page-topbar-left {

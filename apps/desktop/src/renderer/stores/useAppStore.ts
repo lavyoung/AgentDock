@@ -33,6 +33,12 @@ function applyTheme(theme: "dark" | "light" | "system"): void {
     } else {
         root.classList.remove("theme-light");
     }
+    // Sync window title-bar overlay color with theme
+    try {
+        (window as unknown as Record<string, unknown>).electron?.setOverlay(effective);
+    } catch {
+        /* ignore in mock/dev mode */
+    }
 }
 
 export type ViewKey = "overview" | "assets" | "install" | "scenarios" | "targets" | "projects" | "settings";

@@ -1,7 +1,7 @@
 import {app, BrowserWindow} from "electron";
 import path from "node:path";
 
-import {registerIpc} from "./ipc";
+import {registerIpc, setMainWindow} from "./ipc";
 import {migrateDatabase} from "../platform/electron/database";
 import {ensureAgentDockDirs} from "../platform/electron/paths";
 
@@ -31,6 +31,7 @@ function createWindow() {
 
     win.once("ready-to-show", () => {
         win.show();
+        setMainWindow(win);
     });
 
     if (isDev) {

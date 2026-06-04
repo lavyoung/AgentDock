@@ -235,6 +235,8 @@
     cursor: pointer;
     position: relative;
     transition: color 0.15s, background 0.15s;
+    background: var(--bg-elevated);
+    border: 1px solid var(--bd);
 }
 
 .nav-sub-item:hover {
