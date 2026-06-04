@@ -185,7 +185,7 @@ export function TargetsPage(): JSX.Element {
                 open={Boolean(deleteCandidate)}
                 title={t("confirmDeleteTarget")}
                 onClose={() => setDeleteCandidate(null)}
-                width={420}
+                size="sm"
                 footer={(
                     <>
                         <Button type="button" variant="secondary" onClick={() => setDeleteCandidate(null)}>

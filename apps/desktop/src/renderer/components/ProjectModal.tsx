@@ -79,7 +79,7 @@ export function ProjectModal({open, onClose}: ProjectModalProps): JSX.Element {
             open={open}
             title={t("newProjectTitle")}
             onClose={handleClose}
-            width={920}
+            size="lg"
             footer={(
                 <>
                     <Button

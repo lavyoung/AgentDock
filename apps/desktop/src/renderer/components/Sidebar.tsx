@@ -191,12 +191,14 @@ export function Sidebar(): JSX.Element {
                     ))}
 
                     <div className="category-label first">
-                        <span
-                            style={{cursor: "pointer"}}
+                        <button
+                            type="button"
+                            className="category-label-button"
                             onClick={() => setView("scenarios")}
+                            aria-label={t("navScenariosCategory")}
                         >
                             {t("navScenariosCategory")}
-                        </span>
+                        </button>
                         <NavPopover triggerId="popover-scenarios">
                             <PopoverItem
                                 iconPath="M12 5v14M5 12h14"

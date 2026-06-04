@@ -421,7 +421,7 @@ export function AssetsPage(): JSX.Element {
                 open={isNewAssetModalOpen}
                 title={t("newAssetTitle")}
                 onClose={closeNewAssetModal}
-                width={960}
+                size="xl"
                 footer={(
                     <>
                         <button

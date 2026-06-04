@@ -8,7 +8,7 @@ type ModalProps = {
     onClose: () => void;
     children: ReactNode;
     footer?: ReactNode;
-    width?: number;
+    size?: "sm" | "md" | "lg" | "xl";
 };
 
 export function Modal({
@@ -17,7 +17,7 @@ export function Modal({
     onClose,
     children,
     footer,
-    width = 520,
+    size = "md",
 }: ModalProps): ReactNode {
     const dialogRef = useRef<HTMLDivElement | null>(null);
 
@@ -43,11 +43,10 @@ export function Modal({
         >
             <div
                 ref={dialogRef}
-                className="modal-dialog"
+                className={`modal-dialog modal-dialog-${size}`}
                 role="dialog"
                 aria-modal="true"
                 aria-label={title}
-                style={{width}}
             >
                 <header className="modal-header">
                     <h3>{title}</h3>
