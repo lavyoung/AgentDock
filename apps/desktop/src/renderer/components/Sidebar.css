@@ -237,6 +237,9 @@
     transition: color 0.15s, background 0.15s;
     background: var(--bg-elevated);
     border: 1px solid var(--bd);
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
 }
 
 .nav-sub-item:hover {
@@ -258,6 +261,16 @@
     width: 3px;
     background: var(--accent);
     border-radius: 0 3px 3px 0;
+}
+
+.nav-sub-icon {
+    flex-shrink: 0;
+    color: var(--fg-faint);
+    transition: color 0.15s;
+}
+
+.nav-sub-item.active .nav-sub-icon {
+    color: var(--accent);
 }
 
 .nav-sub-item-deep {

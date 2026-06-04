@@ -118,6 +118,8 @@ export function Sidebar(): JSX.Element {
     const view = useAppStore((s) => s.view);
     const setView = useAppStore((s) => s.setView);
     const openScenario = useAppStore((s) => s.openScenario);
+    const scenarios = useAppStore((s) => s.scenarios);
+    const selectedScenario = useAppStore((s) => s.selectedScenario);
     const openProject = useAppStore((s) => s.openProject);
     const resetProjectForm = useAppStore((s) => s.resetProjectForm);
     const refreshScenarios = useAppStore((s) => s.refreshScenarios);
@@ -204,19 +206,31 @@ export function Sidebar(): JSX.Element {
                             />
                         </NavPopover>
                     </div>
-                    <button
-                        type="button"
-                        className="nav-sub-item"
-                        onClick={() => {
-                            setView("scenarios");
-                            void openScenario("default");
-                        }}
-                    >
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14" aria-hidden="true" style={{color: "#22c55e"}}>
-                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                        </svg>
-                        <span>{t("navDefaultScenario")}</span>
-                    </button>
+                    {scenarios.map((scenario) => (
+                        <button
+                            key={scenario.id}
+                            type="button"
+                            className={`nav-sub-item ${view === "scenarios" && selectedScenario?.id === scenario.id ? "active" : ""}`}
+                            onClick={() => {
+                                setView("scenarios");
+                                void openScenario(scenario.id);
+                            }}
+                        >
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                width="14"
+                                height="14"
+                                aria-hidden="true"
+                                className="nav-sub-icon"
+                            >
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                            <span>{scenario.title || scenario.name}</span>
+                        </button>
+                    ))}
 
                     <div className="category-label">
                         <span>{t("navWorkspacesCategory")}</span>

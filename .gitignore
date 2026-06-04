@@ -30,6 +30,7 @@ out
 
 .DS_Store
 *.log
+*.err
 
 .env
 .env.local
