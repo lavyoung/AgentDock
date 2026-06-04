@@ -1,5 +1,7 @@
 import {type JSX, useEffect, useState} from "react";
 
+import {Button} from "../components/Button";
+import {Modal} from "../components/Modal";
 import {useI18n} from "../i18n/useI18n";
 import {getDeployModeLabelKey, useAppStore} from "../stores/useAppStore";
 import "./Pages.css";
@@ -42,35 +44,38 @@ export function TargetsPage(): JSX.Element {
         }
     }
 
+    async function handleDelete(): Promise<void> {
+        const id = deleteCandidate;
+        setDeleteCandidate(null);
+        if (!id) {
+            return;
+        }
+
+        try {
+            await deleteTarget();
+            pushToast("success", t("targetDeleted"));
+        } catch (error) {
+            pushToast("error", String(error));
+        }
+    }
+
     return (
         <div className="view page-targets">
-            {/* ---- Header (proto: h-16 px-8) ---- */}
             <div className="page-topbar">
-                <h1 style={{fontSize: "20px", fontWeight: 600, color: "var(--fg-primary)", margin: 0}}>
-                    {t("targetsTitle")}
-                </h1>
+                <h1 className="page-topbar-title">{t("targetsTitle")}</h1>
             </div>
 
             <div className="page-body targets-grid">
-                {/* === Left: Target list card === */}
-                <div className="left-card" style={{background: "var(--bg-card)", border: "1px solid var(--bd-soft)", borderRadius: "12px", overflow: "hidden"}}>
-                    <div className="left-card-header" style={{padding: "12px 16px", borderBottom: "1px solid var(--bd-soft)", display: "flex", alignItems: "center", justifyContent: "space-between"}}>
-                        <h3 style={{fontSize: "13px", fontWeight: 600, color: "var(--fg-primary)", margin: 0}}>
-                            {t("targetList")}
-                        </h3>
-                        <button
-                            type="button"
-                            onClick={resetTargetForm}
-                            style={{height: "28px", padding: "0 10px", background: "transparent", border: "1px solid var(--bd)", color: "var(--fg-muted)", borderRadius: "6px", fontSize: "12px", cursor: "pointer", fontFamily: "inherit"}}
-                        >
+                <section className="left-card targets-card">
+                    <header className="left-card-header">
+                        <h3>{t("targetList")}</h3>
+                        <Button type="button" variant="secondary" size="sm" onClick={resetTargetForm}>
                             + {t("newTarget")}
-                        </button>
-                    </div>
-                    <div style={{padding: "8px"}}>
+                        </Button>
+                    </header>
+                    <div className="left-card-body targets-card-body">
                         {targets.length === 0 ? (
-                            <div style={{padding: "32px 16px", textAlign: "center", color: "var(--fg-muted)", fontSize: "13px"}}>
-                                {t("targetsEmpty")}
-                            </div>
+                            <div className="targets-empty-state">{t("targetsEmpty")}</div>
                         ) : (
                             targets.map((target) => {
                                 const isActive = selectedTarget?.id === target.id;
@@ -79,37 +84,18 @@ export function TargetsPage(): JSX.Element {
                                         key={target.id}
                                         type="button"
                                         onClick={() => void openTarget(target.id)}
-                                        style={{
-                                            width: "100%",
-                                            padding: "12px",
-                                            background: isActive ? "var(--accent-bg)" : "transparent",
-                                            border: "1px solid " + (isActive ? "var(--accent)" : "transparent"),
-                                            borderRadius: "8px",
-                                            cursor: "pointer",
-                                            textAlign: "left",
-                                            display: "flex",
-                                            flexDirection: "column",
-                                            gap: "6px",
-                                            marginBottom: "4px",
-                                            fontFamily: "inherit",
-                                            transition: "background 0.15s, border-color 0.15s",
-                                        }}
+                                        className={`target-list-item ${isActive ? "active" : ""}`}
+                                        aria-pressed={isActive}
                                     >
-                                        <div style={{display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px"}}>
-                                            <span style={{fontSize: "13px", fontWeight: 500, color: "var(--fg-primary)"}}>
-                                                {target.name}
-                                            </span>
+                                        <div className="target-list-item-header">
+                                            <span className="target-list-item-title">{target.name}</span>
                                             <span className={getPillForMode(target.deployMode)}>
                                                 {t(getDeployModeLabelKey(target.deployMode) as never)}
                                             </span>
                                         </div>
-                                        <div style={{fontSize: "11px", color: "var(--fg-faint)", fontFamily: "ui-monospace, monospace", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis"}}>
-                                            {target.path}
-                                        </div>
-                                        <div style={{display: "flex", alignItems: "center", gap: "6px", fontSize: "11px"}}>
-                                            <span
-                                                className={`sync-pill ${target.enabled ? "synced" : "pending"}`}
-                                            >
+                                        <div className="target-list-item-path">{target.path}</div>
+                                        <div className="target-list-item-status">
+                                            <span className={`sync-pill ${target.enabled ? "synced" : "pending"}`}>
                                                 <span className="pill-dot" />
                                                 {target.enabled ? t("enabledYes") : t("enabledNo")}
                                             </span>
@@ -119,93 +105,46 @@ export function TargetsPage(): JSX.Element {
                             })
                         )}
                     </div>
-                </div>
+                </section>
 
-                {/* === Right: Editor card === */}
-                <div className="left-card" style={{background: "var(--bg-card)", border: "1px solid var(--bd-soft)", borderRadius: "12px", overflow: "hidden"}}>
-                    <div className="left-card-header" style={{padding: "12px 16px", borderBottom: "1px solid var(--bd-soft)"}}>
-                        <h3 style={{fontSize: "13px", fontWeight: 600, color: "var(--fg-primary)", margin: 0}}>
-                            {selectedTarget ? t("targetEditor") : t("createTarget")}
-                        </h3>
-                    </div>
-                    <div style={{padding: "20px"}}>
-                        <div className="field" style={{marginBottom: "16px"}}>
-                            <label htmlFor="target-name" style={{fontSize: "12px", fontWeight: 500, color: "var(--fg-muted)", marginBottom: "6px", display: "block"}}>
-                                {t("targetNameLabel")}
-                            </label>
+                <section className="left-card targets-card">
+                    <header className="left-card-header">
+                        <h3>{selectedTarget ? t("targetEditor") : t("createTarget")}</h3>
+                    </header>
+                    <div className="left-card-body targets-editor-body">
+                        <div className="field">
+                            <label htmlFor="target-name">{t("targetNameLabel")}</label>
                             <input
                                 id="target-name"
                                 value={targetName}
                                 onChange={(event) => setTargetName(event.target.value)}
-                                style={{
-                                    width: "100%",
-                                    padding: "8px 12px",
-                                    fontSize: "13px",
-                                    background: "var(--bg-input)",
-                                    color: "var(--fg-primary)",
-                                    border: "1px solid var(--bd)",
-                                    borderRadius: "6px",
-                                    fontFamily: "inherit",
-                                    boxSizing: "border-box",
-                                }}
                             />
                         </div>
-                        <div className="field" style={{marginBottom: "16px"}}>
-                            <label htmlFor="target-path" style={{fontSize: "12px", fontWeight: 500, color: "var(--fg-muted)", marginBottom: "6px", display: "block"}}>
-                                {t("targetPathLabel")}
-                            </label>
+                        <div className="field">
+                            <label htmlFor="target-path">{t("targetPathLabel")}</label>
                             <input
                                 id="target-path"
                                 value={targetPath}
                                 onChange={(event) => setTargetPath(event.target.value)}
-                                style={{
-                                    width: "100%",
-                                    padding: "8px 12px",
-                                    fontSize: "13px",
-                                    background: "var(--bg-input)",
-                                    color: "var(--fg-primary)",
-                                    border: "1px solid var(--bd)",
-                                    borderRadius: "6px",
-                                    fontFamily: "inherit",
-                                    boxSizing: "border-box",
-                                }}
                             />
-                            <p style={{fontSize: "11px", color: "var(--fg-faint)", margin: "6px 0 0"}}>
-                                {t("targetPathHint")}
-                            </p>
+                            <p className="targets-field-hint">{t("targetPathHint")}</p>
                         </div>
-                        <div className="field" style={{marginBottom: "16px"}}>
-                            <label htmlFor="target-mode" style={{fontSize: "12px", fontWeight: 500, color: "var(--fg-muted)", marginBottom: "6px", display: "block"}}>
-                                {t("targetDeployModeLabel")}
-                            </label>
+                        <div className="field">
+                            <label htmlFor="target-mode">{t("targetDeployModeLabel")}</label>
                             <select
                                 id="target-mode"
                                 value={targetDeployMode}
                                 onChange={(event) =>
-                                    setTargetDeployMode(
-                                        event.target.value as "copy" | "merge"
-                                    )
+                                    setTargetDeployMode(event.target.value as "copy" | "merge")
                                 }
-                                style={{
-                                    width: "100%",
-                                    padding: "8px 12px",
-                                    fontSize: "13px",
-                                    background: "var(--bg-input)",
-                                    color: "var(--fg-primary)",
-                                    border: "1px solid var(--bd)",
-                                    borderRadius: "6px",
-                                    fontFamily: "inherit",
-                                    boxSizing: "border-box",
-                                }}
                             >
                                 <option value="copy">{t("deployModeCopy")}</option>
                                 <option value="merge">{t("deployModeMerge")}</option>
                             </select>
                         </div>
-                        <div style={{display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 0", borderTop: "1px solid var(--bd-soft)"}}>
-                            <span style={{fontSize: "13px", color: "var(--fg-secondary)"}}>
-                                {t("targetEnabledLabel")}
-                            </span>
+
+                        <div className="targets-toggle-row">
+                            <span>{t("targetEnabledLabel")}</span>
                             <button
                                 type="button"
                                 className="toggle"
@@ -219,147 +158,47 @@ export function TargetsPage(): JSX.Element {
                                 <span />
                             </button>
                         </div>
-                        <div style={{display: "flex", alignItems: "center", gap: "8px", marginTop: "16px", paddingTop: "16px", borderTop: "1px solid var(--bd-soft)"}}>
-                            <button
-                                type="button"
-                                onClick={() => void handleSave()}
-                                style={{
-                                    height: "32px",
-                                    padding: "0 14px",
-                                    background: "var(--accent)",
-                                    color: "#fff",
-                                    border: "none",
-                                    borderRadius: "6px",
-                                    fontSize: "13px",
-                                    fontWeight: 500,
-                                    cursor: "pointer",
-                                    fontFamily: "inherit",
-                                }}
-                            >
+
+                        <div className="targets-form-actions">
+                            <Button type="button" variant="primary" onClick={() => void handleSave()}>
                                 {selectedTarget ? t("targetFormSave") : t("targetFormCreate")}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={resetTargetForm}
-                                style={{
-                                    height: "32px",
-                                    padding: "0 14px",
-                                    background: "transparent",
-                                    color: "var(--fg-muted)",
-                                    border: "1px solid var(--bd)",
-                                    borderRadius: "6px",
-                                    fontSize: "13px",
-                                    cursor: "pointer",
-                                    fontFamily: "inherit",
-                                }}
-                            >
+                            </Button>
+                            <Button type="button" variant="secondary" onClick={resetTargetForm}>
                                 {t("cancel")}
-                            </button>
+                            </Button>
                             {selectedTarget ? (
-                                <button
+                                <Button
                                     type="button"
+                                    variant="danger"
+                                    className="targets-delete-button"
                                     onClick={() => setDeleteCandidate(selectedTarget.id)}
-                                    style={{
-                                        height: "32px",
-                                        padding: "0 14px",
-                                        background: "transparent",
-                                        color: "#f87171",
-                                        border: "1px solid rgba(239,68,68,0.4)",
-                                        borderRadius: "6px",
-                                        fontSize: "13px",
-                                        cursor: "pointer",
-                                        fontFamily: "inherit",
-                                        marginLeft: "auto",
-                                    }}
                                 >
                                     {t("deleteTarget")}
-                                </button>
+                                </Button>
                             ) : null}
                         </div>
                     </div>
-                </div>
+                </section>
             </div>
 
-            {deleteCandidate ? (
-                <div
-                    style={{
-                        position: "fixed",
-                        inset: 0,
-                        background: "rgba(0,0,0,0.55)",
-                        backdropFilter: "blur(2px)",
-                        zIndex: 300,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                    }}
-                    onClick={() => setDeleteCandidate(null)}
-                >
-                    <div
-                        onClick={(e) => e.stopPropagation()}
-                        style={{
-                            background: "var(--bg-card)",
-                            border: "1px solid var(--bd-soft)",
-                            borderRadius: "14px",
-                            width: "420px",
-                            maxWidth: "90vw",
-                            overflow: "hidden",
-                        }}
-                    >
-                        <div style={{padding: "16px 20px", borderBottom: "1px solid var(--bd-soft)"}}>
-                            <h2 style={{fontSize: "15px", fontWeight: 600, color: "var(--fg-primary)", margin: 0}}>
-                                {t("confirmDeleteTarget")}
-                            </h2>
-                        </div>
-                        <div style={{padding: "20px", display: "flex", justifyContent: "flex-end", gap: "8px"}}>
-                            <button
-                                type="button"
-                                onClick={() => setDeleteCandidate(null)}
-                                style={{
-                                    height: "32px",
-                                    padding: "0 14px",
-                                    background: "transparent",
-                                    color: "var(--fg-muted)",
-                                    border: "1px solid var(--bd)",
-                                    borderRadius: "6px",
-                                    fontSize: "13px",
-                                    cursor: "pointer",
-                                    fontFamily: "inherit",
-                                }}
-                            >
-                                {t("cancel")}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={async () => {
-                                    const id = deleteCandidate;
-                                    setDeleteCandidate(null);
-                                    if (!id) return;
-                                    try {
-                                        await deleteTarget();
-                                        pushToast("success", t("targetDeleted"));
-                                    } catch (error) {
-                                        pushToast("error", String(error));
-                                    }
-                                }}
-                                style={{
-                                    height: "32px",
-                                    padding: "0 14px",
-                                    background: "#dc2626",
-                                    color: "#fff",
-                                    border: "none",
-                                    borderRadius: "6px",
-                                    fontSize: "13px",
-                                    fontWeight: 500,
-                                    cursor: "pointer",
-                                    fontFamily: "inherit",
-                                }}
-                            >
-                                {t("deleteTarget")}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            ) : null}
+            <Modal
+                open={Boolean(deleteCandidate)}
+                title={t("confirmDeleteTarget")}
+                onClose={() => setDeleteCandidate(null)}
+                width={420}
+                footer={(
+                    <>
+                        <Button type="button" variant="secondary" onClick={() => setDeleteCandidate(null)}>
+                            {t("cancel")}
+                        </Button>
+                        <Button type="button" variant="danger" onClick={() => void handleDelete()}>
+                            {t("deleteTarget")}
+                        </Button>
+                    </>
+                )}
+            >
+                <p className="targets-delete-copy">{t("confirmDeleteTarget")}</p>
+            </Modal>
         </div>
     );
 }

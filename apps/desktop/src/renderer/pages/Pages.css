@@ -22,6 +22,122 @@
     width: 100%;
 }
 
+.targets-card {
+    overflow: hidden;
+}
+
+.targets-card-body {
+    padding: 8px;
+}
+
+.targets-empty-state {
+    padding: 32px 16px;
+    text-align: center;
+    color: var(--fg-muted);
+    font-size: 13px;
+    line-height: 1.65;
+}
+
+.target-list-item {
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 4px;
+    font-family: inherit;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.target-list-item:hover {
+    background: var(--bg-hover);
+    border-color: var(--bd-soft);
+}
+
+.target-list-item.active {
+    background: var(--accent-bg);
+    border-color: var(--accent);
+}
+
+.target-list-item-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.target-list-item-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--fg-primary);
+}
+
+.target-list-item-path {
+    font-size: 11px;
+    color: var(--fg-faint);
+    font-family: ui-monospace, monospace;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.target-list-item-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+}
+
+.targets-editor-body {
+    padding: 20px;
+}
+
+.targets-editor-body .field + .field {
+    margin-top: 16px;
+}
+
+.targets-field-hint {
+    font-size: 11px;
+    color: var(--fg-faint);
+    margin: 6px 0 0;
+}
+
+.targets-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    margin-top: 16px;
+    border-top: 1px solid var(--bd-soft);
+    font-size: 13px;
+    color: var(--fg-secondary);
+}
+
+.targets-form-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--bd-soft);
+}
+
+.targets-delete-button {
+    margin-left: auto;
+}
+
+.targets-delete-copy {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--fg-secondary);
+}
+
 /* === Empty-state body (vertically centers content) === */
 .empty-state-body {
     display: flex;
