@@ -36,7 +36,7 @@ export function TargetsPage(): JSX.Element {
     async function handleSave(): Promise<void> {
         try {
             await saveTarget();
-            pushToast("success", selectedTarget ? "已保存" : "已创建");
+            pushToast("success", selectedTarget ? t("targetSaved") : t("targetCreated"));
         } catch (error) {
             pushToast("error", String(error));
         }
@@ -253,7 +253,7 @@ export function TargetsPage(): JSX.Element {
                                     fontFamily: "inherit",
                                 }}
                             >
-                                {t("targetFormReset")}
+                                {t("cancel")}
                             </button>
                             {selectedTarget ? (
                                 <button
@@ -326,7 +326,7 @@ export function TargetsPage(): JSX.Element {
                                     fontFamily: "inherit",
                                 }}
                             >
-                                {t("targetFormReset")}
+                                {t("cancel")}
                             </button>
                             <button
                                 type="button"
@@ -336,7 +336,7 @@ export function TargetsPage(): JSX.Element {
                                     if (!id) return;
                                     try {
                                         await deleteTarget();
-                                        pushToast("success", "已删除");
+                                        pushToast("success", t("targetDeleted"));
                                     } catch (error) {
                                         pushToast("error", String(error));
                                     }

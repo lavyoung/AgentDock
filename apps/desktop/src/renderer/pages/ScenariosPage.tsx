@@ -46,7 +46,7 @@ function ScenarioCard({
             </div>
             <div className="scenario-card-stat">
                 {t("newScenarioCountSuffix")} <strong>{total}</strong> {t("newScenarioItemSuffix")}
-                {scenario.isBuiltIn && <span style={{marginLeft: 8, color: "#22c55e"}}>★ {t("scenarioBuiltIn")}</span>}
+                {scenario.isBuiltIn && <span style={{marginLeft: 8, color: "#22c55e"}}>{t("scenarioBuiltIn")}</span>}
             </div>
         </div>
     );
@@ -65,6 +65,8 @@ function SkillMini({
     onRemove?: () => void;
     showRemove?: boolean;
 }): JSX.Element {
+    const {t} = useI18n();
+
     return (
         <div className="skill-mini">
             <div className="skill-mini-icon" style={{background: `${color}22`, color}}>
@@ -77,7 +79,7 @@ function SkillMini({
                 <div className="skill-mini-meta">{meta}</div>
             </div>
             {showRemove && onRemove && (
-                <button className="skill-mini-remove" onClick={(e) => { e.stopPropagation(); onRemove(); }} aria-label="移除">
+                <button className="skill-mini-remove" onClick={(e) => { e.stopPropagation(); onRemove(); }} aria-label={t("scenarioRemoveAsset")}>
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
                     </svg>
@@ -98,7 +100,9 @@ function SeverityMini({
     onRemove?: () => void;
     showRemove?: boolean;
 }): JSX.Element {
+    const {t} = useI18n();
     const color = getSeverityColor(severity);
+
     return (
         <div className="skill-mini">
             <div className="skill-mini-icon" style={{background: getSeverityBg(severity), color}}>
@@ -111,7 +115,7 @@ function SeverityMini({
                 <div className="skill-mini-meta" style={{color}}>{severity}</div>
             </div>
             {showRemove && onRemove && (
-                <button className="skill-mini-remove" onClick={(e) => { e.stopPropagation(); onRemove(); }} aria-label="移除">
+                <button className="skill-mini-remove" onClick={(e) => { e.stopPropagation(); onRemove(); }} aria-label={t("scenarioRemoveAsset")}>
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
                     </svg>
@@ -156,7 +160,7 @@ function NewScenarioModal({onClose, onCreate}: {onClose: () => void; onCreate: (
             <div className="asset-picker-panel">
                 <div className="asset-picker-header">
                     <span className="asset-picker-title">{t("newScenarioTitle")}</span>
-                    <button className="icon-btn" onClick={onClose} aria-label="关闭">
+                    <button className="icon-btn" onClick={onClose} aria-label={t("close")}>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
                         </svg>
@@ -227,8 +231,8 @@ function AssetPicker({
             <div className="asset-picker-backdrop" onClick={onClose} />
             <div className="asset-picker-panel">
                 <div className="asset-picker-header">
-                    <span className="asset-picker-title">{t("assetPickerTitle")} — {fieldLabel}</span>
-                    <button className="icon-btn" onClick={onClose} aria-label="关闭">
+                    <span className="asset-picker-title">{t("assetPickerTitle")} - {fieldLabel}</span>
+                    <button className="icon-btn" onClick={onClose} aria-label={t("close")}>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
                         </svg>
@@ -342,7 +346,7 @@ function ScenarioDetail(): JSX.Element {
                                 <span style={{fontSize: 12, fontFamily: "monospace", color: "var(--fg-muted)"}}>{selectedScenario.id}</span>
                                 <span className="scenario-badge" style={{background: "rgba(34,197,94,.10)", color: "#22c55e"}}>{t("scenarioBadgeLabel")}</span>
                                 {selectedScenario.isBuiltIn && (
-                                    <span style={{fontSize: 12, color: "#22c55e"}}>★ {t("scenarioBuiltIn")}</span>
+                                    <span style={{fontSize: 12, color: "#22c55e"}}>{t("scenarioBuiltIn")}</span>
                                 )}
                             </div>
                             {isEdit ? (
@@ -626,7 +630,7 @@ export function ScenariosPage(): JSX.Element {
                 <div style={{display: "flex", alignItems: "center", justifyContent: "space-between"}}>
                     <div>
                         <h1 style={{fontSize: 24, fontWeight: 600, color: "var(--fg-primary)"}}>{t("scenariosTitle")}</h1>
-                        <p style={{fontSize: 13, color: "var(--fg-muted)", marginTop: 4}}>预设的资产 + Agent 组合，创建项目时直接选用</p>
+                        <p style={{fontSize: 13, color: "var(--fg-muted)", marginTop: 4}}>{t("scenarioListSubtitle")}</p>
                     </div>
                     <button className="btn btn-primary" onClick={() => {
                         resetScenarioForm();

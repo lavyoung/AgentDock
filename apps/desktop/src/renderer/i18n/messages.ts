@@ -75,6 +75,8 @@ type MessageCatalog = {
     overviewRefRules: string;
     overviewStatusEnabled: string;
     overviewStatusUninstalled: string;
+    overviewAgentActive: string;
+    overviewAgentInactive: string;
     demoSkillTitle: string;
     demoSkillDescription: string;
     demoSkillContent: string;
@@ -137,6 +139,8 @@ type MessageCatalog = {
     scenarioAddAgent: string;
     scenarioEditScenario: string;
     scenarioDeleteScenario: string;
+    scenarioListSubtitle: string;
+    scenarioRemoveAsset: string;
     scenarioBackToScenarios: string;
     newScenarioTitle: string;
     newScenarioHelp: string;
@@ -204,6 +208,9 @@ type MessageCatalog = {
     targetFormSave: string;
     targetFormCreate: string;
     targetFormReset: string;
+    targetSaved: string;
+    targetCreated: string;
+    targetDeleted: string;
     deleteTarget: string;
     confirmDeleteTarget: string;
 };
@@ -286,6 +293,8 @@ export const messages: Record<Locale, Catalog> = {
         overviewRefRules: "\u89c4\u5219",
         overviewStatusEnabled: "\u5df2\u542f\u7528",
         overviewStatusUninstalled: "\u672a\u5b89\u88c5",
+        overviewAgentActive: "\u5df2\u6fc0\u6d3b",
+        overviewAgentInactive: "\u672a\u6fc0\u6d3b",
         demoSkillTitle: "\u524d\u7aef\u4ee3\u7801\u5ba1\u67e5",
         demoSkillDescription: "\u793a\u4f8b Skill \u8d44\u4ea7\uff0c\u7528\u4e8e\u524d\u7aef\u4ee3\u7801\u5ba1\u67e5\u3002",
         demoSkillContent: "# Frontend Review\n\n## Use case\n\nUse when reviewing React and TypeScript projects.\n\n## Focus areas\n\n- Component structure\n- Type safety\n- Maintainability\n",
@@ -348,6 +357,8 @@ export const messages: Record<Locale, Catalog> = {
         scenarioAddAgent: "\u6dfb\u52a0 Agent",
         scenarioEditScenario: "\u7f16\u8f91\u573a\u666f",
         scenarioDeleteScenario: "\u5220\u9664\u573a\u666f",
+        scenarioListSubtitle: "\u9884\u8bbe\u7684\u8d44\u4ea7 + Agent \u7ec4\u5408\uff0c\u521b\u5efa\u9879\u76ee\u65f6\u53ef\u76f4\u63a5\u9009\u7528",
+        scenarioRemoveAsset: "\u79fb\u9664",
         scenarioBackToScenarios: "\u573a\u666f",
         newScenarioTitle: "\u65b0\u5efa\u573a\u666f",
         newScenarioHelp: "\u573a\u666f\u662f\u4e00\u7ec4\u9884\u8bbe\u914d\u7f6e\uff08\u5173\u8054\u7684 Agent + \u542f\u7528\u7684\u6280\u80fd\uff09\u3002\u4e00\u4e2a Agent \u53ef\u88ab\u591a\u4e2a\u573a\u666f\u5171\u7528\u3002",
@@ -415,6 +426,9 @@ export const messages: Record<Locale, Catalog> = {
         targetFormSave: "\u4fdd\u5b58",
         targetFormCreate: "\u521b\u5efa",
         targetFormReset: "\u91cd\u7f6e",
+        targetSaved: "\u5df2\u4fdd\u5b58",
+        targetCreated: "\u5df2\u521b\u5efa",
+        targetDeleted: "\u5df2\u5220\u9664",
         deleteTarget: "\u5220\u9664\u76ee\u6807",
         confirmDeleteTarget: "\u786e\u5b9a\u8981\u5220\u9664\u6b64\u76ee\u6807\u5417\uff1f",
     },
@@ -493,6 +507,8 @@ export const messages: Record<Locale, Catalog> = {
         overviewRefRules: "Rules",
         overviewStatusEnabled: "Enabled",
         overviewStatusUninstalled: "Uninstalled",
+        overviewAgentActive: "Active",
+        overviewAgentInactive: "Inactive",
         demoSkillTitle: "Frontend Review",
         demoSkillDescription: "Sample Skill asset for frontend code review.",
         demoSkillContent: "# Frontend Review\n\n## Use case\n\nUse when reviewing React and TypeScript projects.\n\n## Focus areas\n\n- Component structure\n- Type safety\n- Maintainability\n",
@@ -555,6 +571,8 @@ export const messages: Record<Locale, Catalog> = {
         scenarioAddAgent: "Add agent",
         scenarioEditScenario: "Edit scenario",
         scenarioDeleteScenario: "Delete scenario",
+        scenarioListSubtitle: "Preset asset and Agent combinations that can be selected directly when creating a project.",
+        scenarioRemoveAsset: "Remove",
         scenarioBackToScenarios: "Scenarios",
         newScenarioTitle: "New scenario",
         newScenarioHelp: "A scenario is a preset bundle (default Agent + which skills to enable). After creation, you can attach it to a project.",
@@ -622,6 +640,9 @@ export const messages: Record<Locale, Catalog> = {
         targetFormSave: "Save",
         targetFormCreate: "Create",
         targetFormReset: "Reset",
+        targetSaved: "Saved",
+        targetCreated: "Created",
+        targetDeleted: "Deleted",
         deleteTarget: "Delete target",
         confirmDeleteTarget: "Are you sure you want to delete this target?",
     },

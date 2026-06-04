@@ -30,7 +30,6 @@ export function OverviewPage(): JSX.Element {
 
     return (
         <div className="view page-overview">
-            {/* ---- Header (proto: h-16 px-8) ---- */}
             <div className="page-topbar">
                 <h1 style={{fontSize: "20px", fontWeight: 600, color: "var(--fg-primary)", margin: 0}}>
                     {t("overviewTitle")}
@@ -38,9 +37,7 @@ export function OverviewPage(): JSX.Element {
             </div>
 
             <div className="page-body" style={{padding: "32px", display: "flex", flexDirection: "column", gap: "24px", maxWidth: "1024px"}}>
-                {/* === Stats row (4 cards) === */}
                 <div style={{display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px"}}>
-                    {/* Total Skills */}
                     <div className="overview-stat-card">
                         <div className="overview-stat-label">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14" style={{color: "#22c55e"}} aria-hidden="true">
@@ -50,7 +47,6 @@ export function OverviewPage(): JSX.Element {
                         </div>
                         <div className="overview-stat-value">{enabledCount}</div>
                     </div>
-                    {/* Total Rules */}
                     <div className="overview-stat-card">
                         <div className="overview-stat-label">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14" style={{color: "#3b82f6"}} aria-hidden="true">
@@ -59,13 +55,12 @@ export function OverviewPage(): JSX.Element {
                             <span>{t("overviewTotalRules")}</span>
                         </div>
                         <div className="overview-stat-value" style={{color: "var(--fg-faint)"}}>
-                            —
+                            -
                             <span style={{fontSize: "12px", fontWeight: 400, marginLeft: "4px"}}>
                                 {t("overviewRulesPending")}
                             </span>
                         </div>
                     </div>
-                    {/* Scenarios */}
                     <div className="overview-stat-card">
                         <div className="overview-stat-label">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14" style={{color: "#a855f7"}} aria-hidden="true">
@@ -77,7 +72,6 @@ export function OverviewPage(): JSX.Element {
                         </div>
                         <div className="overview-stat-value">1</div>
                     </div>
-                    {/* Agents */}
                     <div className="overview-stat-card">
                         <div className="overview-stat-label">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14" style={{color: "#f97316"}} aria-hidden="true">
@@ -103,9 +97,7 @@ export function OverviewPage(): JSX.Element {
                     </div>
                 </div>
 
-                {/* === Agent breakdown table (proto: 4-col grid + green bar header) === */}
                 <div style={{background: "var(--bg-card)", border: "1px solid var(--bd)", borderRadius: "12px", overflow: "hidden"}}>
-                    {/* Header bar with green accent */}
                     <div style={{padding: "16px 20px", borderBottom: "1px solid var(--bd-soft)", display: "flex", alignItems: "center", gap: "8px"}}>
                         <span style={{width: "4px", height: "16px", background: "var(--accent)", borderRadius: "2px"}} aria-hidden="true" />
                         <h2 style={{fontSize: "15px", fontWeight: 500, color: "var(--fg-primary)", margin: 0}}>
@@ -113,7 +105,6 @@ export function OverviewPage(): JSX.Element {
                         </h2>
                     </div>
 
-                    {/* Column headers */}
                     <div className="overview-agent-row header">
                         <div>AGENT</div>
                         <div>{t("overviewRefSkills")}</div>
@@ -121,13 +112,12 @@ export function OverviewPage(): JSX.Element {
                         <div style={{textAlign: "right"}}>{t("overviewStatusEnabled")}</div>
                     </div>
 
-                    {/* Rows */}
                     {AGENT_ROWS.map((agent) => (
                         <div key={agent.name} className="overview-agent-row">
                             <div style={{display: "flex", alignItems: "center", gap: "10px"}}>
                                 <span
                                     className={`mini-radio ${agent.active ? "active" : "empty"}`}
-                                    aria-label={agent.active ? "已激活" : "未激活"}
+                                    aria-label={agent.active ? t("overviewAgentActive") : t("overviewAgentInactive")}
                                 />
                                 <span style={{color: "var(--fg-primary)", fontWeight: 500, fontSize: "13px"}}>
                                     {agent.name}

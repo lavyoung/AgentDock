@@ -36,8 +36,8 @@ function initMockData() {
     mockScenarios.push({
         id: "default",
         name: "default",
-        title: "默认场景",
-        description: "内置默认场景，包含常用技能与 OpenCode Agent",
+        title: "Default scenario",
+        description: "Built-in default scenario with common skills and OpenCode Agent",
         skillIds: [],
         ruleIds: [],
         agentFileIds: [],

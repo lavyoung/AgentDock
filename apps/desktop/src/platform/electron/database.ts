@@ -159,8 +159,8 @@ export function migrateDatabase(): void {
             .run(
                 "default",
                 "default",
-                "默认场景",
-                "内置默认场景，包含常用技能与 OpenCode Agent",
+                "Default scenario",
+                "Built-in default scenario with common skills and OpenCode Agent",
                 now,
                 now
             );
