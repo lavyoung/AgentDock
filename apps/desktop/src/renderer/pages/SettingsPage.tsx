@@ -48,6 +48,7 @@ export function SettingsPage(): JSX.Element {
     const setSettingsAutoUpdate = useAppStore((s) => s.setSettingsAutoUpdate);
     const setSettingsNotifications = useAppStore((s) => s.setSettingsNotifications);
     const setSettingsSound = useAppStore((s) => s.setSettingsSound);
+    const runApplicationSync = useAppStore((s) => s.runApplicationSync);
     const pushToast = useAppStore((s) => s.pushToast);
 
     useEffect(() => {
@@ -289,9 +290,14 @@ export function SettingsPage(): JSX.Element {
                                         </div>
                                         <div className="settings-row-label-sub">{t("settingsAgentLocationsHint")}</div>
                                     </div>
-                                    <button type="button" className="btn btn-secondary" onClick={() => void handleRedetect()}>
-                                        {t("settingsAgentRedetect")}
-                                    </button>
+                                    <div className="settings-agent-toolbar-actions">
+                                        <button type="button" className="btn btn-secondary" onClick={() => void handleRedetect()}>
+                                            {t("settingsAgentRedetect")}
+                                        </button>
+                                        <button type="button" className="btn btn-primary" onClick={() => void runApplicationSync()}>
+                                            {t("settingsAgentSync")}
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <div className="settings-agent-grid">

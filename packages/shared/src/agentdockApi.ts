@@ -3,6 +3,7 @@ import type {
     ApplicationId,
     ApplicationLocationRecord,
     ApplicationRecord,
+    ApplicationSyncResult,
     UpdateApplicationInput,
     UpdateApplicationLocationInput,
 } from "../../core/src/types/application";
@@ -70,5 +71,6 @@ export interface AgentdockApi {
             id: string,
             input: UpdateApplicationLocationInput
         ): Promise<ApplicationLocationRecord>;
+        runSync(id: ApplicationId): Promise<ApplicationSyncResult>;
     };
 }

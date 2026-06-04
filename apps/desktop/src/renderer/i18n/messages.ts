@@ -59,6 +59,9 @@ type MessageCatalog = {
     settingsAgentSummarySupported: string;
     settingsAgentActions: string;
     settingsAgentRedetect: string;
+    settingsAgentSync: string;
+    settingsAgentSyncSuccess: string;
+    settingsAgentSyncConflict: string;
     settingsAgentList: string;
     settingsAgentLocations: string;
     settingsAgentLocationsHint: string;
@@ -349,6 +352,9 @@ export const messages: Record<Locale, Catalog> = {
         settingsAgentSummarySupported: "\u5df2\u63a5\u5165 Agent",
         settingsAgentActions: "\u64cd\u4f5c",
         settingsAgentRedetect: "\u91cd\u65b0\u68c0\u6d4b",
+        settingsAgentSync: "\u540c\u6b65\u8d44\u4ea7",
+        settingsAgentSyncSuccess: "\u5df2\u5411 {locations} \u4e2a\u4f4d\u7f6e\u540c\u6b65 {skills} \u4e2a Skills \u548c {agentsMd} \u4e2a AGENTS.md \u8d44\u4ea7\u3002",
+        settingsAgentSyncConflict: "\u5176\u4e2d\u6709 {count} \u4e2a\u6258\u7ba1\u533a\u5757\u51b2\u7a81\u9700\u8981\u624b\u52a8\u5904\u7406\u3002",
         settingsAgentList: "Agent \u5217\u8868",
         settingsAgentLocations: "\u6258\u7ba1\u4f4d\u7f6e",
         settingsAgentLocationsHint: "\u57fa\u4e8e\u5f53\u524d\u76ee\u6807\u548c\u672c\u5730\u5de5\u4f5c\u533a\u626b\u63cf\u53ef\u6258\u7ba1\u7684 Skills / AGENTS.md \u8def\u5f84\u3002",
@@ -635,6 +641,9 @@ export const messages: Record<Locale, Catalog> = {
         settingsAgentSummarySupported: "Integrated Agents",
         settingsAgentActions: "Actions",
         settingsAgentRedetect: "Re-detect",
+        settingsAgentSync: "Sync assets",
+        settingsAgentSyncSuccess: "Synced {skills} Skills and {agentsMd} AGENTS.md assets to {locations} locations.",
+        settingsAgentSyncConflict: "{count} managed block conflicts need manual review.",
         settingsAgentList: "Agent list",
         settingsAgentLocations: "Managed locations",
         settingsAgentLocationsHint: "Scan the current targets and local workspace paths for manageable Skills and AGENTS.md locations.",

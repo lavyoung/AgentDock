@@ -360,6 +360,7 @@ type Actions = {
     saveApplication(): Promise<void>;
     detectApplicationLocations(): Promise<void>;
     saveApplicationLocation(): Promise<void>;
+    runApplicationSync(): Promise<void>;
     selectLocation(location: ApplicationLocationRecord | null): void;
     setApplicationEnabled(value: boolean): void;
     setLocationName(value: string): void;
@@ -916,6 +917,29 @@ export const useAppStore = create<AppStore>((set, get) => ({
         const {selectedLocation, selectedApplicationId, locationName, locationPath, locationEnabled} = get();
         if (!selectedLocation || !selectedApplicationId) return;
         await agentdockClient.applications.updateLocation(selectedLocation.id, {name: locationName, path: locationPath, enabled: locationEnabled});
+        await get().openApplication(selectedApplicationId);
+    },
+
+    async runApplicationSync() {
+        const {selectedApplicationId} = get();
+        if (!selectedApplicationId) return;
+
+        const result = await agentdockClient.applications.runSync(selectedApplicationId);
+        const baseMessage = get()
+            ._t("settingsAgentSyncSuccess")
+            .replace("{locations}", String(result.touched_locations))
+            .replace("{skills}", String(result.synced_skills))
+            .replace("{agentsMd}", String(result.synced_agents_md));
+
+        if (result.conflicts.length > 0) {
+            get().pushToast(
+                "error",
+                `${baseMessage} ${get()._t("settingsAgentSyncConflict").replace("{count}", String(result.conflicts.length))}`
+            );
+            return;
+        }
+
+        get().pushToast("success", baseMessage);
         await get().openApplication(selectedApplicationId);
     },
 

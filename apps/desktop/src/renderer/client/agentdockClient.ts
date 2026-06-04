@@ -332,6 +332,14 @@ const mockApi: AgentdockApi = {
             mockLocations[idx] = next;
             return next;
         },
+        runSync: async (id) => ({
+            application_id: id,
+            synced_skills: mockAssets.filter((asset) => asset.type === "skill" && asset.status === "active").length,
+            synced_agents_md: mockAssets.filter((asset) => asset.type === "agents-md" && asset.status === "active").length,
+            touched_locations: mockLocations.filter((location) => location.application_id === id && location.enabled).length,
+            conflicts: [],
+            synced_at: nowIso(),
+        }),
     },
 };
 
@@ -346,7 +354,7 @@ export const agentdockClient: AgentdockApi = MOCK_MODE ? mockApi : new Proxy({} 
                 snapshots: {list: notReady, restore: notReady},
                 targets: {list: notReady, get: notReady, create: notReady, update: notReady, delete: notReady},
                 scenarios: {list: notReady, get: notReady, create: notReady, update: notReady, delete: notReady, addAsset: notReady, removeAsset: notReady},
-                applications: {list: notReady, get: notReady, update: notReady, refreshLocations: notReady, updateLocation: notReady},
+                applications: {list: notReady, get: notReady, update: notReady, refreshLocations: notReady, updateLocation: notReady, runSync: notReady},
             }[prop];
         }
         return api[prop];

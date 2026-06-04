@@ -50,6 +50,7 @@ const agentdockApi: AgentdockApi = {
             ipcRenderer.invoke("applications:refresh-locations", id),
         updateLocation: (id, input) =>
             ipcRenderer.invoke("applications:update-location", id, input),
+        runSync: (id) => ipcRenderer.invoke("applications:run-sync", id),
     },
 };
 

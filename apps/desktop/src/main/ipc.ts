@@ -1,5 +1,6 @@
 import {BrowserWindow, ipcMain} from "electron";
 import {ApplicationService} from "../../../../packages/core/src/application/applicationService";
+import {ApplicationSyncService} from "../../../../packages/core/src/application/applicationSyncService";
 import type {ApplicationId} from "../../../../packages/core/src/types/application";
 import {AssetService} from "../../../../packages/core/src/asset/assetService";
 import {type CreateRuleInput, RuleService, type UpdateRuleInput} from "../../../../packages/core/src/rules/ruleService";
@@ -60,6 +61,12 @@ export function registerIpc() {
         homeDir: getHomeDir(),
         path: nodePathPort,
         targetRepository,
+    });
+    const applicationSyncService = new ApplicationSyncService({
+        applicationRepository,
+        assetRepository,
+        fileSystem: nodeFileSystemPort,
+        path: nodePathPort,
     });
     const scenarioService = new ScenarioService({
         scenarioRepository,
@@ -154,6 +161,10 @@ export function registerIpc() {
             return applicationService.updateLocation(id, input);
         }
     );
+
+    ipcMain.handle("applications:run-sync", async (_event, id: ApplicationId) => {
+        return applicationSyncService.syncApplication(id);
+    });
 
     // ---------- scenarios ----------
     ipcMain.handle("scenarios:list", async () => {

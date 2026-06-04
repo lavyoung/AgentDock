@@ -54,3 +54,18 @@ export type UpdateApplicationLocationInput = {
     path?: string;
     enabled?: boolean;
 };
+
+export type ApplicationSyncConflict = {
+    asset_id: string;
+    location_id: string;
+    reason: string;
+};
+
+export type ApplicationSyncResult = {
+    application_id: ApplicationId;
+    synced_skills: number;
+    synced_agents_md: number;
+    touched_locations: number;
+    conflicts: ApplicationSyncConflict[];
+    synced_at: string;
+};

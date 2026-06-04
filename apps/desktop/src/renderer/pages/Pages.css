@@ -2059,6 +2059,13 @@
     gap: 16px;
 }
 
+.settings-agent-toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
 .settings-agent-toolbar-title {
     font-size: 16px;
     font-weight: 600;
