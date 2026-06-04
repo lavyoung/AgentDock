@@ -17,6 +17,9 @@ export type ApplicationRecord = {
     name: string;
     description: string;
     enabled: boolean;
+    total_locations: number;
+    enabled_locations: number;
+    existing_locations: number;
     created_at: string;
     updated_at: string;
 };

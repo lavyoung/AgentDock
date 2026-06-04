@@ -1,5 +1,6 @@
 import {BrowserWindow, ipcMain} from "electron";
 import {ApplicationService} from "../../../../packages/core/src/application/applicationService";
+import type {ApplicationId} from "../../../../packages/core/src/types/application";
 import {AssetService} from "../../../../packages/core/src/asset/assetService";
 import {type CreateRuleInput, RuleService, type UpdateRuleInput} from "../../../../packages/core/src/rules/ruleService";
 import {
@@ -132,17 +133,17 @@ export function registerIpc() {
         return applicationService.listApplications();
     });
 
-    ipcMain.handle("applications:get", async (_event, id: "codex") => {
+    ipcMain.handle("applications:get", async (_event, id: ApplicationId) => {
         return applicationService.getApplication(id);
     });
 
-    ipcMain.handle("applications:update", async (_event, id: "codex", input) => {
+    ipcMain.handle("applications:update", async (_event, id: ApplicationId, input) => {
         return applicationService.updateApplication(id, input);
     });
 
     ipcMain.handle(
         "applications:refresh-locations",
-        async (_event, id: "codex") => {
+        async (_event, id: ApplicationId) => {
             return applicationService.refreshLocations(id);
         }
     );

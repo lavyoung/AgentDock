@@ -1,5 +1,14 @@
 import type {AgentdockApi} from "../../../../../packages/shared/src/agentdockApi";
-import type {ApplicationDetail, ApplicationLocationRecord} from "../../../../../packages/core/src/types/application";
+import {
+    getApplicationDefinition,
+    listSupportedApplications,
+} from "../../../../../packages/core/src/application/applicationCatalog";
+import type {
+    ApplicationDetail,
+    ApplicationId,
+    ApplicationLocationRecord,
+    ApplicationRecord,
+} from "../../../../../packages/core/src/types/application";
 import type {AssetDetail, RuleRecord, ScenarioRecord} from "../../../../../packages/core/src/types/asset";
 import type {TargetRecord} from "../../../../../packages/core/src/types/target";
 
@@ -23,7 +32,9 @@ const mockAssets: AssetDetail[] = [];
 const mockRules: RuleRecord[] = [];
 const mockScenarios: ScenarioRecord[] = [];
 const mockTargets: TargetRecord[] = [];
-let mockAppEnabled = false;
+const mockApplications = new Map<ApplicationId, boolean>(
+    listSupportedApplications().map((application) => [application.id, application.id === "codex"])
+);
 let mockLocations: ApplicationLocationRecord[] = [];
 
 function nowIso(): string {
@@ -247,40 +258,67 @@ const mockApi: AgentdockApi = {
         },
     },
     applications: {
-        list: async () => [
-            {
-                id: "codex",
-                name: "Codex",
-                enabled: mockAppEnabled,
-                created_at: nowIso(),
-                updated_at: nowIso(),
-            },
-        ],
+        list: async () =>
+            listSupportedApplications().map((application): ApplicationRecord => {
+                const locations = mockLocations.filter(
+                    (location) => location.application_id === application.id
+                );
+                return {
+                    id: application.id,
+                    name: application.name,
+                    description: application.description,
+                    enabled: mockApplications.get(application.id) ?? false,
+                    total_locations: locations.length,
+                    enabled_locations: locations.filter((location) => location.enabled).length,
+                    existing_locations: locations.filter((location) => location.exists).length,
+                    created_at: nowIso(),
+                    updated_at: nowIso(),
+                };
+            }),
         get: async (id) => {
-            if (id !== "codex") return null;
+            const definition = getApplicationDefinition(id);
             const detail: ApplicationDetail = {
                 application: {
-                    id: "codex",
-                    name: "Codex",
-                    enabled: mockAppEnabled,
+                    id: definition.id,
+                    name: definition.name,
+                    description: definition.description,
+                    enabled: mockApplications.get(id) ?? false,
+                    total_locations: mockLocations.filter((location) => location.application_id === id).length,
+                    enabled_locations: mockLocations.filter(
+                        (location) => location.application_id === id && location.enabled
+                    ).length,
+                    existing_locations: mockLocations.filter(
+                        (location) => location.application_id === id && location.exists
+                    ).length,
                     created_at: nowIso(),
                     updated_at: nowIso(),
                 },
-                locations: mockLocations,
+                locations: mockLocations.filter((location) => location.application_id === id),
             };
             return detail;
         },
         update: async (id, input) => {
-            if (input.enabled !== undefined) mockAppEnabled = input.enabled;
+            if (input.enabled !== undefined) {
+                mockApplications.set(id, input.enabled);
+            }
+            const definition = getApplicationDefinition(id);
             return {
                 id,
-                name: "Codex",
-                enabled: mockAppEnabled,
+                name: definition.name,
+                description: definition.description,
+                enabled: mockApplications.get(id) ?? false,
+                total_locations: mockLocations.filter((location) => location.application_id === id).length,
+                enabled_locations: mockLocations.filter(
+                    (location) => location.application_id === id && location.enabled
+                ).length,
+                existing_locations: mockLocations.filter(
+                    (location) => location.application_id === id && location.exists
+                ).length,
                 created_at: nowIso(),
                 updated_at: nowIso(),
             };
         },
-        refreshLocations: async () => mockLocations,
+        refreshLocations: async (id) => mockLocations.filter((location) => location.application_id === id),
         updateLocation: async (id, input) => {
             const idx = mockLocations.findIndex((l) => l.id === id);
             if (idx < 0) throw new Error("Location not found");

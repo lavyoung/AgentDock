@@ -2160,6 +2160,26 @@
     justify-content: flex-end;
 }
 
+.settings-agent-editor {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--bd-soft);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.settings-agent-editor-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--fg-primary);
+}
+
+.settings-agent-editor-grid {
+    display: grid;
+    gap: 12px;
+}
+
 .settings-agent-empty {
     padding: 18px 20px;
     background: var(--bg-soft);

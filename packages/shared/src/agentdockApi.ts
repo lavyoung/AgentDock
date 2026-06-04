@@ -1,5 +1,6 @@
 import type {
     ApplicationDetail,
+    ApplicationId,
     ApplicationLocationRecord,
     ApplicationRecord,
     UpdateApplicationInput,
@@ -62,9 +63,9 @@ export interface AgentdockApi {
     };
     applications: {
         list(): Promise<ApplicationRecord[]>;
-        get(id: "codex"): Promise<ApplicationDetail | null>;
-        update(id: "codex", input: UpdateApplicationInput): Promise<ApplicationRecord>;
-        refreshLocations(id: "codex"): Promise<ApplicationLocationRecord[]>;
+        get(id: ApplicationId): Promise<ApplicationDetail | null>;
+        update(id: ApplicationId, input: UpdateApplicationInput): Promise<ApplicationRecord>;
+        refreshLocations(id: ApplicationId): Promise<ApplicationLocationRecord[]>;
         updateLocation(
             id: string,
             input: UpdateApplicationLocationInput

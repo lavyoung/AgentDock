@@ -349,7 +349,11 @@ class SqliteApplicationRepository implements ApplicationRepository {
         return rows.map((row) => ({
             id: row.id,
             name: row.name,
+            description: "",
             enabled: row.enabled === 1,
+            total_locations: 0,
+            enabled_locations: 0,
+            existing_locations: 0,
             created_at: row.created_at,
             updated_at: row.updated_at,
         }));
@@ -385,7 +389,11 @@ class SqliteApplicationRepository implements ApplicationRepository {
         return {
             id: row.id,
             name: row.name,
+            description: "",
             enabled: row.enabled === 1,
+            total_locations: 0,
+            enabled_locations: 0,
+            existing_locations: 0,
             created_at: row.created_at,
             updated_at: row.updated_at,
         };

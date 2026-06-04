@@ -1,32 +1,63 @@
-import {type JSX} from "react";
+import {type JSX, useEffect, useMemo} from "react";
 
 import {useI18n} from "../i18n/useI18n";
 import {useAppStore} from "../stores/useAppStore";
 import "./Pages.css";
 
-interface AgentRow {
+type AgentRow = {
+    id: string;
     name: string;
     active: boolean;
-    installed: boolean;
+    hasUsableLocation: boolean;
     refSkills: number;
     refRules: number;
-}
-
-const AGENT_ROWS: AgentRow[] = [
-    {name: "OpenCode", active: true, installed: true, refSkills: 12, refRules: 0},
-    {name: "Claude Code", active: false, installed: false, refSkills: 0, refRules: 0},
-    {name: "Gemini CLI", active: false, installed: false, refSkills: 0, refRules: 0},
-    {name: "Windsurf", active: false, installed: false, refSkills: 0, refRules: 0},
-    {name: "CodeBuddy", active: false, installed: false, refSkills: 0, refRules: 0},
-    {name: "Cursor CLI", active: false, installed: false, refSkills: 0, refRules: 0},
-    {name: "Copilot CLI", active: false, installed: false, refSkills: 0, refRules: 0},
-];
+};
 
 export function OverviewPage(): JSX.Element {
     const {t} = useI18n();
     const assets = useAppStore((s) => s.assets);
-    const enabledCount = assets.filter((a) => a.status === "active").length;
-    const activatedAgents = AGENT_ROWS.filter((a) => a.active).length;
+    const scenarios = useAppStore((s) => s.scenarios);
+    const applications = useAppStore((s) => s.applications);
+    const refreshApplications = useAppStore((s) => s.refreshApplications);
+    const refreshScenarios = useAppStore((s) => s.refreshScenarios);
+
+    useEffect(() => {
+        void refreshApplications();
+        void refreshScenarios();
+    }, [refreshApplications, refreshScenarios]);
+
+    const enabledCount = assets.filter((asset) => asset.status === "active").length;
+
+    const agentRows = useMemo<AgentRow[]>(() => {
+        return applications.map((application) => {
+            const relatedScenarios = scenarios.filter((scenario) =>
+                scenario.agentAppIds.includes(application.id)
+            );
+            const refSkills = relatedScenarios.reduce(
+                (total, scenario) => total + scenario.skillIds.length,
+                0
+            );
+            const refRules = relatedScenarios.reduce(
+                (total, scenario) => total + scenario.ruleIds.length,
+                0
+            );
+
+            return {
+                id: application.id,
+                name: application.name,
+                active:
+                    application.enabled &&
+                    application.enabled_locations > 0 &&
+                    application.existing_locations > 0,
+                hasUsableLocation:
+                    application.enabled_locations > 0 && application.existing_locations > 0,
+                refSkills,
+                refRules,
+            };
+        });
+    }, [applications, scenarios]);
+
+    const activatedAgents = agentRows.filter((agent) => agent.active).length;
 
     return (
         <div className="view page-overview">
@@ -68,7 +99,7 @@ export function OverviewPage(): JSX.Element {
                             </svg>
                             <span>{t("overviewTotalScenarios")}</span>
                         </div>
-                        <div className="overview-stat-value">1</div>
+                        <div className="overview-stat-value">{scenarios.length}</div>
                     </div>
 
                     <div className="overview-stat-card">
@@ -89,7 +120,7 @@ export function OverviewPage(): JSX.Element {
                         </div>
                         <div className="overview-stat-value">
                             {activatedAgents}
-                            <span className="overview-stat-ratio">/ {AGENT_ROWS.length}</span>
+                            <span className="overview-stat-ratio">/ {agentRows.length}</span>
                         </div>
                     </div>
                 </div>
@@ -107,8 +138,8 @@ export function OverviewPage(): JSX.Element {
                         <div className="overview-agent-status-header">{t("overviewStatusEnabled")}</div>
                     </div>
 
-                    {AGENT_ROWS.map((agent) => (
-                        <div key={agent.name} className="overview-agent-row">
+                    {agentRows.map((agent) => (
+                        <div key={agent.id} className="overview-agent-row">
                             <div className="overview-agent-name">
                                 <span
                                     className={`mini-radio ${agent.active ? "active" : "empty"}`}
@@ -123,6 +154,8 @@ export function OverviewPage(): JSX.Element {
                             <div className="overview-agent-status">
                                 {agent.active ? (
                                     <span className="badge badge-green">{t("overviewStatusEnabled")}</span>
+                                ) : agent.hasUsableLocation ? (
+                                    <span className="badge badge-gray">{t("enabledNo")}</span>
                                 ) : (
                                     <span className="badge badge-gray">{t("overviewStatusUninstalled")}</span>
                                 )}

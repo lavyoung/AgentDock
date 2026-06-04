@@ -1,5 +1,6 @@
 import {type JSX, useEffect, useState} from "react";
 
+import {listSupportedApplications} from "../../../../../packages/core/src/application/applicationCatalog";
 import {useI18n} from "../i18n/useI18n";
 import {useAppStore} from "../stores/useAppStore";
 import "./Pages.css";
@@ -10,25 +11,31 @@ type AvailableAgent = {
     id: string;
     name: string;
     description: string;
+    enabled: boolean;
 };
 
-const AVAILABLE_AGENTS: AvailableAgent[] = [
-    {
-        id: "opencode",
-        name: "OpenCode Agent",
-        description: "Default local coding agent used by the Phase 1 prototype.",
-    },
-    {
-        id: "codex",
-        name: "Codex Agent",
-        description: "Project-oriented coding workflow with local sync preview.",
-    },
-    {
-        id: "claude-code",
-        name: "Claude Code Agent",
-        description: "Code review and documentation oriented project companion.",
-    },
-];
+function useAvailableAgents(): AvailableAgent[] {
+    const applications = useAppStore((s) => s.applications);
+
+    if (applications.length > 0) {
+        return applications.map((application) => ({
+            id: application.id,
+            name: application.name,
+            description: application.description,
+            enabled:
+                application.enabled &&
+                application.enabled_locations > 0 &&
+                application.existing_locations > 0,
+        }));
+    }
+
+    return listSupportedApplications().map((application) => ({
+        id: application.id,
+        name: application.name,
+        description: application.description,
+        enabled: false,
+    }));
+}
 
 function ScenarioCard({
     scenario,
@@ -329,7 +336,13 @@ function AgentPicker({onClose}: {onClose: () => void}): JSX.Element {
     const {t} = useI18n();
     const selectedScenario = useAppStore((s) => s.selectedScenario);
     const addAgentAppToScenario = useAppStore((s) => s.addAgentAppToScenario);
+    const refreshApplications = useAppStore((s) => s.refreshApplications);
+    const availableAgents = useAvailableAgents();
     const selectedIds = selectedScenario?.agentAppIds ?? [];
+
+    useEffect(() => {
+        void refreshApplications();
+    }, [refreshApplications]);
 
     return (
         <div className="asset-picker">
@@ -346,14 +359,14 @@ function AgentPicker({onClose}: {onClose: () => void}): JSX.Element {
                 </div>
                 <div className="asset-picker-body">
                     <p className="form-hint form-hint-spaced">{t("scenarioAgentPickerHint")}</p>
-                    {AVAILABLE_AGENTS.map((agent) => {
+                    {availableAgents.map((agent) => {
                         const isAlready = selectedIds.includes(agent.id);
                         return (
                             <div
                                 key={agent.id}
-                                className={`asset-picker-item ${isAlready ? "is-already" : ""}`}
+                                className={`asset-picker-item ${isAlready || !agent.enabled ? "is-already" : ""}`}
                                 onClick={() => {
-                                    if (!isAlready) {
+                                    if (!isAlready && agent.enabled) {
                                         void addAgentAppToScenario(agent.id);
                                         onClose();
                                     }
@@ -376,6 +389,8 @@ function AgentPicker({onClose}: {onClose: () => void}): JSX.Element {
                                 </div>
                                 {isAlready ? (
                                     <span className="picker-item-added">{t("assetPickerAlreadyAdded")}</span>
+                                ) : !agent.enabled ? (
+                                    <span className="picker-item-added">{t("enabledNo")}</span>
                                 ) : null}
                             </div>
                         );
@@ -394,6 +409,7 @@ function ScenarioDetail(): JSX.Element {
     const assets = useAppStore((s) => s.assets);
     const rules = useAppStore((s) => s.rules);
     const projects = useAppStore((s) => s.projects);
+    const refreshApplications = useAppStore((s) => s.refreshApplications);
     const setView = useAppStore((s) => s.setView);
     const openProject = useAppStore((s) => s.openProject);
     const setScenarioDetailView = useAppStore((s) => s.setScenarioDetailView);
@@ -406,7 +422,12 @@ function ScenarioDetail(): JSX.Element {
     const scenarioDescription = useAppStore((s) => s.scenarioDescription);
     const setScenarioName = useAppStore((s) => s.setScenarioName);
     const setScenarioDescription = useAppStore((s) => s.setScenarioDescription);
+    const availableAgents = useAvailableAgents();
     const [showAgentPicker, setShowAgentPicker] = useState(false);
+
+    useEffect(() => {
+        void refreshApplications();
+    }, [refreshApplications]);
 
     if (!selectedScenario) return <div className="page-body"><p>{t("scenarioNotFound")}</p></div>;
 
@@ -414,7 +435,7 @@ function ScenarioDetail(): JSX.Element {
     const ruleAssets = rules.filter((r) => selectedScenario.ruleIds.includes(r.id));
     const agentFileAssets = assets.filter((a) => a.type === "agents-md" && selectedScenario.agentFileIds.includes(a.id));
     const linkedProjects = projects.filter((project) => selectedScenario.projectIds.includes(project.id));
-    const linkedAgents = AVAILABLE_AGENTS.filter((agent) => selectedScenario.agentAppIds.includes(agent.id));
+    const linkedAgents = availableAgents.filter((agent) => selectedScenario.agentAppIds.includes(agent.id));
 
     const isEdit = scenarioDetailView === "edit";
 
@@ -742,6 +763,7 @@ export function ScenariosPage(): JSX.Element {
     const assetPickerOpen = useAppStore((s) => s.assetPickerOpen);
     const assetPickerField = useAppStore((s) => s.assetPickerField);
     const refreshScenarios = useAppStore((s) => s.refreshScenarios);
+    const refreshApplications = useAppStore((s) => s.refreshApplications);
     const openScenario = useAppStore((s) => s.openScenario);
     const saveScenario = useAppStore((s) => s.saveScenario);
     const closeAssetPicker = useAppStore((s) => s.closeAssetPicker);
@@ -751,7 +773,8 @@ export function ScenariosPage(): JSX.Element {
 
     useEffect(() => {
         void refreshScenarios();
-    }, [refreshScenarios]);
+        void refreshApplications();
+    }, [refreshApplications, refreshScenarios]);
 
     // Detail view
     if (selectedScenario && view === "scenarios") {

@@ -36,6 +36,10 @@ export function SettingsPage(): JSX.Element {
     const selectLocation = useAppStore((s) => s.selectLocation);
     const setLocationEnabled = useAppStore((s) => s.setLocationEnabled);
     const saveApplicationLocation = useAppStore((s) => s.saveApplicationLocation);
+    const locationName = useAppStore((s) => s.locationName);
+    const locationPath = useAppStore((s) => s.locationPath);
+    const setLocationName = useAppStore((s) => s.setLocationName);
+    const setLocationPath = useAppStore((s) => s.setLocationPath);
     const settingsDataPath = useAppStore((s) => s.settingsDataPath);
     const settingsAutoUpdate = useAppStore((s) => s.settingsAutoUpdate);
     const settingsNotifications = useAppStore((s) => s.settingsNotifications);
@@ -100,6 +104,18 @@ export function SettingsPage(): JSX.Element {
 
         try {
             await detectApplicationLocations();
+        } catch (error) {
+            pushToast("error", String(error));
+        }
+    }
+
+    async function handleSaveSelectedLocation(): Promise<void> {
+        if (!selectedLocation) {
+            return;
+        }
+
+        try {
+            await saveApplicationLocation();
         } catch (error) {
             pushToast("error", String(error));
         }
@@ -371,6 +387,34 @@ export function SettingsPage(): JSX.Element {
                                                 })}
                                             </div>
                                         )}
+
+                                        {selectedLocation ? (
+                                            <div className="settings-agent-editor">
+                                                <div className="settings-agent-editor-title">{selectedLocation.name}</div>
+                                                <div className="settings-agent-editor-grid">
+                                                    <label className="form-field">
+                                                        <span className="form-label">{t("targetsName")}</span>
+                                                        <input
+                                                            type="text"
+                                                            className="settings-input"
+                                                            value={locationName}
+                                                            onChange={(event) => setLocationName(event.target.value)}
+                                                            onBlur={() => void handleSaveSelectedLocation()}
+                                                        />
+                                                    </label>
+                                                    <label className="form-field">
+                                                        <span className="form-label">{t("targetsPath")}</span>
+                                                        <input
+                                                            type="text"
+                                                            className="settings-input"
+                                                            value={locationPath}
+                                                            onChange={(event) => setLocationPath(event.target.value)}
+                                                            onBlur={() => void handleSaveSelectedLocation()}
+                                                        />
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        ) : null}
                                     </section>
                                 </div>
                             </>

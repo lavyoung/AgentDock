@@ -1,5 +1,6 @@
 import {nanoid} from "nanoid";
 
+import {getApplicationDefinition, listSupportedApplications,} from "./applicationCatalog";
 import type {FileSystemPort} from "../ports/fileSystemPort";
 import type {PathPort} from "../ports/pathPort";
 import type {TargetRepository} from "../target/targetRepository";
@@ -20,13 +21,6 @@ type ApplicationServiceDependencies = {
     homeDir: string;
     path: PathPort;
     targetRepository: TargetRepository;
-};
-
-const DEFAULT_APPLICATIONS: Record<ApplicationId, Pick<ApplicationRecord, "id" | "name">> = {
-    codex: {
-        id: "codex",
-        name: "Codex",
-    },
 };
 
 export class ApplicationService {
@@ -51,8 +45,10 @@ export class ApplicationService {
                 .map((application) => [application.id, application])
         );
 
-        return Object.values(DEFAULT_APPLICATIONS).map((defaults) => {
-            return existing.get(defaults.id) ?? this.buildDefaultApplication(defaults.id);
+        return listSupportedApplications().map((definition) => {
+            return this.withLocationStats(
+                this.mergeWithDefaults(existing.get(definition.id), definition.id)
+            );
         });
     }
 
@@ -64,7 +60,7 @@ export class ApplicationService {
         }
 
         return {
-            application,
+            application: this.withLocationStats(application),
             locations: this.listLocations(id),
         };
     }
@@ -83,6 +79,17 @@ export class ApplicationService {
         this.applicationRepository.upsertApplication(next);
 
         return next;
+    }
+
+    private withLocationStats(application: ApplicationRecord): ApplicationRecord {
+        const locations = this.listLocations(application.id);
+
+        return {
+            ...application,
+            total_locations: locations.length,
+            enabled_locations: locations.filter((location) => location.enabled).length,
+            existing_locations: locations.filter((location) => location.exists).length,
+        };
     }
 
     async refreshLocations(id: ApplicationId): Promise<ApplicationLocationRecord[]> {
@@ -179,23 +186,26 @@ export class ApplicationService {
     private async detectLocations(
         applicationId: ApplicationId
     ): Promise<ApplicationLocationRecord[]> {
-        switch (applicationId) {
-            case "codex":
-                return this.detectCodexLocations();
-        }
+        return this.detectLocationsForApplication(applicationId);
     }
 
-    private async detectCodexLocations(): Promise<ApplicationLocationRecord[]> {
+    private async detectLocationsForApplication(
+        applicationId: ApplicationId
+    ): Promise<ApplicationLocationRecord[]> {
+        const definition = getApplicationDefinition(applicationId);
         const now = new Date().toISOString();
         const locations: ApplicationLocationRecord[] = [];
-        const globalSkillsPath = this.path.join(this.homeDir, ".codex", "skills");
+        const globalSkillsPath = this.path.join(
+            this.homeDir,
+            ...definition.globalSkillSegments
+        );
 
         locations.push({
             id: nanoid(),
-            application_id: "codex",
-            location_key: "codex:global:skills",
+            application_id: applicationId,
+            location_key: `${applicationId}:global:skills`,
             target_id: null,
-            name: "Codex Global Skills",
+            name: `${definition.name} Global Skills`,
             kind: "skills",
             scope: "global",
             path: globalSkillsPath,
@@ -207,35 +217,33 @@ export class ApplicationService {
         });
 
         for (const target of this.targetRepository.list()) {
-            const projectSkillsPath = this.path.join(target.path, ".codex", "skills");
-            const projectAgentsPath = this.path.join(target.path, "AGENTS.md");
+            for (const kind of definition.projectSupports) {
+                const projectPath =
+                    kind === "skills"
+                        ? this.path.join(target.path, ...definition.projectSkillSegments)
+                        : this.path.join(target.path, "AGENTS.md");
 
-            locations.push(
-                this.buildDetectedProjectLocation({
-                    targetId: target.id,
-                    targetName: target.name,
-                    kind: "skills",
-                    path: projectSkillsPath,
-                    exists: await this.fileSystem.exists(projectSkillsPath),
-                    now,
-                })
-            );
-            locations.push(
-                this.buildDetectedProjectLocation({
-                    targetId: target.id,
-                    targetName: target.name,
-                    kind: "agents-md",
-                    path: projectAgentsPath,
-                    exists: await this.fileSystem.exists(projectAgentsPath),
-                    now,
-                })
-            );
+                locations.push(
+                    this.buildDetectedProjectLocation({
+                        applicationId,
+                        applicationName: definition.name,
+                        targetId: target.id,
+                        targetName: target.name,
+                        kind,
+                        path: projectPath,
+                        exists: await this.fileSystem.exists(projectPath),
+                        now,
+                    })
+                );
+            }
         }
 
         return locations;
     }
 
     private buildDetectedProjectLocation(input: {
+        applicationId: ApplicationId;
+        applicationName: string;
         exists: boolean;
         kind: ApplicationLocationKind;
         now: string;
@@ -245,13 +253,13 @@ export class ApplicationService {
     }): ApplicationLocationRecord {
         return {
             id: nanoid(),
-            application_id: "codex",
-            location_key: `codex:project:${input.targetId}:${input.kind}`,
+            application_id: input.applicationId,
+            location_key: `${input.applicationId}:project:${input.targetId}:${input.kind}`,
             target_id: input.targetId,
             name:
                 input.kind === "skills"
-                    ? `${input.targetName} Codex Skills`
-                    : `${input.targetName} Project AGENTS.md`,
+                    ? `${input.targetName} ${input.applicationName} Skills`
+                    : `${input.targetName} ${input.applicationName} AGENTS.md`,
             kind: input.kind,
             scope: "project",
             path: input.path,
@@ -283,7 +291,7 @@ export class ApplicationService {
         const existing = this.applicationRepository.findApplicationById(id);
 
         if (existing) {
-            return existing;
+            return this.mergeWithDefaults(existing, id);
         }
 
         const created = this.buildDefaultApplication(id);
@@ -293,22 +301,42 @@ export class ApplicationService {
     }
 
     private getResolvedApplication(id: ApplicationId): ApplicationRecord | null {
-        return (
-            this.applicationRepository.findApplicationById(id) ??
-            (DEFAULT_APPLICATIONS[id] ? this.buildDefaultApplication(id) : null)
-        );
+        const existing = this.applicationRepository.findApplicationById(id);
+        return this.mergeWithDefaults(existing, id);
     }
 
     private buildDefaultApplication(id: ApplicationId): ApplicationRecord {
         const now = new Date().toISOString();
-        const defaults = DEFAULT_APPLICATIONS[id];
+        const defaults = getApplicationDefinition(id);
 
         return {
             id: defaults.id,
             name: defaults.name,
+            description: defaults.description,
             enabled: false,
+            total_locations: 0,
+            enabled_locations: 0,
+            existing_locations: 0,
             created_at: now,
             updated_at: now,
+        };
+    }
+
+    private mergeWithDefaults(
+        existing: ApplicationRecord | null | undefined,
+        id: ApplicationId
+    ): ApplicationRecord {
+        const defaults = getApplicationDefinition(id);
+
+        if (!existing) {
+            return this.buildDefaultApplication(id);
+        }
+
+        return {
+            ...existing,
+            id,
+            name: defaults.name,
+            description: defaults.description,
         };
     }
 }
