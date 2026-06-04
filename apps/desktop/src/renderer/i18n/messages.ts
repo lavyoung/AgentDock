@@ -116,9 +116,27 @@ type MessageCatalog = {
     newAssetCreated: string;
     installTitle: string;
     installSubtitle: string;
+    installCatalogTitle: string;
+    installCatalogSubtitle: string;
+    installCatalogEmpty: string;
+    installActionInstall: string;
+    installActionOpen: string;
+    installStatusInstalled: string;
+    installStatusAvailable: string;
+    installOutputLabel: string;
+    installStarterReleaseTitle: string;
+    installStarterReleaseDesc: string;
+    installStarterGuardrailsTitle: string;
+    installStarterGuardrailsDesc: string;
+    installStarterWorkspaceTitle: string;
+    installStarterWorkspaceDesc: string;
     projectsTitle: string;
     projectsSubtitle: string;
     projectsEmpty: string;
+    projectsStatsTotal: string;
+    projectsStatsLinked: string;
+    projectsStatsManual: string;
+    projectsStatsPreviewFirst: string;
     newProjectTitle: string;
     newProjectHelp: string;
     projectNameLabel: string;
@@ -138,6 +156,17 @@ type MessageCatalog = {
     projectValidationPath: string;
     projectCreated: string;
     projectOpen: string;
+    projectOpenScenario: string;
+    projectCreatedAtLabel: string;
+    projectUpdatedAtLabel: string;
+    projectScenarioSummary: string;
+    projectScenarioSkills: string;
+    projectScenarioRules: string;
+    projectScenarioAgentFiles: string;
+    projectScenarioAgents: string;
+    projectNoScenarioLinked: string;
+    projectWorkflowTitle: string;
+    projectWorkflowDesc: string;
     scenariosTitle: string;
     scenariosEmpty: string;
     scenariosComingSoon: string;
@@ -358,9 +387,27 @@ export const messages: Record<Locale, Catalog> = {
         newAssetCreated: "\u8d44\u4ea7\u201c{name}\u201d\u5df2\u521b\u5efa",
         installTitle: "\u5b89\u88c5\u6280\u80fd",
         installSubtitle: "\u4ece\u4ed3\u5e93\u6d4f\u89c8\u5e76\u5b89\u88c5\u65b0\u6280\u80fd",
+        installCatalogTitle: "\u5165\u95e8\u8d44\u4ea7\u5e93",
+        installCatalogSubtitle: "\u5148\u7528\u51e0\u4e2a\u5e38\u7528 starter assets \u628a\u672c\u5730 Registry \u586b\u8d77\u6765\uff0c\u5f8c\u7eed\u518d\u63a5\u5165\u771f\u6b63\u7684\u5e02\u573a/\u4ed3\u5e93\u6d41\u7a0b\u3002",
+        installCatalogEmpty: "\u6240\u6709 starter assets \u90fd\u5df2\u7ecf\u5b89\u88c5\u5230\u672c\u5730 Registry \u4e86\u3002",
+        installActionInstall: "\u5b89\u88c5",
+        installActionOpen: "\u6253\u5f00\u8d44\u4ea7",
+        installStatusInstalled: "\u5df2\u5b89\u88c5",
+        installStatusAvailable: "\u53ef\u5b89\u88c5",
+        installOutputLabel: "\u8f93\u51fa\u4f4d\u7f6e",
+        installStarterReleaseTitle: "\u53d1\u7248\u51c6\u5907\u68c0\u67e5",
+        installStarterReleaseDesc: "\u9762\u5411\u7248\u672c\u53d1\u5e03\u524d\u7684\u6700\u540e\u68c0\u67e5\uff0c\u8986\u76d6 changelog\u3001risk review \u548c rollback \u63d0\u9192\u3002",
+        installStarterGuardrailsTitle: "\u4ed3\u5e93\u62a4\u680f",
+        installStarterGuardrailsDesc: "\u7528\u4e8e\u957f\u671f\u9879\u76ee\u7684\u4ee3\u7801\u53d8\u66f4\u62a4\u680f\uff0c\u5f3a\u8c03\u5c0f\u6b65\u63d0\u4ea4\u3001\u53ef\u9a8c\u8bc1\u548c\u4e0d\u7834\u574f\u73b0\u6709\u7ed3\u6784\u3002",
+        installStarterWorkspaceTitle: "\u5de5\u4f5c\u533a AGENTS.md",
+        installStarterWorkspaceDesc: "\u4e00\u4e2a\u4f5c\u4e3a\u9879\u76ee\u7ea7\u57fa\u7ebf\u7684 AGENTS.md starter\uff0c\u9002\u5408\u5728 sync preview \u524d\u5148\u5efa\u7acb\u6258\u7ba1\u533a\u5757\u3002",
         projectsTitle: "\u5173\u8054\u9879\u76ee",
         projectsSubtitle: "\u7ed1\u5b9a\u5230\u4f60\u7684\u9879\u76ee\u4ed3\u5e93",
         projectsEmpty: "\u8fd8\u6ca1\u6709\u9879\u76ee\uff0c\u5148\u521b\u5efa\u4e00\u4e2a\u5de5\u4f5c\u533a\u6765\u627f\u63a5\u573a\u666f\u548c\u76ee\u6807\u3002",
+        projectsStatsTotal: "\u9879\u76ee\u603b\u6570",
+        projectsStatsLinked: "\u5df2\u5173\u8054\u573a\u666f",
+        projectsStatsManual: "\u624b\u52a8\u540c\u6b65",
+        projectsStatsPreviewFirst: "\u9884\u89c8\u540e\u540c\u6b65",
         newProjectTitle: "\u65b0\u5efa\u9879\u76ee",
         newProjectHelp: "\u9879\u76ee\u4f1a\u8bb0\u5f55\u672c\u5730\u8def\u5f84\u3001\u9ed8\u8ba4\u573a\u666f\u4e0e\u540c\u6b65\u6a21\u5f0f\uff0c\u65b9\u4fbf\u540e\u7eed\u9884\u89c8\u548c\u540c\u6b65\u3002",
         projectNameLabel: "\u9879\u76ee\u540d\u79f0",
@@ -380,6 +427,17 @@ export const messages: Record<Locale, Catalog> = {
         projectValidationPath: "\u8bf7\u586b\u5199\u9879\u76ee\u8def\u5f84",
         projectCreated: "\u9879\u76ee\u201c{name}\u201d\u5df2\u521b\u5efa",
         projectOpen: "\u6253\u5f00",
+        projectOpenScenario: "\u6253\u5f00\u573a\u666f",
+        projectCreatedAtLabel: "\u521b\u5efa\u65f6\u95f4",
+        projectUpdatedAtLabel: "\u66f4\u65b0\u65f6\u95f4",
+        projectScenarioSummary: "\u5173\u8054\u573a\u666f\u6982\u89c8",
+        projectScenarioSkills: "\u6280\u80fd",
+        projectScenarioRules: "\u89c4\u5219",
+        projectScenarioAgentFiles: "Agent \u6587\u4ef6",
+        projectScenarioAgents: "Agent",
+        projectNoScenarioLinked: "\u8fd8\u6ca1\u6709\u5173\u8054\u573a\u666f\uff0c\u8fd9\u4e2a\u9879\u76ee\u76ee\u524d\u53ea\u4f5c\u4e3a\u672c\u5730\u5de5\u4f5c\u533a\u8bb0\u5f55\u3002",
+        projectWorkflowTitle: "\u540c\u6b65\u95ed\u73af",
+        projectWorkflowDesc: "\u9879\u76ee\u7528\u6765\u627f\u63a5\u573a\u666f\u548c\u76ee\u6807\u7684\u771f\u5b9e\u95ed\u73af\u3002\u4e0b\u4e00\u6b65\u4f1a\u4ece\u9879\u76ee\u89c6\u89d2\u8865\u4e0a Sync Matrix\u3001preview \u548c run sync \u884c\u4e3a\u3002",
         scenariosTitle: "\u573a\u666f",
         scenariosEmpty: "\u6682\u65e0\u573a\u666f\u3002",
         scenariosComingSoon: "\u573a\u666f\u8ba9\u4f60\u53ef\u4ee5\u5c06\u8d44\u4ea7\u5206\u7ec4\u5e76\u6309\u573a\u666f\u542f\u7528/\u7981\u7528\u3002\u8fd9\u662f\u7b2c\u4e8c\u9636\u6bb5\u7684\u529f\u80fd\u3002",
@@ -596,9 +654,27 @@ export const messages: Record<Locale, Catalog> = {
         newAssetCreated: 'Asset "{name}" created',
         installTitle: "Install Skills",
         installSubtitle: "Browse and install new skills from the registry",
+        installCatalogTitle: "Starter registry",
+        installCatalogSubtitle: "Use a few curated starter assets to seed the local Registry now, then swap this page over to a real market or repository flow later.",
+        installCatalogEmpty: "All starter assets are already installed in the local Registry.",
+        installActionInstall: "Install",
+        installActionOpen: "Open asset",
+        installStatusInstalled: "Installed",
+        installStatusAvailable: "Available",
+        installOutputLabel: "Output",
+        installStarterReleaseTitle: "Release Readiness",
+        installStarterReleaseDesc: "A final pre-release checklist focused on changelog review, risk validation, and rollback reminders.",
+        installStarterGuardrailsTitle: "Repository Guardrails",
+        installStarterGuardrailsDesc: "Starter guidance for long-lived repos with an emphasis on small diffs, verification, and preserving structure.",
+        installStarterWorkspaceTitle: "Workspace AGENTS.md",
+        installStarterWorkspaceDesc: "A project-level AGENTS.md baseline that is useful before wiring full sync preview and managed block flows.",
         projectsTitle: "Linked Projects",
         projectsSubtitle: "Link to your project repositories",
         projectsEmpty: "No projects yet. Create a workspace to connect scenarios and targets.",
+        projectsStatsTotal: "Total projects",
+        projectsStatsLinked: "Linked to scenario",
+        projectsStatsManual: "Manual sync",
+        projectsStatsPreviewFirst: "Preview before sync",
         newProjectTitle: "New project",
         newProjectHelp: "Projects capture the local path, default scenario, and sync mode so we can preview and sync consistently later.",
         projectNameLabel: "Project name",
@@ -618,6 +694,17 @@ export const messages: Record<Locale, Catalog> = {
         projectValidationPath: "Please enter a project path",
         projectCreated: 'Project "{name}" created',
         projectOpen: "Open",
+        projectOpenScenario: "Open scenario",
+        projectCreatedAtLabel: "Created at",
+        projectUpdatedAtLabel: "Updated at",
+        projectScenarioSummary: "Scenario summary",
+        projectScenarioSkills: "Skills",
+        projectScenarioRules: "Rules",
+        projectScenarioAgentFiles: "Agent files",
+        projectScenarioAgents: "Agents",
+        projectNoScenarioLinked: "No scenario is linked yet, so this project currently acts as a local workspace record only.",
+        projectWorkflowTitle: "Sync workflow",
+        projectWorkflowDesc: "Projects are the bridge between scenarios and targets. The next step is to complete the project-level Sync Matrix, preview, and run-sync loop here.",
         scenariosTitle: "Scenarios",
         scenariosEmpty: "No scenarios yet.",
         scenariosComingSoon: "Scenarios let you group assets and enable/disable them by scenario. This is a Phase 2 feature.",
