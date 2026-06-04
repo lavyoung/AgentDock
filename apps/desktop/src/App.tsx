@@ -1,4 +1,4 @@
-import type {JSX} from "react";
+import {type JSX, useEffect} from "react";
 
 import {Sidebar} from "./renderer/components/Sidebar";
 import {ToastContainer} from "./renderer/components/Toast";
@@ -15,6 +15,14 @@ import "./App.css";
 
 function App(): JSX.Element {
     const view = useAppStore((s) => s.view);
+
+    useEffect(() => {
+        try {
+            window.electron?.windowReady();
+        } catch {
+            /* ignore in mock/dev fallback */
+        }
+    }, []);
 
     return (
         <div className="app-shell">

@@ -36,6 +36,14 @@ export function SettingsPage(): JSX.Element {
     const selectLocation = useAppStore((s) => s.selectLocation);
     const setLocationEnabled = useAppStore((s) => s.setLocationEnabled);
     const saveApplicationLocation = useAppStore((s) => s.saveApplicationLocation);
+    const settingsDataPath = useAppStore((s) => s.settingsDataPath);
+    const settingsAutoUpdate = useAppStore((s) => s.settingsAutoUpdate);
+    const settingsNotifications = useAppStore((s) => s.settingsNotifications);
+    const settingsSound = useAppStore((s) => s.settingsSound);
+    const setSettingsDataPath = useAppStore((s) => s.setSettingsDataPath);
+    const setSettingsAutoUpdate = useAppStore((s) => s.setSettingsAutoUpdate);
+    const setSettingsNotifications = useAppStore((s) => s.setSettingsNotifications);
+    const setSettingsSound = useAppStore((s) => s.setSettingsSound);
     const pushToast = useAppStore((s) => s.pushToast);
 
     useEffect(() => {
@@ -384,7 +392,8 @@ export function SettingsPage(): JSX.Element {
                                 <input
                                     type="text"
                                     className="settings-input"
-                                    defaultValue="/Users/skills/data"
+                                    value={settingsDataPath}
+                                    onChange={(event) => setSettingsDataPath(event.target.value)}
                                     aria-label={t("settingsDataPath")}
                                 />
                                 <button type="button" className="btn-text-emerald">
@@ -403,7 +412,15 @@ export function SettingsPage(): JSX.Element {
                                     <div className="settings-row-label-sub">{t("settingsAutoUpdateDesc")}</div>
                                 </div>
                             </div>
-                            <button type="button" className="toggle" data-state="on" role="switch" aria-checked="true" aria-label={t("settingsAutoUpdate")}>
+                            <button
+                                type="button"
+                                className="toggle"
+                                data-state={settingsAutoUpdate ? "on" : "off"}
+                                role="switch"
+                                aria-checked={settingsAutoUpdate}
+                                aria-label={t("settingsAutoUpdate")}
+                                onClick={() => setSettingsAutoUpdate(!settingsAutoUpdate)}
+                            >
                                 <span />
                             </button>
                         </div>
@@ -424,7 +441,15 @@ export function SettingsPage(): JSX.Element {
                                     <div className="settings-row-label-sub">{t("settingsNotificationsDesc")}</div>
                                 </div>
                             </div>
-                            <button type="button" className="toggle" data-state="on" role="switch" aria-checked="true" aria-label={t("settingsNotifications")}>
+                            <button
+                                type="button"
+                                className="toggle"
+                                data-state={settingsNotifications ? "on" : "off"}
+                                role="switch"
+                                aria-checked={settingsNotifications}
+                                aria-label={t("settingsNotifications")}
+                                onClick={() => setSettingsNotifications(!settingsNotifications)}
+                            >
                                 <span />
                             </button>
                         </div>
@@ -436,7 +461,15 @@ export function SettingsPage(): JSX.Element {
                                 </svg>
                                 <span>{t("settingsSound")}</span>
                             </div>
-                            <button type="button" className="toggle" data-state="off" role="switch" aria-checked="false" aria-label={t("settingsSound")}>
+                            <button
+                                type="button"
+                                className="toggle"
+                                data-state={settingsSound ? "on" : "off"}
+                                role="switch"
+                                aria-checked={settingsSound}
+                                aria-label={t("settingsSound")}
+                                onClick={() => setSettingsSound(!settingsSound)}
+                            >
                                 <span />
                             </button>
                         </div>

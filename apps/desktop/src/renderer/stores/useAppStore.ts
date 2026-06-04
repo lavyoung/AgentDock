@@ -46,6 +46,12 @@ export type ViewKey = "overview" | "assets" | "install" | "scenarios" | "targets
 export type ScenarioDetailView = "view" | "edit";
 export type ThemeMode = "dark" | "light" | "system";
 export type ProjectSyncMode = "manual" | "preview-first";
+export type StoredSettings = {
+    dataPath: string;
+    autoUpdate: boolean;
+    notifications: boolean;
+    sound: boolean;
+};
 
 export type ProjectRecord = {
     id: string;
@@ -59,6 +65,13 @@ export type ProjectRecord = {
 };
 
 const PROJECTS_STORAGE_KEY = "agentdock:projects";
+const SETTINGS_STORAGE_KEY = "agentdock:settings";
+const DEFAULT_STORED_SETTINGS: StoredSettings = {
+    dataPath: "~/.agentdock",
+    autoUpdate: true,
+    notifications: true,
+    sound: false,
+};
 
 export type ToastKind = "info" | "success" | "error";
 
@@ -137,6 +150,60 @@ function persistProjects(projects: ProjectRecord[]): void {
     }
 }
 
+function readStoredSettings(): StoredSettings {
+    if (typeof window === "undefined") {
+        return DEFAULT_STORED_SETTINGS;
+    }
+
+    try {
+        const raw = window.localStorage.getItem(SETTINGS_STORAGE_KEY);
+        if (!raw) {
+            return DEFAULT_STORED_SETTINGS;
+        }
+
+        const parsed = JSON.parse(raw) as unknown;
+        if (!parsed || typeof parsed !== "object") {
+            return DEFAULT_STORED_SETTINGS;
+        }
+
+        const candidate = parsed as Record<string, unknown>;
+        return {
+            dataPath:
+                typeof candidate.dataPath === "string" && candidate.dataPath.trim()
+                    ? candidate.dataPath
+                    : DEFAULT_STORED_SETTINGS.dataPath,
+            autoUpdate:
+                typeof candidate.autoUpdate === "boolean"
+                    ? candidate.autoUpdate
+                    : DEFAULT_STORED_SETTINGS.autoUpdate,
+            notifications:
+                typeof candidate.notifications === "boolean"
+                    ? candidate.notifications
+                    : DEFAULT_STORED_SETTINGS.notifications,
+            sound:
+                typeof candidate.sound === "boolean"
+                    ? candidate.sound
+                    : DEFAULT_STORED_SETTINGS.sound,
+        };
+    } catch {
+        return DEFAULT_STORED_SETTINGS;
+    }
+}
+
+function persistStoredSettings(settings: StoredSettings): void {
+    if (typeof window === "undefined") {
+        return;
+    }
+
+    try {
+        window.localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
+    } catch {
+        /* ignore */
+    }
+}
+
+const initialStoredSettings = readStoredSettings();
+
 type State = {
     view: ViewKey;
 
@@ -204,6 +271,12 @@ type State = {
     locationName: string;
     locationPath: string;
     locationEnabled: boolean;
+
+    // persisted settings
+    settingsDataPath: string;
+    settingsAutoUpdate: boolean;
+    settingsNotifications: boolean;
+    settingsSound: boolean;
 
     // ui
     toasts: Toast[],
@@ -292,6 +365,10 @@ type Actions = {
     setLocationName(value: string): void;
     setLocationPath(value: string): void;
     setLocationEnabled(value: boolean): void;
+    setSettingsDataPath(value: string): void;
+    setSettingsAutoUpdate(value: boolean): void;
+    setSettingsNotifications(value: boolean): void;
+    setSettingsSound(value: boolean): void;
 
     pushToast(kind: ToastKind, message: string): void;
     dismissToast(id: string): void;
@@ -357,6 +434,11 @@ const initialState: State = {
     locationName: "",
     locationPath: "",
     locationEnabled: false,
+
+    settingsDataPath: initialStoredSettings.dataPath,
+    settingsAutoUpdate: initialStoredSettings.autoUpdate,
+    settingsNotifications: initialStoredSettings.notifications,
+    settingsSound: initialStoredSettings.sound,
 
     toasts: [],
     theme: (() => {
@@ -846,6 +928,46 @@ export const useAppStore = create<AppStore>((set, get) => ({
     setLocationName(value) { set({locationName: value}); },
     setLocationPath(value) { set({locationPath: value}); },
     setLocationEnabled(value) { set({locationEnabled: value}); },
+
+    setSettingsDataPath(value) {
+        set({settingsDataPath: value});
+        persistStoredSettings({
+            dataPath: value,
+            autoUpdate: get().settingsAutoUpdate,
+            notifications: get().settingsNotifications,
+            sound: get().settingsSound,
+        });
+    },
+
+    setSettingsAutoUpdate(value) {
+        set({settingsAutoUpdate: value});
+        persistStoredSettings({
+            dataPath: get().settingsDataPath,
+            autoUpdate: value,
+            notifications: get().settingsNotifications,
+            sound: get().settingsSound,
+        });
+    },
+
+    setSettingsNotifications(value) {
+        set({settingsNotifications: value});
+        persistStoredSettings({
+            dataPath: get().settingsDataPath,
+            autoUpdate: get().settingsAutoUpdate,
+            notifications: value,
+            sound: get().settingsSound,
+        });
+    },
+
+    setSettingsSound(value) {
+        set({settingsSound: value});
+        persistStoredSettings({
+            dataPath: get().settingsDataPath,
+            autoUpdate: get().settingsAutoUpdate,
+            notifications: get().settingsNotifications,
+            sound: value,
+        });
+    },
 
     // ---------- toasts ----------
     pushToast(kind, message) {

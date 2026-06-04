@@ -6,6 +6,7 @@ import {migrateDatabase} from "../platform/electron/database";
 import {ensureAgentDockDirs} from "../platform/electron/paths";
 
 const isDev = process.env.NODE_ENV === "development";
+const DARK_WINDOW_CHROME = "#0a0a0b";
 
 function createWindow() {
     const win = new BrowserWindow({
@@ -15,11 +16,11 @@ function createWindow() {
         minHeight: 560,
         titleBarStyle: "hidden",
         titleBarOverlay: {
-            color: "#0a0a0b",
+            color: DARK_WINDOW_CHROME,
             symbolColor: "#a1a1aa",
             height: 32,
         },
-        backgroundColor: "#0a0a0b",
+        backgroundColor: DARK_WINDOW_CHROME,
         frame: false,
         show: false,
         webPreferences: {
@@ -29,19 +30,14 @@ function createWindow() {
         },
     });
 
-    win.once("ready-to-show", () => {
-        win.show();
-        setMainWindow(win);
-    });
+    setMainWindow(win);
 
-    // Safety net: show window after 2s even if ready-to-show hasn't fired
-    // (e.g. Vite HMR keeps the page loading forever).
+    // Safety net: show window after 2s even if the renderer never reports ready.
     setTimeout(() => {
         if (!win.isDestroyed() && !win.isVisible()) {
             // eslint-disable-next-line no-console
             console.warn("[AgentDock] ready-to-show timeout — forcing window show");
             win.show();
-            setMainWindow(win);
         }
     }, 2000);
 

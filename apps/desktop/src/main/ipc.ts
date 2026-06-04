@@ -21,6 +21,8 @@ import {nodeFileSystemPort, nodePathPort,} from "../platform/electron/fileSystem
 import {getHomeDir, getRegistryAssetsDir} from "../platform/electron/paths";
 
 let _mainWindow: BrowserWindow | null = null;
+const DARK_WINDOW_CHROME = "#0a0a0b";
+const LIGHT_WINDOW_CHROME = "#f4f4f5";
 
 export function setMainWindow(win: BrowserWindow): void {
     _mainWindow = win;
@@ -216,9 +218,19 @@ export function registerIpc() {
     ipcMain.handle("window:setOverlay", async (_event, theme: "dark" | "light") => {
         if (!_mainWindow) return;
         if (theme === "light") {
-            _mainWindow.setTitleBarOverlay({color: "#ffffff", symbolColor: "#52525b", height: 32});
+            _mainWindow.setTitleBarOverlay({color: LIGHT_WINDOW_CHROME, symbolColor: "#3f3f46", height: 32});
         } else {
-            _mainWindow.setTitleBarOverlay({color: "#0a0a0b", symbolColor: "#a1a1aa", height: 32});
+            _mainWindow.setTitleBarOverlay({color: DARK_WINDOW_CHROME, symbolColor: "#a1a1aa", height: 32});
         }
+    });
+
+    ipcMain.on("window:ready", (event) => {
+        const win = BrowserWindow.fromWebContents(event.sender);
+        if (!win || win.isDestroyed() || win.isVisible()) {
+            return;
+        }
+
+        setMainWindow(win);
+        win.show();
     });
 }

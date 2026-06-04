@@ -1,4 +1,10 @@
-export type ApplicationId = "codex";
+export type ApplicationId =
+    | "codex"
+    | "claude-code"
+    | "cursor"
+    | "gemini-cli"
+    | "copilot-cli"
+    | "windsurf";
 
 export type ApplicationLocationKind = "skills" | "agents-md";
 
@@ -9,6 +15,7 @@ export type ApplicationLocationSource = "detected" | "manual";
 export type ApplicationRecord = {
     id: ApplicationId;
     name: string;
+    description: string;
     enabled: boolean;
     created_at: string;
     updated_at: string;
