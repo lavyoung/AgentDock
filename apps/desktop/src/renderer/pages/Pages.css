@@ -3532,6 +3532,15 @@
     background: color-mix(in srgb, var(--bg-elevated) 82%, rgba(255, 255, 255, 0.02));
     border-color: color-mix(in srgb, var(--bd-soft) 92%, rgba(255, 255, 255, 0.05));
 }
+.scenario-create-modal .modal-header {
+    background:
+        linear-gradient(180deg, rgba(34, 197, 94, 0.12), rgba(34, 197, 94, 0.02)),
+        var(--bg-section);
+}
+.scenario-create-modal-hint {
+    margin: -2px 0 4px;
+    color: var(--fg-secondary);
+}
 .scenario-edit-modal-actions {
     display: flex;
     align-items: center;
@@ -3709,7 +3718,6 @@
     margin-top: 4px;
     margin-bottom: 0;
 }
-
 .placeholder-spacious {
     padding: 48px 0;
 }

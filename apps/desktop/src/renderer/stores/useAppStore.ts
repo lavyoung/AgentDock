@@ -379,6 +379,7 @@ type State = {
     scenarioName: string;
     scenarioTitle: string;
     scenarioDescription: string;
+    scenarioCreateModalOpen: boolean;
 
     // projects
     projects: ProjectRecord[];
@@ -469,6 +470,8 @@ type Actions = {
     setScenarioTitle(value: string): void;
     setScenarioDescription(value: string): void;
     setScenarioDetailView(view: ScenarioDetailView): void;
+    openScenarioCreateModal(): void;
+    closeScenarioCreateModal(): void;
     openAssetPicker(field: "skillIds" | "ruleIds" | "agentFileIds"): void;
     closeAssetPicker(): void;
     addAssetToScenario(field: "skillIds" | "ruleIds" | "agentFileIds", assetId: string): Promise<void>;
@@ -551,6 +554,7 @@ const initialState: State = {
     scenarioName: "",
     scenarioTitle: "",
     scenarioDescription: "",
+    scenarioCreateModalOpen: false,
 
     projects: readStoredProjects(),
     selectedProjectId: null,
@@ -851,6 +855,13 @@ export const useAppStore = create<AppStore>((set, get) => ({
     setScenarioTitle(value) { set({scenarioTitle: value}); },
     setScenarioDescription(value) { set({scenarioDescription: value}); },
     setScenarioDetailView(view) { set({scenarioDetailView: view}); },
+    openScenarioCreateModal() {
+        get().resetScenarioForm();
+        set({view: "scenarios", scenarioCreateModalOpen: true});
+    },
+    closeScenarioCreateModal() {
+        set({scenarioCreateModalOpen: false});
+    },
 
     openAssetPicker(field) { set({assetPickerOpen: true, assetPickerField: field}); },
     closeAssetPicker() { set({assetPickerOpen: false, assetPickerField: null}); },

@@ -226,53 +226,52 @@ function NewScenarioModal({onClose, onCreate}: {onClose: () => void; onCreate: (
     const setDescription = useAppStore((s) => s.setScenarioDescription);
 
     return (
-        <div className="asset-picker">
-            <div className="asset-picker-backdrop" onClick={onClose} />
-            <div className="asset-picker-panel">
-                <div className="asset-picker-header">
-                    <span className="asset-picker-title">{t("newScenarioTitle")}</span>
-                    <button type="button" className="icon-btn" onClick={onClose} aria-label={t("close")}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                        </svg>
+        <Modal
+            open={true}
+            title={t("newScenarioTitle")}
+            onClose={onClose}
+            size="md"
+            dialogClassName="scenario-edit-modal scenario-create-modal"
+            footer={(
+                <div className="scenario-edit-modal-actions">
+                    <button type="button" className="btn scenario-edit-modal-btn scenario-edit-modal-btn-secondary" onClick={onClose}>
+                        {t("close")}
+                    </button>
+                    <button type="button" className="btn scenario-edit-modal-btn scenario-edit-modal-btn-primary" onClick={onCreate}>
+                        {t("newScenario")}
                     </button>
                 </div>
-                <div className="asset-picker-body">
-                    <p className="form-hint form-hint-spaced">{t("newScenarioHelp")}</p>
-                    <div className="new-scenario-form">
-                        <div className="form-field">
-                            <label className="form-label">{t("newScenarioName")}</label>
-                            <input
-                                className="form-input"
-                                type="text"
-                                value={name}
-                                onChange={(e) => {
-                                    setName(e.target.value);
-                                    setTitle(e.target.value);
-                                }}
-                                placeholder={t("newScenarioNamePlaceholder")}
-                                autoFocus
-                            />
-                        </div>
-                        <div className="form-field">
-                            <label className="form-label">{t("newScenarioDescLabel")}</label>
-                            <textarea
-                                className="form-textarea"
-                                value={description}
-                                onChange={(e) => setDescription(e.target.value)}
-                                placeholder={t("newScenarioDescPlaceholder")}
-                                rows={3}
-                            />
-                        </div>
-                        <div className="form-hint">{t("newScenarioPreviewHint")}</div>
-                        <div className="form-actions">
-                            <button type="button" className="btn btn-primary" onClick={onCreate}>{t("newScenario")}</button>
-                            <button type="button" className="btn btn-ghost" onClick={onClose}>{t("close")}</button>
-                        </div>
-                    </div>
+            )}
+        >
+            <div className="new-scenario-form scenario-edit-modal-form">
+                <p className="form-hint scenario-create-modal-hint">{t("newScenarioHelp")}</p>
+                <div className="form-field">
+                    <label className="form-label">{t("newScenarioName")}</label>
+                    <input
+                        className="form-input"
+                        type="text"
+                        value={name}
+                        onChange={(e) => {
+                            setName(e.target.value);
+                            setTitle(e.target.value);
+                        }}
+                        placeholder={t("newScenarioNamePlaceholder")}
+                        autoFocus
+                    />
                 </div>
+                <div className="form-field">
+                    <label className="form-label">{t("newScenarioDescLabel")}</label>
+                    <textarea
+                        className="form-textarea"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        placeholder={t("newScenarioDescPlaceholder")}
+                        rows={3}
+                    />
+                </div>
+                <div className="form-hint">{t("newScenarioPreviewHint")}</div>
             </div>
-        </div>
+        </Modal>
     );
 }
 
@@ -876,9 +875,8 @@ export function ScenariosPage(): JSX.Element {
     const openScenario = useAppStore((s) => s.openScenario);
     const saveScenario = useAppStore((s) => s.saveScenario);
     const closeAssetPicker = useAppStore((s) => s.closeAssetPicker);
-    const resetScenarioForm = useAppStore((s) => s.resetScenarioForm);
-
-    const [showNewModal, setShowNewModal] = useState(false);
+    const scenarioCreateModalOpen = useAppStore((s) => s.scenarioCreateModalOpen);
+    const closeScenarioCreateModal = useAppStore((s) => s.closeScenarioCreateModal);
 
     useEffect(() => {
         void refreshScenarios();
@@ -906,15 +904,6 @@ export function ScenariosPage(): JSX.Element {
                         <h1 className="scenarios-list-title">{t("scenariosTitle")}</h1>
                         <p className="scenarios-list-subtitle">{t("scenarioListSubtitle")}</p>
                     </div>
-                    <button type="button" className="btn btn-primary" onClick={() => {
-                        resetScenarioForm();
-                        setShowNewModal(true);
-                    }}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-                        </svg>
-                        {t("newScenario")}
-                    </button>
                 </div>
             </div>
 
@@ -941,12 +930,16 @@ export function ScenariosPage(): JSX.Element {
                 )}
             </div>
 
-            {showNewModal && (
+            {scenarioCreateModalOpen && (
                 <NewScenarioModal
-                    onClose={() => setShowNewModal(false)}
+                    onClose={closeScenarioCreateModal}
                     onCreate={() => {
-                        void saveScenario();
-                        setShowNewModal(false);
+                        void saveScenario().then(() => {
+                            const state = useAppStore.getState();
+                            if (state.selectedScenario) {
+                                state.closeScenarioCreateModal();
+                            }
+                        });
                     }}
                 />
             )}

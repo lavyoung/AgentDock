@@ -118,6 +118,7 @@ export function Sidebar(): JSX.Element {
     const view = useAppStore((s) => s.view);
     const setView = useAppStore((s) => s.setView);
     const openScenario = useAppStore((s) => s.openScenario);
+    const openScenarioCreateModal = useAppStore((s) => s.openScenarioCreateModal);
     const scenarios = useAppStore((s) => s.scenarios);
     const selectedScenario = useAppStore((s) => s.selectedScenario);
     const openProject = useAppStore((s) => s.openProject);
@@ -136,7 +137,7 @@ export function Sidebar(): JSX.Element {
 
     function handleNavAction(action: string): void {
         if (action === "new-scenario") {
-            setView("scenarios");
+            openScenarioCreateModal();
             return;
         }
 
