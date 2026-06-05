@@ -54,7 +54,7 @@ function getOutputPath(template: StarterTemplate): string {
         return "<target-path>/AGENTS.md";
     }
 
-    return `<target-path>/.agentdock/skills/${template.id}/SKILL.md`;
+    return `<target-path>/skills/${template.id}/SKILL.md`;
 }
 
 export function InstallPage(): JSX.Element {

@@ -1038,20 +1038,14 @@ export const useAppStore = create<AppStore>((set, get) => ({
         const {
             projects,
             scenarios,
-            targets: storedTargets,
             projectName,
             projectPath,
             projectDefaultScenarioId,
             projectSyncMode,
-            projectAgentLabel,
         } = get();
 
         const trimmedName = projectName.trim();
         const trimmedPath = projectPath.trim();
-        const targets = storedTargets.length > 0 ? storedTargets : await agentdockClient.targets.list();
-        const defaultTargetIds = targets
-            .filter((target) => target.enabled)
-            .map((target) => target.id);
         const now = new Date().toISOString();
         const idBase = createProjectId(trimmedName);
         let nextId = idBase;
@@ -1080,11 +1074,11 @@ export const useAppStore = create<AppStore>((set, get) => ({
             name: trimmedName,
             path: trimmedPath,
             defaultScenarioId: projectDefaultScenarioId,
-            targetIds: defaultTargetIds,
+            targetIds: [],
             syncMode: projectSyncMode,
             syncStatus: "pending",
             lastSyncedAt: null,
-            agentLabel: projectAgentLabel.trim() || "OpenCode Agent",
+            agentLabel: "",
             syncHistory: [],
             createdAt: now,
             updatedAt: now,
@@ -1251,7 +1245,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
             projectPath: "",
             projectDefaultScenarioId: "default",
             projectSyncMode: "manual",
-            projectAgentLabel: "OpenCode Agent",
+            projectAgentLabel: "",
             selectedProjectSyncPreview: null,
         });
     },

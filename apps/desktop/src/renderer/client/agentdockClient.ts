@@ -71,10 +71,19 @@ function buildMockSyncPreview(input: SyncPreviewInput): SyncPreviewResult {
         warnings.push("No sync destinations are available for this scenario.");
     }
 
+    const activeSkillAssets = scenario.skillIds
+        .map((assetId) => mockAssets.find((asset) => asset.id === assetId) ?? null)
+        .filter((asset): asset is AssetDetail => Boolean(asset) && asset.type === "skill" && asset.status === "active");
+    const activeAgentsMdAssets = scenario.agentFileIds
+        .map((assetId) => mockAssets.find((asset) => asset.id === assetId) ?? null)
+        .filter((asset): asset is AssetDetail => Boolean(asset) && asset.type === "agents-md" && asset.status === "active");
+
+    if (activeSkillAssets.length === 0 && activeAgentsMdAssets.length === 0) {
+        warnings.push(`Scenario "${scenario.title || scenario.name}" has no active Skill or AGENTS.md assets to sync.`);
+    }
+
     const items = resolvedTargets.flatMap((target) => {
-        const skillItems = scenario.skillIds
-            .map((assetId) => mockAssets.find((asset) => asset.id === assetId) ?? null)
-            .filter((asset): asset is AssetDetail => Boolean(asset) && asset.type === "skill" && asset.status === "active")
+        const skillItems = activeSkillAssets
             .map((asset) => ({
                 asset_id: asset.id,
                 asset_name: asset.title || asset.name,
@@ -82,12 +91,10 @@ function buildMockSyncPreview(input: SyncPreviewInput): SyncPreviewResult {
                 target_id: target.id,
                 target_name: target.name,
                 target_root: target.path,
-                output_path: `${target.path}\\.agentdock\\skills\\${asset.id}\\SKILL.md`,
+                output_path: `${target.path}\\skills\\${asset.id}\\SKILL.md`,
                 operation: "create" as const,
             }));
-        const agentsMdItems = scenario.agentFileIds
-            .map((assetId) => mockAssets.find((asset) => asset.id === assetId) ?? null)
-            .filter((asset): asset is AssetDetail => Boolean(asset) && asset.type === "agents-md" && asset.status === "active")
+        const agentsMdItems = activeAgentsMdAssets
             .map((asset) => ({
                 asset_id: asset.id,
                 asset_name: asset.title || asset.name,

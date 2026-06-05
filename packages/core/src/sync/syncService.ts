@@ -142,11 +142,14 @@ export class SyncService {
         );
         const items: SyncPlanItem[] = [];
 
+        if (skillAssets.length === 0 && agentsMdAssets.length === 0) {
+            warnings.push(`Scenario "${scenario.title || scenario.name}" has no active Skill or AGENTS.md assets to sync.`);
+        }
+
         for (const target of targets) {
             for (const asset of skillAssets) {
                 const outputPath = this.path.join(
                     target.path,
-                    ".agentdock",
                     "skills",
                     asset.id,
                     getAssetMainFileName(asset.type)
@@ -252,7 +255,7 @@ export class SyncService {
 
     private async writeSkillAsset(target: ResolvedSyncTarget, asset: AssetRecord): Promise<void> {
         const content = await this.readAssetContent(asset);
-        const assetDir = this.path.join(target.path, ".agentdock", "skills", asset.id);
+        const assetDir = this.path.join(target.path, "skills", asset.id);
         await this.fileSystem.ensureDir(assetDir);
         await this.fileSystem.writeText(
             this.path.join(assetDir, getAssetMainFileName(asset.type)),

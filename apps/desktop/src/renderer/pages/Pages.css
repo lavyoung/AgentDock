@@ -3656,6 +3656,12 @@
 .scenario-sync-preview {
     margin-top: 14px;
 }
+.scenario-sync-default-output-note {
+    margin-bottom: 12px;
+}
+.scenario-sync-default-output-note p {
+    word-break: break-all;
+}
 .detail-row-icon-project {
     background: rgba(59,130,246,.15);
     color: #3b82f6;

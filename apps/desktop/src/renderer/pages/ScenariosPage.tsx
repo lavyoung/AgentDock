@@ -89,6 +89,14 @@ function getProjectSyncTargetCount(targetIds: string[]): number {
     return targetIds.length > 0 ? targetIds.length : 1;
 }
 
+function getProjectDefaultSkillsPath(projectPath: string): string {
+    return `${projectPath}${projectPath.endsWith("\\") ? "" : "\\"}skills`;
+}
+
+function getProjectDefaultAgentsPath(projectPath: string): string {
+    return `${projectPath}${projectPath.endsWith("\\") ? "" : "\\"}AGENTS.md`;
+}
+
 type AvailableAgent = {
     id: string;
     name: string;
@@ -762,7 +770,11 @@ function ScenarioDetail(): JSX.Element {
                 ...current,
                 [projectId]: preview,
             }));
-            pushToast("success", t("projectSyncPreviewReady"));
+            if (preview.operation_count === 0 && preview.warnings.length > 0) {
+                pushToast("error", preview.warnings[0] ?? t("projectSyncPreviewReady"));
+            } else {
+                pushToast("success", t("projectSyncPreviewReady"));
+            }
         } catch (error) {
             pushToast("error", String(error));
         } finally {
@@ -783,6 +795,18 @@ function ScenarioDetail(): JSX.Element {
                 "{written}",
                 String(result.written_count)
             );
+            const linkedProject = linkedProjects.find((project) => project.id === projectId) ?? null;
+            const defaultOutputMessage =
+                linkedProject && linkedProject.targetIds.length === 0
+                    ? t("scenarioRunSyncDefaultOutputs")
+                        .replace("{skillsPath}", getProjectDefaultSkillsPath(linkedProject.path))
+                        .replace("{agentsPath}", getProjectDefaultAgentsPath(linkedProject.path))
+                    : "";
+
+            if (result.operation_count === 0 && result.warnings.length > 0) {
+                pushToast("error", result.warnings[0]);
+                return;
+            }
 
             if (result.conflicts.length > 0) {
                 pushToast(
@@ -790,12 +814,12 @@ function ScenarioDetail(): JSX.Element {
                     `${successMessage} ${t("projectSyncRunConflict").replace(
                         "{count}",
                         String(result.conflicts.length)
-                    )}`
+                    )}${defaultOutputMessage ? ` ${defaultOutputMessage}` : ""}`
                 );
                 return;
             }
 
-            pushToast("success", successMessage);
+            pushToast("success", `${successMessage}${defaultOutputMessage ? ` ${defaultOutputMessage}` : ""}`);
         } catch (error) {
             pushToast("error", String(error));
         } finally {
@@ -1220,6 +1244,15 @@ function ScenarioDetail(): JSX.Element {
 
                                             {preview ? (
                                                 <div className="project-sync-preview scenario-sync-preview">
+                                                    {project.targetIds.length === 0 ? (
+                                                        <div className="projects-note-card scenario-sync-default-output-note">
+                                                            <p>
+                                                                {t("scenarioRunSyncDefaultOutputs")
+                                                                    .replace("{skillsPath}", getProjectDefaultSkillsPath(project.path))
+                                                                    .replace("{agentsPath}", getProjectDefaultAgentsPath(project.path))}
+                                                            </p>
+                                                        </div>
+                                                    ) : null}
                                                     <div className="projects-scenario-stats">
                                                         <article className="scenario-stat-card">
                                                             <div className="scenario-stat-label">{t("projectSyncTargets")}</div>

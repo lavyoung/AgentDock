@@ -253,6 +253,7 @@ type MessageCatalog = {
     scenarioRunSyncLastSynced: string;
     scenarioRunSyncNever: string;
     scenarioRunSyncUsesProjectRoot: string;
+    scenarioRunSyncDefaultOutputs: string;
     scenarioRecentActivity: string;
     scenarioActivityNote: string;
     scenarioUsedSkills: string;
@@ -471,7 +472,7 @@ export const messages: Record<Locale, Catalog> = {
         skillsNewAsset: "\u65b0\u5efa\u8d44\u4ea7",
         newAssetTitle: "\u65b0\u5efa\u8d44\u4ea7",
         newAssetType: "\u8d44\u4ea7\u7c7b\u578b",
-        newAssetTypeSkillDesc: "\u9762\u5411\u5177\u4f53\u80fd\u529b\u7684 Skill\uff0c\u540c\u6b65\u5230 .agentdock/skills/<id>/SKILL.md",
+        newAssetTypeSkillDesc: "\u9762\u5411\u5177\u4f53\u80fd\u529b\u7684 Skill\uff0c\u540c\u6b65\u5230 skills/<id>/SKILL.md",
         newAssetTypeAgentsMdDesc: "\u9879\u76ee\u7ea7 AGENTS.md \u8d44\u4ea7\uff0c\u540c\u6b65\u65f6\u5408\u5e76\u5230\u76ee\u6807 AGENTS.md",
         newAssetTitleLabel: "\u6807\u9898",
         newAssetIdLabel: "\u8d44\u4ea7 ID",
@@ -510,7 +511,7 @@ export const messages: Record<Locale, Catalog> = {
         projectsStatsManual: "\u624b\u52a8\u540c\u6b65",
         projectsStatsPreviewFirst: "\u9884\u89c8\u540e\u540c\u6b65",
         newProjectTitle: "\u65b0\u5efa\u9879\u76ee",
-        newProjectHelp: "\u9879\u76ee\u4f1a\u8bb0\u5f55\u672c\u5730\u8def\u5f84\u3001\u9ed8\u8ba4\u573a\u666f\u4e0e\u540c\u6b65\u6a21\u5f0f\uff0c\u65b9\u4fbf\u540e\u7eed\u9884\u89c8\u548c\u540c\u6b65\u3002",
+        newProjectHelp: "\u9879\u76ee\u4f1a\u8bb0\u5f55\u672c\u5730\u8def\u5f84\u3001\u9ed8\u8ba4\u573a\u666f\u4e0e\u540c\u6b65\u6a21\u5f0f\uff0c\u521b\u5efa\u540e\u4f1a\u4f5c\u4e3a\u573a\u666f\u7684\u540c\u6b65\u843d\u70b9\uff0c\u4e0d\u4f1a\u9ed8\u8ba4\u7ed1\u5b9a Agent\u3002",
         projectNameLabel: "\u9879\u76ee\u540d\u79f0",
         projectPathLabel: "\u672c\u5730\u8def\u5f84",
         projectPathHint: "\u586b\u5199\u9879\u76ee\u6839\u76ee\u5f55\u7684\u7edd\u5bf9\u8def\u5f84",
@@ -601,6 +602,7 @@ export const messages: Record<Locale, Catalog> = {
         scenarioRunSyncLastSynced: "\u4e0a\u6b21\u540c\u6b65\uff1a{time}",
         scenarioRunSyncNever: "\u8fd8\u6ca1\u6709\u540c\u6b65\u8bb0\u5f55",
         scenarioRunSyncUsesProjectRoot: "\u672a\u989d\u5916\u914d\u7f6e\u76ee\u5f55\u65f6\uff0c\u9ed8\u8ba4\u5199\u5165\u9879\u76ee\u6839\u76ee\u5f55",
+        scenarioRunSyncDefaultOutputs: "Skill \u4f1a\u5199\u5165 {skillsPath}\\<skill-id>\\SKILL.md\uff0cAGENTS.md \u4f1a\u5408\u5e76\u5230 {agentsPath}",
         scenarioRecentActivity: "\u6700\u8fd1\u6d3b\u52a8",
         scenarioActivityNote: "\u573a\u666f\u53d8\u66f4\u540e\uff0c\u5173\u8054\u7684\u9879\u76ee\u6216 Agent \u4f1a\u5728\u4e0b\u6b21\u540c\u6b65\u65f6\u88ab\u91cd\u65b0\u8ba1\u7b97\u3002\u5982\u679c\u8fd9\u4e2a\u573a\u666f\u6682\u65f6\u8fd8\u6ca1\u6709\u5173\u8054\u4efb\u4f55\u9879\u76ee\u6216 Agent\uff0c\u4ecd\u7136\u53ef\u4ee5\u4f5c\u4e3a\u4e00\u4e2a\u9884\u8bbe\u4fdd\u7559\u3002",
         scenarioUsedSkills: "\u4f7f\u7528\u7684\u6280\u80fd",
@@ -815,7 +817,7 @@ export const messages: Record<Locale, Catalog> = {
         skillsNewAsset: "New asset",
         newAssetTitle: "New asset",
         newAssetType: "Asset type",
-        newAssetTypeSkillDesc: "Capability-oriented Skill synced to .agentdock/skills/<id>/SKILL.md",
+        newAssetTypeSkillDesc: "Capability-oriented Skill synced to skills/<id>/SKILL.md",
         newAssetTypeAgentsMdDesc: "Project-level AGENTS.md asset merged into the target AGENTS.md",
         newAssetTitleLabel: "Title",
         newAssetIdLabel: "Asset ID",
@@ -854,7 +856,7 @@ export const messages: Record<Locale, Catalog> = {
         projectsStatsManual: "Manual sync",
         projectsStatsPreviewFirst: "Preview before sync",
         newProjectTitle: "New project",
-        newProjectHelp: "Projects capture the local path, default scenario, and sync mode so we can preview and sync consistently later.",
+        newProjectHelp: "Projects capture the local path, default scenario, and sync mode. After creation, the project becomes a sync destination for that scenario without binding an Agent by default.",
         projectNameLabel: "Project name",
         projectPathLabel: "Local path",
         projectPathHint: "Enter the absolute path to the project root",
@@ -945,6 +947,7 @@ export const messages: Record<Locale, Catalog> = {
         scenarioRunSyncLastSynced: "Last synced: {time}",
         scenarioRunSyncNever: "No sync history yet",
         scenarioRunSyncUsesProjectRoot: "If no extra directories are configured, the project root is used by default",
+        scenarioRunSyncDefaultOutputs: "Skills write to {skillsPath}\\<skill-id>\\SKILL.md, and AGENTS.md merges into {agentsPath}",
         scenarioRecentActivity: "Recent activity",
         scenarioActivityNote: "After changing a scenario, linked projects or Agents will be recalculated on the next sync. If this scenario is not linked to anything yet, it can still be kept as a preset.",
         scenarioUsedSkills: "Active Skills",

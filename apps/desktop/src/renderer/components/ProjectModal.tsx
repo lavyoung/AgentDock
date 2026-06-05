@@ -29,7 +29,6 @@ export function ProjectModal({open, onClose}: ProjectModalProps): JSX.Element {
     const projectPath = useAppStore((s) => s.projectPath);
     const projectDefaultScenarioId = useAppStore((s) => s.projectDefaultScenarioId);
     const projectSyncMode = useAppStore((s) => s.projectSyncMode);
-    const projectAgentLabel = useAppStore((s) => s.projectAgentLabel);
     const setProjectName = useAppStore((s) => s.setProjectName);
     const setProjectPath = useAppStore((s) => s.setProjectPath);
     const setProjectDefaultScenarioId = useAppStore((s) => s.setProjectDefaultScenarioId);
@@ -187,16 +186,6 @@ export function ProjectModal({open, onClose}: ProjectModalProps): JSX.Element {
                                 <option value="preview-first">{t("projectSyncModePreviewFirst")}</option>
                             </select>
                         </div>
-                    </div>
-                    <div className="field">
-                        <label htmlFor="project-agent">{t("projectAgentLabel")}</label>
-                        <input
-                            id="project-agent"
-                            type="text"
-                            value={projectAgentLabel}
-                            readOnly
-                        />
-                        <div className="field-hint">{t("projectAgentHint")}</div>
                     </div>
                 </div>
 

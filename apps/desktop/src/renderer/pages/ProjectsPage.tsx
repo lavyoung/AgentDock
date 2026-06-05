@@ -191,10 +191,6 @@ export function ProjectsPage(): JSX.Element {
                                                     <div className="field-readonly">{selectedProject.id}</div>
                                                 </div>
                                                 <div className="field">
-                                                    <label>{t("projectAgentLabel")}</label>
-                                                    <div className="field-readonly">{selectedProject.agentLabel}</div>
-                                                </div>
-                                                <div className="field">
                                                     <label>{t("projectPathLabel")}</label>
                                                     <div className="field-readonly">{selectedProject.path}</div>
                                                 </div>
