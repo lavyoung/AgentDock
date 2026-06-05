@@ -236,6 +236,10 @@ type MessageCatalog = {
     scenarioAgentFiles: string;
     scenarioAgent: string;
     scenarioProjects: string;
+    scenarioAddProject: string;
+    scenarioProjectPickerTitle: string;
+    scenarioProjectPickerHint: string;
+    scenarioProjectPickerEmpty: string;
     scenarioRecentActivity: string;
     scenarioActivityNote: string;
     scenarioUsedSkills: string;
@@ -567,6 +571,10 @@ export const messages: Record<Locale, Catalog> = {
         scenarioAgentFiles: "AGENTS.md \u6587\u4ef6",
         scenarioAgent: "Agent",
         scenarioProjects: "\u5173\u8054\u9879\u76ee",
+        scenarioAddProject: "\u5173\u8054\u9879\u76ee",
+        scenarioProjectPickerTitle: "\u5173\u8054\u9879\u76ee",
+        scenarioProjectPickerHint: "\u9009\u62e9\u4e00\u4e2a\u5de5\u4f5c\u533a\u5173\u8054\u5230\u5f53\u524d\u573a\u666f\u3002\u5982\u679c\u8be5\u9879\u76ee\u5df2\u7ed1\u5b9a\u5230\u5176\u4ed6\u573a\u666f\uff0c\u4f1a\u81ea\u52a8\u5207\u6362\u8fc7\u6765\u3002",
+        scenarioProjectPickerEmpty: "\u6682\u65e0\u53ef\u5173\u8054\u9879\u76ee",
         scenarioRecentActivity: "\u6700\u8fd1\u6d3b\u52a8",
         scenarioActivityNote: "\u573a\u666f\u53d8\u66f4\u540e\uff0c\u5173\u8054\u7684\u9879\u76ee\u4f1a\u5728\u4e0b\u6b21\u540c\u6b65\u65f6\u88ab\u91cd\u65b0\u8ba1\u7b97\u3002\u5982\u679c\u9879\u76ee\u5904\u4e8e\u201c\u5df2\u540c\u6b65\u201d\u72b6\u6001\uff0c\u9700\u8981\u5148\u5728\u9879\u76ee\u4e2d\u70b9\u201c\u672a\u540c\u6b65\u201d\u624d\u4f1a\u91cd\u65b0\u5e94\u7528\u3002",
         scenarioUsedSkills: "\u4f7f\u7528\u7684\u6280\u80fd",
@@ -894,6 +902,10 @@ export const messages: Record<Locale, Catalog> = {
         scenarioAgentFiles: "Agent files",
         scenarioAgent: "Agent",
         scenarioProjects: "Linked projects",
+        scenarioAddProject: "Link project",
+        scenarioProjectPickerTitle: "Link project",
+        scenarioProjectPickerHint: "Choose a workspace to associate with this scenario. If the project is already linked to another scenario, it will be moved here.",
+        scenarioProjectPickerEmpty: "No projects available to link",
         scenarioRecentActivity: "Recent activity",
         scenarioActivityNote: "After changing a scenario, linked projects will be recalculated on the next sync. If a project is in the 'synced' state, you need to click 'unsync' in the project first to reapply.",
         scenarioUsedSkills: "Active Skills",

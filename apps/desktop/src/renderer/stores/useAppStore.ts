@@ -478,6 +478,7 @@ type Actions = {
     removeAssetFromScenario(field: "skillIds" | "ruleIds" | "agentFileIds", assetId: string): Promise<void>;
     addAgentAppToScenario(agentId: string): Promise<void>;
     removeAgentAppFromScenario(agentId: string): Promise<void>;
+    addProjectToScenario(projectId: string): Promise<void>;
 
     openProject(id: string): void;
     createProject(): Promise<ProjectRecord>;
@@ -909,6 +910,57 @@ export const useAppStore = create<AppStore>((set, get) => ({
         });
         await get().openScenario(selectedScenario.id);
         await get().refreshScenarios();
+    },
+
+    async addProjectToScenario(projectId) {
+        const {selectedScenario, projects, scenarios, selectedProjectId} = get();
+        if (!selectedScenario) return;
+
+        const project = projects.find((item) => item.id === projectId);
+        if (!project) return;
+
+        if (selectedScenario.projectIds.includes(projectId) && project.defaultScenarioId === selectedScenario.id) {
+            return;
+        }
+
+        const previousScenarioId = project.defaultScenarioId;
+        const nextProjectIds = selectedScenario.projectIds.includes(projectId)
+            ? selectedScenario.projectIds
+            : [...selectedScenario.projectIds, projectId];
+
+        await agentdockClient.scenarios.update(selectedScenario.id, {
+            projectIds: nextProjectIds,
+        });
+
+        if (previousScenarioId && previousScenarioId !== selectedScenario.id) {
+            const previousScenario = scenarios.find((item) => item.id === previousScenarioId);
+            if (previousScenario && previousScenario.projectIds.includes(projectId)) {
+                await agentdockClient.scenarios.update(previousScenario.id, {
+                    projectIds: previousScenario.projectIds.filter((id) => id !== projectId),
+                });
+            }
+        }
+
+        const now = new Date().toISOString();
+        const updatedProjects = projects.map((item) =>
+            item.id === projectId
+                ? {
+                    ...item,
+                    defaultScenarioId: selectedScenario.id,
+                    updatedAt: now,
+                    syncStatus: "pending",
+                }
+                : item
+        );
+
+        persistProjects(updatedProjects);
+        set({
+            projects: updatedProjects,
+            selectedProjectId: selectedProjectId === projectId ? projectId : selectedProjectId,
+        });
+
+        await get().refreshScenarios();
+        await get().openScenario(selectedScenario.id);
     },
 
     openProject(id) {

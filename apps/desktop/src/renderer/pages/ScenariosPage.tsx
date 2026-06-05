@@ -508,6 +508,86 @@ function AgentPicker({onClose}: {onClose: () => void}): JSX.Element {
     );
 }
 
+function ProjectPicker({onClose}: {onClose: () => void}): JSX.Element {
+    const {t} = useI18n();
+    const selectedScenario = useAppStore((s) => s.selectedScenario);
+    const projects = useAppStore((s) => s.projects);
+    const scenarios = useAppStore((s) => s.scenarios);
+    const addProjectToScenario = useAppStore((s) => s.addProjectToScenario);
+
+    const selectedIds = selectedScenario?.projectIds ?? [];
+
+    return (
+        <div className="asset-picker">
+            <div className="asset-picker-backdrop" onClick={onClose} />
+            <div className="asset-picker-panel">
+                <div className="asset-picker-header">
+                    <span className="asset-picker-title">{t("scenarioProjectPickerTitle")}</span>
+                    <button type="button" className="icon-btn" onClick={onClose} aria-label={t("close")}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </button>
+                </div>
+                <div className="asset-picker-body">
+                    <p className="form-hint form-hint-spaced">{t("scenarioProjectPickerHint")}</p>
+                    {projects.length === 0 ? (
+                        <div className="asset-picker-empty">{t("scenarioProjectPickerEmpty")}</div>
+                    ) : (
+                        projects.map((project) => {
+                            const isAlready = selectedIds.includes(project.id);
+                            const linkedScenario = project.defaultScenarioId
+                                ? scenarios.find((scenario) => scenario.id === project.defaultScenarioId) ?? null
+                                : null;
+
+                            return (
+                                <div
+                                    key={project.id}
+                                    className={`asset-picker-item ${isAlready ? "is-already" : ""}`}
+                                    onClick={() => {
+                                        if (!isAlready) {
+                                            void addProjectToScenario(project.id);
+                                            onClose();
+                                        }
+                                    }}
+                                    onKeyDown={(event) => {
+                                        if (!isAlready && isActionKey(event.key)) {
+                                            event.preventDefault();
+                                            void addProjectToScenario(project.id);
+                                            onClose();
+                                        }
+                                    }}
+                                    role="button"
+                                    tabIndex={0}
+                                    aria-disabled={isAlready}
+                                >
+                                    <div className="picker-item-icon picker-item-icon-project">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M3 7l9-4 9 4-9 4-9-4z"/>
+                                            <path d="M3 17l9 4 9-4"/>
+                                            <path d="M3 12l9 4 9-4"/>
+                                        </svg>
+                                    </div>
+                                    <div className="picker-item-body">
+                                        <div className="picker-item-title">{project.name}</div>
+                                        <div className="picker-item-meta">{project.path}</div>
+                                    </div>
+                                    {isAlready ? (
+                                        <span className="picker-item-added">{t("assetPickerAlreadyAdded")}</span>
+                                    ) : linkedScenario ? (
+                                        <span className="picker-item-added">{linkedScenario.title || linkedScenario.name}</span>
+                                    ) : null}
+                                </div>
+                            );
+                        })
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}
+
 // --- Scenario Detail View ---
 function ScenarioDetail(): JSX.Element {
     const {t} = useI18n();
@@ -527,6 +607,7 @@ function ScenarioDetail(): JSX.Element {
     const setScenarioDescription = useAppStore((s) => s.setScenarioDescription);
     const availableAgents = useAvailableAgents();
     const [showAgentPicker, setShowAgentPicker] = useState(false);
+    const [showProjectPicker, setShowProjectPicker] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
 
     useEffect(() => {
@@ -801,10 +882,27 @@ function ScenarioDetail(): JSX.Element {
                 <section className="left-card">
                     <header className="left-card-header">
                         <h3>
+                            <svg className="scenario-section-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M3 7l9-4 9 4-9 4-9-4z"/>
+                                <path d="M3 17l9 4 9-4"/>
+                                <path d="M3 12l9 4 9-4"/>
+                            </svg>
                             <span className="scenario-section-title">{t("scenarioProjects")}</span>
                         </h3>
-                        <div className="scenario-section-meta scenario-section-meta--static">
+                        <div className="scenario-section-meta">
                             <span className="scenario-section-count">{linkedProjects.length}</span>
+                            <button
+                                type="button"
+                                className="scenario-section-add scenario-section-add--project"
+                                title={t("scenarioAddProject")}
+                                aria-label={t("scenarioAddProject")}
+                                onClick={() => setShowProjectPicker(true)}
+                            >
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <line x1="12" y1="5" x2="12" y2="19"/>
+                                    <line x1="5" y1="12" x2="19" y2="12"/>
+                                </svg>
+                            </button>
                         </div>
                     </header>
                     <div className="left-card-body scenario-section-stack">
@@ -853,6 +951,9 @@ function ScenarioDetail(): JSX.Element {
 
             {showAgentPicker ? (
                 <AgentPicker onClose={() => setShowAgentPicker(false)} />
+            ) : null}
+            {showProjectPicker ? (
+                <ProjectPicker onClose={() => setShowProjectPicker(false)} />
             ) : null}
             <EditScenarioModal
                 open={showEditModal}
