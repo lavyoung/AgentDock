@@ -17,6 +17,7 @@ import type {
     ScenarioRecord,
 } from "../../../../../packages/core/src/types/asset";
 import type {SnapshotRecord} from "../../../../../packages/core/src/types/snapshot";
+import type {SyncPreviewResult} from "../../../../../packages/core/src/types/sync";
 import type {TargetDeployMode, TargetRecord} from "../../../../../packages/core/src/types/target";
 import {agentdockClient} from "../client/agentdockClient";
 
@@ -46,6 +47,7 @@ export type ViewKey = "overview" | "assets" | "install" | "scenarios" | "targets
 export type ScenarioDetailView = "view" | "edit";
 export type ThemeMode = "dark" | "light" | "system";
 export type ProjectSyncMode = "manual" | "preview-first";
+export type ProjectSyncStatus = "pending" | "synced" | "conflict";
 export type StoredSettings = {
     dataPath: string;
     autoUpdate: boolean;
@@ -59,6 +61,8 @@ export type ProjectRecord = {
     path: string;
     defaultScenarioId: string | null;
     syncMode: ProjectSyncMode;
+    syncStatus: ProjectSyncStatus;
+    lastSyncedAt: string | null;
     agentLabel: string;
     createdAt: string;
     updatedAt: string;
@@ -116,22 +120,41 @@ function readStoredProjects(): ProjectRecord[] {
             return [];
         }
 
-        return parsed.filter((item): item is ProjectRecord => {
+        return parsed.flatMap((item) => {
             if (!item || typeof item !== "object") {
-                return false;
+                return [];
             }
 
             const candidate = item as Record<string, unknown>;
-            return (
-                typeof candidate.id === "string" &&
-                typeof candidate.name === "string" &&
-                typeof candidate.path === "string" &&
-                (typeof candidate.defaultScenarioId === "string" || candidate.defaultScenarioId === null) &&
-                (candidate.syncMode === "manual" || candidate.syncMode === "preview-first") &&
-                typeof candidate.agentLabel === "string" &&
-                typeof candidate.createdAt === "string" &&
-                typeof candidate.updatedAt === "string"
-            );
+            if (
+                typeof candidate.id !== "string" ||
+                typeof candidate.name !== "string" ||
+                typeof candidate.path !== "string" ||
+                (typeof candidate.defaultScenarioId !== "string" && candidate.defaultScenarioId !== null) ||
+                (candidate.syncMode !== "manual" && candidate.syncMode !== "preview-first") ||
+                typeof candidate.agentLabel !== "string" ||
+                typeof candidate.createdAt !== "string" ||
+                typeof candidate.updatedAt !== "string"
+            ) {
+                return [];
+            }
+
+            return [{
+                id: candidate.id,
+                name: candidate.name,
+                path: candidate.path,
+                defaultScenarioId: candidate.defaultScenarioId,
+                syncMode: candidate.syncMode,
+                syncStatus:
+                    candidate.syncStatus === "synced" || candidate.syncStatus === "conflict"
+                        ? candidate.syncStatus
+                        : "pending",
+                lastSyncedAt:
+                    typeof candidate.lastSyncedAt === "string" ? candidate.lastSyncedAt : null,
+                agentLabel: candidate.agentLabel,
+                createdAt: candidate.createdAt,
+                updatedAt: candidate.updatedAt,
+            }];
         });
     } catch {
         return [];
@@ -249,6 +272,7 @@ type State = {
     projectDefaultScenarioId: string | null;
     projectSyncMode: ProjectSyncMode;
     projectAgentLabel: string;
+    selectedProjectSyncPreview: SyncPreviewResult | null;
 
     // asset picker (modal for adding to scenario)
     assetPickerOpen: boolean;
@@ -338,6 +362,8 @@ type Actions = {
 
     openProject(id: string): void;
     createProject(): Promise<ProjectRecord>;
+    previewSelectedProjectSync(): Promise<void>;
+    runSelectedProjectSync(): Promise<void>;
     resetProjectForm(): void;
     setProjectName(value: string): void;
     setProjectPath(value: string): void;
@@ -416,6 +442,7 @@ const initialState: State = {
     projectDefaultScenarioId: "default",
     projectSyncMode: "manual",
     projectAgentLabel: "OpenCode Agent",
+    selectedProjectSyncPreview: null,
 
     assetPickerOpen: false,
     assetPickerField: null,
@@ -759,6 +786,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
             projectDefaultScenarioId: project.defaultScenarioId,
             projectSyncMode: project.syncMode,
             projectAgentLabel: project.agentLabel,
+            selectedProjectSyncPreview: null,
         });
     },
 
@@ -804,6 +832,8 @@ export const useAppStore = create<AppStore>((set, get) => ({
             path: trimmedPath,
             defaultScenarioId: projectDefaultScenarioId,
             syncMode: projectSyncMode,
+            syncStatus: "pending",
+            lastSyncedAt: null,
             agentLabel: projectAgentLabel.trim() || "OpenCode Agent",
             createdAt: now,
             updatedAt: now,
@@ -820,6 +850,56 @@ export const useAppStore = create<AppStore>((set, get) => ({
         return created;
     },
 
+    async previewSelectedProjectSync() {
+        const {projects, selectedProjectId} = get();
+        const project = projects.find((candidate) => candidate.id === selectedProjectId) ?? null;
+
+        if (!project?.defaultScenarioId) {
+            throw new Error(get()._t("projectSyncRequiresScenario"));
+        }
+
+        const preview = await agentdockClient.sync.preview({
+            scenario_id: project.defaultScenarioId,
+        });
+        set({selectedProjectSyncPreview: preview});
+    },
+
+    async runSelectedProjectSync() {
+        const {projects, selectedProjectId} = get();
+        const project = projects.find((candidate) => candidate.id === selectedProjectId) ?? null;
+
+        if (!project?.defaultScenarioId) {
+            throw new Error(get()._t("projectSyncRequiresScenario"));
+        }
+
+        if (project.syncMode === "preview-first" || !get().selectedProjectSyncPreview) {
+            const preview = await agentdockClient.sync.preview({
+                scenario_id: project.defaultScenarioId,
+            });
+            set({selectedProjectSyncPreview: preview});
+        }
+
+        const result = await agentdockClient.sync.run({
+            scenario_id: project.defaultScenarioId,
+        });
+        const nextProjects = projects.map((candidate) =>
+            candidate.id === project.id
+                ? {
+                    ...candidate,
+                    syncStatus: result.conflicts.length > 0 ? "conflict" : "synced",
+                    lastSyncedAt: result.synced_at,
+                    updatedAt: result.synced_at,
+                }
+                : candidate
+        );
+
+        persistProjects(nextProjects);
+        set({
+            projects: nextProjects,
+            selectedProjectSyncPreview: result,
+        });
+    },
+
     resetProjectForm() {
         set({
             selectedProjectId: null,
@@ -828,6 +908,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
             projectDefaultScenarioId: "default",
             projectSyncMode: "manual",
             projectAgentLabel: "OpenCode Agent",
+            selectedProjectSyncPreview: null,
         });
     },
 

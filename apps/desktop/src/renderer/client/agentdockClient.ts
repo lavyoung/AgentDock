@@ -10,6 +10,7 @@ import type {
     ApplicationRecord,
 } from "../../../../../packages/core/src/types/application";
 import type {AssetDetail, RuleRecord, ScenarioRecord} from "../../../../../packages/core/src/types/asset";
+import type {SyncPreviewInput, SyncPreviewResult, SyncRunResult} from "../../../../../packages/core/src/types/sync";
 import type {TargetRecord} from "../../../../../packages/core/src/types/target";
 
 function getApi(): AgentdockApi | null {
@@ -39,6 +40,66 @@ let mockLocations: ApplicationLocationRecord[] = [];
 
 function nowIso(): string {
     return new Date().toISOString();
+}
+
+function buildMockSyncPreview(input: SyncPreviewInput): SyncPreviewResult {
+    initMockData();
+    const scenario = mockScenarios.find((candidate) => candidate.id === input.scenario_id);
+
+    if (!scenario) {
+        throw new Error(`Scenario not found: ${input.scenario_id}`);
+    }
+
+    const targets = mockTargets.filter((target) =>
+        target.enabled && (!input.target_ids?.length || input.target_ids.includes(target.id))
+    );
+    const warnings: string[] = [];
+
+    if (targets.length === 0) {
+        warnings.push("No enabled targets are configured yet.");
+    }
+
+    const items = targets.flatMap((target) => {
+        const skillItems = scenario.skillIds
+            .map((assetId) => mockAssets.find((asset) => asset.id === assetId) ?? null)
+            .filter((asset): asset is AssetDetail => Boolean(asset) && asset.type === "skill" && asset.status === "active")
+            .map((asset) => ({
+                asset_id: asset.id,
+                asset_name: asset.title || asset.name,
+                asset_type: asset.type,
+                target_id: target.id,
+                target_name: target.name,
+                target_root: target.path,
+                output_path: `${target.path}\\.agentdock\\skills\\${asset.id}\\SKILL.md`,
+                operation: "create" as const,
+            }));
+        const agentsMdItems = scenario.agentFileIds
+            .map((assetId) => mockAssets.find((asset) => asset.id === assetId) ?? null)
+            .filter((asset): asset is AssetDetail => Boolean(asset) && asset.type === "agents-md" && asset.status === "active")
+            .map((asset) => ({
+                asset_id: asset.id,
+                asset_name: asset.title || asset.name,
+                asset_type: asset.type,
+                target_id: target.id,
+                target_name: target.name,
+                target_root: target.path,
+                output_path: `${target.path}\\AGENTS.md`,
+                operation: "merge" as const,
+            }));
+
+        return [...skillItems, ...agentsMdItems];
+    });
+
+    return {
+        scenario_id: scenario.id,
+        target_count: targets.length,
+        operation_count: items.length,
+        create_count: items.filter((item) => item.operation === "create").length,
+        update_count: 0,
+        merge_count: items.filter((item) => item.operation === "merge").length,
+        warnings,
+        items,
+    };
 }
 
 // Bootstrap a built-in default scenario
@@ -350,6 +411,15 @@ const mockApi: AgentdockApi = {
             synced_at: nowIso(),
         }),
     },
+    sync: {
+        preview: async (input) => buildMockSyncPreview(input),
+        run: async (input): Promise<SyncRunResult> => ({
+            ...buildMockSyncPreview(input),
+            written_count: buildMockSyncPreview(input).operation_count,
+            conflicts: [],
+            synced_at: nowIso(),
+        }),
+    },
 };
 
 export const agentdockClient: AgentdockApi = MOCK_MODE ? mockApi : new Proxy({} as AgentdockApi, {
@@ -364,6 +434,7 @@ export const agentdockClient: AgentdockApi = MOCK_MODE ? mockApi : new Proxy({} 
                 targets: {list: notReady, get: notReady, create: notReady, update: notReady, delete: notReady},
                 scenarios: {list: notReady, get: notReady, create: notReady, update: notReady, delete: notReady, addAsset: notReady, removeAsset: notReady},
                 applications: {list: notReady, get: notReady, update: notReady, refreshLocations: notReady, updateLocation: notReady, runSync: notReady},
+                sync: {preview: notReady, run: notReady},
             }[prop];
         }
         return api[prop];

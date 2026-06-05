@@ -189,6 +189,24 @@ type MessageCatalog = {
     projectNoScenarioLinked: string;
     projectWorkflowTitle: string;
     projectWorkflowDesc: string;
+    projectSyncPreviewAction: string;
+    projectSyncRunAction: string;
+    projectSyncRequiresScenario: string;
+    projectSyncPreviewReady: string;
+    projectSyncRunSuccess: string;
+    projectSyncRunConflict: string;
+    projectSyncStatusPending: string;
+    projectSyncStatusSynced: string;
+    projectSyncStatusConflict: string;
+    projectSyncLastSynced: string;
+    projectSyncTargets: string;
+    projectSyncOperations: string;
+    projectSyncWarnings: string;
+    projectSyncWritten: string;
+    projectSyncPreviewEmpty: string;
+    projectSyncOperationCreate: string;
+    projectSyncOperationUpdate: string;
+    projectSyncOperationMerge: string;
     scenariosTitle: string;
     scenariosEmpty: string;
     scenariosComingSoon: string;
@@ -481,7 +499,25 @@ export const messages: Record<Locale, Catalog> = {
         projectScenarioAgents: "Agent",
         projectNoScenarioLinked: "\u8fd8\u6ca1\u6709\u5173\u8054\u573a\u666f\uff0c\u8fd9\u4e2a\u9879\u76ee\u76ee\u524d\u53ea\u4f5c\u4e3a\u672c\u5730\u5de5\u4f5c\u533a\u8bb0\u5f55\u3002",
         projectWorkflowTitle: "\u540c\u6b65\u95ed\u73af",
-        projectWorkflowDesc: "\u9879\u76ee\u7528\u6765\u627f\u63a5\u573a\u666f\u548c\u76ee\u6807\u7684\u771f\u5b9e\u95ed\u73af\u3002\u4e0b\u4e00\u6b65\u4f1a\u4ece\u9879\u76ee\u89c6\u89d2\u8865\u4e0a Sync Matrix\u3001preview \u548c run sync \u884c\u4e3a\u3002",
+        projectWorkflowDesc: "\u9879\u76ee\u7528\u6765\u627f\u63a5\u573a\u666f\u548c\u76ee\u6807\u7684\u771f\u5b9e\u95ed\u73af\u3002\u73b0\u5728\u53ef\u4ee5\u5148\u5728\u8fd9\u91cc\u9884\u89c8\u540c\u6b65\u8ba1\u5212\uff0c\u518d\u624b\u52a8\u6267\u884c run sync\u3002",
+        projectSyncPreviewAction: "\u9884\u89c8\u540c\u6b65",
+        projectSyncRunAction: "\u6267\u884c\u540c\u6b65",
+        projectSyncRequiresScenario: "\u8bf7\u5148\u4e3a\u9879\u76ee\u5173\u8054\u4e00\u4e2a\u573a\u666f\u3002",
+        projectSyncPreviewReady: "\u540c\u6b65\u9884\u89c8\u5df2\u751f\u6210\u3002",
+        projectSyncRunSuccess: "\u5df2\u5199\u5165 {written} \u4e2a\u540c\u6b65\u64cd\u4f5c\u3002",
+        projectSyncRunConflict: "\u5176\u4e2d\u6709 {count} \u4e2a AGENTS.md \u6258\u7ba1\u533a\u5757\u51b2\u7a81\u9700\u8981\u624b\u52a8\u5904\u7406\u3002",
+        projectSyncStatusPending: "\u5f85\u540c\u6b65",
+        projectSyncStatusSynced: "\u5df2\u540c\u6b65",
+        projectSyncStatusConflict: "\u6709\u51b2\u7a81",
+        projectSyncLastSynced: "\u4e0a\u6b21\u540c\u6b65",
+        projectSyncTargets: "\u76ee\u6807",
+        projectSyncOperations: "\u64cd\u4f5c",
+        projectSyncWarnings: "\u63d0\u9192",
+        projectSyncWritten: "\u5df2\u5199\u5165",
+        projectSyncPreviewEmpty: "\u8fd8\u6ca1\u6709\u751f\u6210\u9884\u89c8\u3002\u5148\u70b9\u201c\u9884\u89c8\u540c\u6b65\u201d\u770b\u770b\u8981\u5199\u5230\u54ea\u4e9b\u76ee\u6807\u3002",
+        projectSyncOperationCreate: "\u521b\u5efa",
+        projectSyncOperationUpdate: "\u66f4\u65b0",
+        projectSyncOperationMerge: "\u5408\u5e76",
         scenariosTitle: "\u573a\u666f",
         scenariosEmpty: "\u6682\u65e0\u573a\u666f\u3002",
         scenariosComingSoon: "\u573a\u666f\u8ba9\u4f60\u53ef\u4ee5\u5c06\u8d44\u4ea7\u5206\u7ec4\u5e76\u6309\u573a\u666f\u542f\u7528/\u7981\u7528\u3002\u8fd9\u662f\u7b2c\u4e8c\u9636\u6bb5\u7684\u529f\u80fd\u3002",
@@ -770,7 +806,25 @@ export const messages: Record<Locale, Catalog> = {
         projectScenarioAgents: "Agents",
         projectNoScenarioLinked: "No scenario is linked yet, so this project currently acts as a local workspace record only.",
         projectWorkflowTitle: "Sync workflow",
-        projectWorkflowDesc: "Projects are the bridge between scenarios and targets. The next step is to complete the project-level Sync Matrix, preview, and run-sync loop here.",
+        projectWorkflowDesc: "Projects bridge scenarios and targets. You can now preview the sync plan here first, then manually run the sync.",
+        projectSyncPreviewAction: "Preview sync",
+        projectSyncRunAction: "Run sync",
+        projectSyncRequiresScenario: "Link a scenario to this project before previewing sync.",
+        projectSyncPreviewReady: "Sync preview generated.",
+        projectSyncRunSuccess: "Wrote {written} sync operations.",
+        projectSyncRunConflict: "{count} AGENTS.md managed block conflicts need manual review.",
+        projectSyncStatusPending: "Pending",
+        projectSyncStatusSynced: "Synced",
+        projectSyncStatusConflict: "Conflict",
+        projectSyncLastSynced: "Last synced",
+        projectSyncTargets: "Targets",
+        projectSyncOperations: "Operations",
+        projectSyncWarnings: "Warnings",
+        projectSyncWritten: "Written",
+        projectSyncPreviewEmpty: "No preview yet. Generate one first to inspect what will be written to each target.",
+        projectSyncOperationCreate: "Create",
+        projectSyncOperationUpdate: "Update",
+        projectSyncOperationMerge: "Merge",
         scenariosTitle: "Scenarios",
         scenariosEmpty: "No scenarios yet.",
         scenariosComingSoon: "Scenarios let you group assets and enable/disable them by scenario. This is a Phase 2 feature.",

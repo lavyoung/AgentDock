@@ -1586,6 +1586,10 @@
     color: var(--fg-muted);
 }
 
+.project-list-item-status {
+    margin-top: 10px;
+}
+
 .project-hero {
     display: flex;
     align-items: flex-start;
@@ -1614,6 +1618,80 @@
     gap: 8px;
     flex-wrap: wrap;
     justify-content: flex-end;
+}
+
+.projects-workflow-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.project-sync-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.project-sync-warning-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.project-sync-warning-item {
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(245, 158, 11, 0.28);
+    background: rgba(245, 158, 11, 0.08);
+    color: #fbbf24;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.project-sync-item-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.project-sync-item {
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--bd);
+    background: var(--bg-card);
+}
+
+.project-sync-item-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.project-sync-item-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--fg-primary);
+}
+
+.project-sync-item-meta {
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--fg-muted);
+}
+
+.project-sync-item-path {
+    font-size: 11px;
+    line-height: 1.7;
+    color: var(--fg-faint);
+    font-family: ui-monospace, monospace;
+    word-break: break-all;
+}
+
+.project-sync-empty {
+    margin-top: 16px;
 }
 
 .project-detail-grid {

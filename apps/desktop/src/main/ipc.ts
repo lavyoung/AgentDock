@@ -12,6 +12,8 @@ import {
     type UpdateScenarioInput
 } from "../../../../packages/core/src/scenario/scenarioService";
 import {SnapshotService} from "../../../../packages/core/src/snapshot/snapshotService";
+import {SyncService} from "../../../../packages/core/src/sync/syncService";
+import type {SyncPreviewInput} from "../../../../packages/core/src/types/sync";
 import {TargetService} from "../../../../packages/core/src/target/targetService";
 import {
     createApplicationRepository,
@@ -76,6 +78,13 @@ export function registerIpc() {
     });
     const ruleService = new RuleService({
         ruleRepository,
+    });
+    const syncService = new SyncService({
+        scenarioRepository,
+        assetRepository,
+        targetRepository,
+        fileSystem: nodeFileSystemPort,
+        path: nodePathPort,
     });
 
     ipcMain.handle("app:pick-path", async (event, input: PickPathInput) => {
@@ -206,6 +215,14 @@ export function registerIpc() {
 
     ipcMain.handle("applications:run-sync", async (_event, id: ApplicationId) => {
         return applicationSyncService.syncApplication(id);
+    });
+
+    ipcMain.handle("sync:preview", async (_event, input: SyncPreviewInput) => {
+        return syncService.previewScenarioSync(input);
+    });
+
+    ipcMain.handle("sync:run", async (_event, input: SyncPreviewInput) => {
+        return syncService.runScenarioSync(input);
     });
 
     // ---------- scenarios ----------

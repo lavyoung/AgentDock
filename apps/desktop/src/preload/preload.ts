@@ -53,6 +53,10 @@ const agentdockApi: AgentdockApi = {
             ipcRenderer.invoke("applications:update-location", id, input),
         runSync: (id) => ipcRenderer.invoke("applications:run-sync", id),
     },
+    sync: {
+        preview: (input) => ipcRenderer.invoke("sync:preview", input),
+        run: (input) => ipcRenderer.invoke("sync:run", input),
+    },
 };
 
 contextBridge.exposeInMainWorld("agentdock", agentdockApi);
