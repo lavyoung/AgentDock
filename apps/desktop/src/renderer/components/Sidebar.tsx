@@ -122,6 +122,7 @@ export function Sidebar(): JSX.Element {
     const scenarios = useAppStore((s) => s.scenarios);
     const selectedScenario = useAppStore((s) => s.selectedScenario);
     const openProject = useAppStore((s) => s.openProject);
+    const selectedProjectId = useAppStore((s) => s.selectedProjectId);
     const resetProjectForm = useAppStore((s) => s.resetProjectForm);
     const refreshScenarios = useAppStore((s) => s.refreshScenarios);
     const assets = useAppStore((s) => s.assets);
@@ -246,22 +247,11 @@ export function Sidebar(): JSX.Element {
                             />
                         </NavPopover>
                     </div>
-                    <button
-                        type="button"
-                        className="nav-sub-item"
-                        onClick={() => setView("projects")}
-                    >
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14" aria-hidden="true">
-                            <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/>
-                            <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>
-                        </svg>
-                        <span>{t("navLinkedProjects")}</span>
-                    </button>
                     {projects.map((project) => (
                         <button
                             key={project.id}
                             type="button"
-                            className={`nav-sub-item nav-sub-item-deep ${view === "projects" ? "active" : ""}`}
+                            className={`nav-sub-item ${view === "projects" && selectedProjectId === project.id ? "active" : ""}`}
                             onClick={() => openProject(project.id)}
                         >
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14" aria-hidden="true">

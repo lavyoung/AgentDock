@@ -1567,6 +1567,10 @@
     gap: 20px;
 }
 
+.projects-layout-single {
+    grid-template-columns: minmax(0, 1fr);
+}
+
 .projects-detail-stack {
     display: flex;
     flex-direction: column;
@@ -3452,6 +3456,17 @@
 .scenario-empty-copy {
     font-size: 13px;
     color: var(--fg-muted);
+}
+.scenario-project-summary {
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--bd-soft);
+    background:
+        linear-gradient(180deg, rgba(96, 165, 250, 0.08), rgba(96, 165, 250, 0.02)),
+        var(--bg-elevated);
+    color: var(--fg-secondary);
+    font-size: 13px;
+    line-height: 1.65;
 }
 .detail-row-icon-project {
     background: rgba(59,130,246,.15);

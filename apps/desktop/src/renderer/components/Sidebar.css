@@ -289,12 +289,6 @@
     color: var(--accent);
 }
 
-.nav-sub-item-deep {
-    margin-left: 16px;
-    background: transparent;
-    border-style: dashed;
-}
-
 /* === Footer === */
 .sidebar-footer {
     border-top: 1px solid var(--bd-soft);

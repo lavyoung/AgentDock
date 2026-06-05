@@ -597,7 +597,6 @@ function ScenarioDetail(): JSX.Element {
     const projects = useAppStore((s) => s.projects);
     const refreshApplications = useAppStore((s) => s.refreshApplications);
     const setView = useAppStore((s) => s.setView);
-    const openProject = useAppStore((s) => s.openProject);
     const openAssetPicker = useAppStore((s) => s.openAssetPicker);
     const saveScenario = useAppStore((s) => s.saveScenario);
     const deleteScenario = useAppStore((s) => s.deleteScenario);
@@ -909,28 +908,9 @@ function ScenarioDetail(): JSX.Element {
                         {linkedProjects.length === 0 ? (
                             <div className="scenario-empty-copy">{t("scenarioNoProjects")}</div>
                         ) : (
-                            linkedProjects.map((project) => (
-                                <div key={project.id} className="detail-row">
-                                    <div className="detail-row-icon detail-row-icon-project">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                            <path d="M3 7l9-4 9 4-9 4-9-4z"/>
-                                            <path d="M3 17l9 4 9-4"/>
-                                            <path d="M3 12l9 4 9-4"/>
-                                        </svg>
-                                    </div>
-                                    <div className="detail-row-body">
-                                        <div className="detail-row-title">{project.name}</div>
-                                        <div className="detail-row-meta">{project.path}</div>
-                                    </div>
-                                    <button
-                                        type="button"
-                                        className="btn btn-ghost btn-sm"
-                                        onClick={() => openProject(project.id)}
-                                    >
-                                        {t("scenarioOpenProject")}
-                                    </button>
-                                </div>
-                            ))
+                            <div className="scenario-project-summary">
+                                {t("scenarioProjectsSummary").replace("{count}", String(linkedProjects.length))}
+                            </div>
                         )}
                     </div>
                 </section>

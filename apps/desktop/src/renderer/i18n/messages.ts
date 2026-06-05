@@ -237,6 +237,7 @@ type MessageCatalog = {
     scenarioAgent: string;
     scenarioProjects: string;
     scenarioAddProject: string;
+    scenarioProjectsSummary: string;
     scenarioProjectPickerTitle: string;
     scenarioProjectPickerHint: string;
     scenarioProjectPickerEmpty: string;
@@ -572,6 +573,7 @@ export const messages: Record<Locale, Catalog> = {
         scenarioAgent: "Agent",
         scenarioProjects: "\u5173\u8054\u9879\u76ee",
         scenarioAddProject: "\u5173\u8054\u9879\u76ee",
+        scenarioProjectsSummary: "\u5df2\u5173\u8054 {count} \u4e2a\u9879\u76ee\uff0c\u53ef\u4ece\u5de6\u4fa7\u5de5\u4f5c\u533a\u76f4\u63a5\u67e5\u770b\u548c\u5207\u6362\u3002",
         scenarioProjectPickerTitle: "\u5173\u8054\u9879\u76ee",
         scenarioProjectPickerHint: "\u9009\u62e9\u4e00\u4e2a\u5de5\u4f5c\u533a\u5173\u8054\u5230\u5f53\u524d\u573a\u666f\u3002\u5982\u679c\u8be5\u9879\u76ee\u5df2\u7ed1\u5b9a\u5230\u5176\u4ed6\u573a\u666f\uff0c\u4f1a\u81ea\u52a8\u5207\u6362\u8fc7\u6765\u3002",
         scenarioProjectPickerEmpty: "\u6682\u65e0\u53ef\u5173\u8054\u9879\u76ee",
@@ -903,6 +905,7 @@ export const messages: Record<Locale, Catalog> = {
         scenarioAgent: "Agent",
         scenarioProjects: "Linked projects",
         scenarioAddProject: "Link project",
+        scenarioProjectsSummary: "{count} linked project(s). View and switch them from the left workspace list.",
         scenarioProjectPickerTitle: "Link project",
         scenarioProjectPickerHint: "Choose a workspace to associate with this scenario. If the project is already linked to another scenario, it will be moved here.",
         scenarioProjectPickerEmpty: "No projects available to link",

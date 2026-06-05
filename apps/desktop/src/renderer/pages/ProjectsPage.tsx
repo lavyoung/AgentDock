@@ -112,7 +112,6 @@ export function ProjectsPage(): JSX.Element {
     const selectedProjectSyncPreview = useAppStore((s) => s.selectedProjectSyncPreview);
     const scenarios = useAppStore((s) => s.scenarios);
     const targets = useAppStore((s) => s.targets);
-    const openProject = useAppStore((s) => s.openProject);
     const openScenario = useAppStore((s) => s.openScenario);
     const refreshScenarios = useAppStore((s) => s.refreshScenarios);
     const refreshTargets = useAppStore((s) => s.refreshTargets);
@@ -244,233 +243,192 @@ export function ProjectsPage(): JSX.Element {
                             </article>
                         </section>
 
-                        <div className="projects-layout">
+                        <div className="projects-layout projects-layout-single">
+                            <div className="projects-detail-stack">
                             <section className="left-card">
                                 <header className="left-card-header">
-                                    <h3>{t("projectsTitle")}</h3>
+                                    <h3>{selectedProject ? selectedProject.name : t("projectsSubtitle")}</h3>
                                 </header>
-                                <div className="left-card-body projects-list">
-                                    {projects.map((project) => {
-                                        const scenario = project.defaultScenarioId
-                                            ? scenarios.find((item) => item.id === project.defaultScenarioId) ?? null
-                                            : null;
-
-                                        return (
-                                            <button
-                                                key={project.id}
-                                                type="button"
-                                                className={`project-list-item ${selectedProject?.id === project.id ? "active" : ""}`}
-                                                onClick={() => openProject(project.id)}
-                                            >
-                                                <div className="project-list-item-header">
-                                                    <strong>{project.name}</strong>
+                                <div className="left-card-body">
+                                    {selectedProject ? (
+                                        <>
+                                            <div className="project-hero">
+                                                <div className="project-hero-main">
+                                                    <h2>{selectedProject.name}</h2>
+                                                    <p>{selectedProject.path}</p>
+                                                </div>
+                                                <div className="project-hero-badges">
                                                     <span className="badge badge-blue">
-                                                        {project.syncMode === "manual"
+                                                        {selectedProject.syncMode === "manual"
                                                             ? t("projectSyncModeManual")
                                                             : t("projectSyncModePreviewFirst")}
                                                     </span>
-                                                </div>
-                                                <div className="project-list-item-path">{project.path}</div>
-                                                <div className="project-list-item-status">
-                                                    <span className={getProjectSyncStatusClass(project.syncStatus)}>
+                                                    <span className="badge badge-gray">
+                                                        {selectedScenario ? selectedScenario.title || selectedScenario.name : t("projectScenarioNone")}
+                                                    </span>
+                                                    <span className={getProjectSyncStatusClass(selectedProject.syncStatus)}>
                                                         <span className="pill-dot" />
-                                                        {getProjectSyncStatusLabel(t, project.syncStatus)}
+                                                        {getProjectSyncStatusLabel(t, selectedProject.syncStatus)}
                                                     </span>
                                                 </div>
-                                                <div className="project-list-item-meta">
-                                                    {scenario ? scenario.title || scenario.name : t("projectScenarioNone")}
+                                            </div>
+
+                                            <div className="project-detail-grid">
+                                                <div className="field">
+                                                    <label>{t("panelFieldId")}</label>
+                                                    <div className="field-readonly">{selectedProject.id}</div>
                                                 </div>
-                                            </button>
-                                        );
-                                    })}
+                                                <div className="field">
+                                                    <label>{t("projectAgentLabel")}</label>
+                                                    <div className="field-readonly">{selectedProject.agentLabel}</div>
+                                                </div>
+                                                <div className="field">
+                                                    <label>{t("projectPathLabel")}</label>
+                                                    <div className="field-readonly">{selectedProject.path}</div>
+                                                </div>
+                                                <div className="field">
+                                                    <label>{t("projectScenarioLabel")}</label>
+                                                    <div className="field-readonly">
+                                                        {selectedScenario ? selectedScenario.title || selectedScenario.name : t("projectScenarioNone")}
+                                                    </div>
+                                                </div>
+                                                <div className="field">
+                                                    <label>{t("projectCreatedAtLabel")}</label>
+                                                    <div className="field-readonly">{formatDate(selectedProject.createdAt)}</div>
+                                                </div>
+                                                <div className="field">
+                                                    <label>{t("projectUpdatedAtLabel")}</label>
+                                                    <div className="field-readonly">{formatDate(selectedProject.updatedAt)}</div>
+                                                </div>
+                                                <div className="field">
+                                                    <label>{t("projectSyncLastSynced")}</label>
+                                                    <div className="field-readonly">
+                                                        {selectedProject.lastSyncedAt ? formatDate(selectedProject.lastSyncedAt) : "-"}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <div className="assets-empty projects-empty-inline">
+                                            <p>{t("projectsSubtitle")}</p>
+                                        </div>
+                                    )}
                                 </div>
                             </section>
 
-                            <div className="projects-detail-stack">
-                                <section className="left-card">
-                                    <header className="left-card-header">
-                                        <h3>{selectedProject ? selectedProject.name : t("projectsSubtitle")}</h3>
-                                    </header>
-                                    <div className="left-card-body">
-                                        {selectedProject ? (
-                                            <>
-                                                <div className="project-hero">
-                                                    <div className="project-hero-main">
-                                                        <h2>{selectedProject.name}</h2>
-                                                        <p>{selectedProject.path}</p>
-                                                    </div>
-                                                    <div className="project-hero-badges">
-                                                        <span className="badge badge-blue">
-                                                            {selectedProject.syncMode === "manual"
-                                                                ? t("projectSyncModeManual")
-                                                                : t("projectSyncModePreviewFirst")}
-                                                        </span>
-                                                        <span className="badge badge-gray">
-                                                            {selectedScenario ? selectedScenario.title || selectedScenario.name : t("projectScenarioNone")}
-                                                        </span>
-                                                        <span className={getProjectSyncStatusClass(selectedProject.syncStatus)}>
-                                                            <span className="pill-dot" />
-                                                            {getProjectSyncStatusLabel(t, selectedProject.syncStatus)}
-                                                        </span>
-                                                    </div>
-                                                </div>
-
-                                                <div className="project-detail-grid">
-                                                    <div className="field">
-                                                        <label>{t("panelFieldId")}</label>
-                                                        <div className="field-readonly">{selectedProject.id}</div>
-                                                    </div>
-                                                    <div className="field">
-                                                        <label>{t("projectAgentLabel")}</label>
-                                                        <div className="field-readonly">{selectedProject.agentLabel}</div>
-                                                    </div>
-                                                    <div className="field">
-                                                        <label>{t("projectPathLabel")}</label>
-                                                        <div className="field-readonly">{selectedProject.path}</div>
-                                                    </div>
-                                                    <div className="field">
-                                                        <label>{t("projectScenarioLabel")}</label>
-                                                        <div className="field-readonly">
-                                                            {selectedScenario ? selectedScenario.title || selectedScenario.name : t("projectScenarioNone")}
-                                                        </div>
-                                                    </div>
-                                                    <div className="field">
-                                                        <label>{t("projectCreatedAtLabel")}</label>
-                                                        <div className="field-readonly">{formatDate(selectedProject.createdAt)}</div>
-                                                    </div>
-                                                    <div className="field">
-                                                        <label>{t("projectUpdatedAtLabel")}</label>
-                                                        <div className="field-readonly">{formatDate(selectedProject.updatedAt)}</div>
-                                                    </div>
-                                                    <div className="field">
-                                                        <label>{t("projectSyncLastSynced")}</label>
-                                                        <div className="field-readonly">
-                                                            {selectedProject.lastSyncedAt ? formatDate(selectedProject.lastSyncedAt) : "-"}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </>
-                                        ) : (
-                                            <div className="assets-empty projects-empty-inline">
-                                                <p>{t("projectsSubtitle")}</p>
-                                            </div>
-                                        )}
-                                    </div>
-                                </section>
-
-                                <section className="left-card">
-                                    <header className="left-card-header">
-                                        <h3>{t("projectScenarioSummary")}</h3>
-                                        {selectedScenario ? (
-                                            <button
-                                                type="button"
-                                                className="btn btn-secondary btn-sm"
-                                                onClick={() => {
-                                                    setView("scenarios");
-                                                    void openScenario(selectedScenario.id);
-                                                }}
-                                            >
-                                                {t("projectOpenScenario")}
-                                            </button>
-                                        ) : null}
-                                    </header>
-                                    <div className="left-card-body">
-                                        {selectedScenario ? (
-                                            <div className="projects-scenario-stats">
-                                                <article className="scenario-stat-card">
-                                                    <div className="scenario-stat-label">{t("projectScenarioSkills")}</div>
-                                                    <div className="scenario-stat-value">{selectedScenario.skillIds.length}</div>
-                                                </article>
-                                                <article className="scenario-stat-card">
-                                                    <div className="scenario-stat-label">{t("projectScenarioRules")}</div>
-                                                    <div className="scenario-stat-value">{selectedScenario.ruleIds.length}</div>
-                                                </article>
-                                                <article className="scenario-stat-card">
-                                                    <div className="scenario-stat-label">{t("projectScenarioAgentFiles")}</div>
-                                                    <div className="scenario-stat-value">{selectedScenario.agentFileIds.length}</div>
-                                                </article>
-                                                <article className="scenario-stat-card">
-                                                    <div className="scenario-stat-label">{t("projectScenarioAgents")}</div>
-                                                    <div className="scenario-stat-value">{selectedScenario.agentAppIds.length}</div>
-                                                </article>
-                                            </div>
-                                        ) : (
-                                            <div className="projects-note-card">
-                                                <p>{t("projectNoScenarioLinked")}</p>
-                                            </div>
-                                        )}
-                                    </div>
-                                </section>
-
-                                <section className="left-card">
-                                    <header className="left-card-header">
-                                        <h3>{t("projectSyncMatrixTitle")}</h3>
-                                    </header>
-                                    <div className="left-card-body">
-                                        <div className="projects-note-card">
-                                            <p>{t("projectSyncMatrixDesc")}</p>
+                            <section className="left-card">
+                                <header className="left-card-header">
+                                    <h3>{t("projectScenarioSummary")}</h3>
+                                    {selectedScenario ? (
+                                        <button
+                                            type="button"
+                                            className="btn btn-secondary btn-sm"
+                                            onClick={() => {
+                                                setView("scenarios");
+                                                void openScenario(selectedScenario.id);
+                                            }}
+                                        >
+                                            {t("projectOpenScenario")}
+                                        </button>
+                                    ) : null}
+                                </header>
+                                <div className="left-card-body">
+                                    {selectedScenario ? (
+                                        <div className="projects-scenario-stats">
+                                            <article className="scenario-stat-card">
+                                                <div className="scenario-stat-label">{t("projectScenarioSkills")}</div>
+                                                <div className="scenario-stat-value">{selectedScenario.skillIds.length}</div>
+                                            </article>
+                                            <article className="scenario-stat-card">
+                                                <div className="scenario-stat-label">{t("projectScenarioRules")}</div>
+                                                <div className="scenario-stat-value">{selectedScenario.ruleIds.length}</div>
+                                            </article>
+                                            <article className="scenario-stat-card">
+                                                <div className="scenario-stat-label">{t("projectScenarioAgentFiles")}</div>
+                                                <div className="scenario-stat-value">{selectedScenario.agentFileIds.length}</div>
+                                            </article>
+                                            <article className="scenario-stat-card">
+                                                <div className="scenario-stat-label">{t("projectScenarioAgents")}</div>
+                                                <div className="scenario-stat-value">{selectedScenario.agentAppIds.length}</div>
+                                            </article>
                                         </div>
-                                        {targets.length === 0 ? (
-                                            <div className="projects-note-card project-sync-empty">
-                                                <p>{t("projectSyncMatrixEmpty")}</p>
-                                            </div>
-                                        ) : selectedProject ? (
-                                            <div className="project-target-matrix">
-                                                {targets.map((target) => {
-                                                    const isSelected = selectedProject.targetIds.includes(target.id);
-                                                    return (
-                                                        <button
-                                                            key={target.id}
-                                                            type="button"
-                                                            className={`project-target-row ${isSelected ? "active" : ""} ${target.enabled ? "" : "disabled"}`}
-                                                            onClick={() => toggleSelectedProjectTarget(target.id)}
-                                                            disabled={!target.enabled}
-                                                        >
-                                                            <div className="project-target-row-main">
-                                                                <div className="project-target-row-title">{target.name}</div>
-                                                                <div className="project-target-row-path">{target.path}</div>
-                                                            </div>
-                                                            <div className="project-target-row-meta">
-                                                                <span className={target.deployMode === "copy" ? "badge badge-blue" : "badge badge-orange"}>
-                                                                    {target.deployMode === "copy" ? t("deployModeCopy") : t("deployModeMerge")}
-                                                                </span>
-                                                                <span className={target.enabled ? "badge badge-green" : "badge badge-gray"}>
-                                                                    {target.enabled ? t("enabledYes") : t("enabledNo")}
-                                                                </span>
-                                                                <span className={getProjectSyncStatusClass(isSelected ? "synced" : "pending")}>
-                                                                    <span className="pill-dot" />
-                                                                    {isSelected ? t("projectSyncMatrixSelected") : t("projectSyncMatrixNotSelected")}
-                                                                </span>
-                                                            </div>
-                                                        </button>
-                                                    );
-                                                })}
-                                            </div>
-                                        ) : (
-                                            <div className="projects-note-card project-sync-empty">
-                                                <p>{t("projectsSubtitle")}</p>
-                                            </div>
-                                        )}
-                                    </div>
-                                </section>
-
-                                <section className="left-card">
-                                    <header className="left-card-header">
-                                        <h3>{t("projectSyncHistoryTitle")}</h3>
-                                        {selectedProject ? (
-                                            <span className="badge badge-gray">
-                                                {selectedProject.syncHistory.length}
-                                            </span>
-                                        ) : null}
-                                    </header>
-                                    <div className="left-card-body">
+                                    ) : (
                                         <div className="projects-note-card">
-                                            <p>{t("projectSyncHistoryDesc")}</p>
+                                            <p>{t("projectNoScenarioLinked")}</p>
                                         </div>
+                                    )}
+                                </div>
+                            </section>
 
-                                        {selectedProject ? (
-                                            selectedProject.syncHistory.length > 0 ? (
-                                                <div className="project-sync-history-list">
+                            <section className="left-card">
+                                <header className="left-card-header">
+                                    <h3>{t("projectSyncMatrixTitle")}</h3>
+                                </header>
+                                <div className="left-card-body">
+                                    <div className="projects-note-card">
+                                        <p>{t("projectSyncMatrixDesc")}</p>
+                                    </div>
+                                    {targets.length === 0 ? (
+                                        <div className="projects-note-card project-sync-empty">
+                                            <p>{t("projectSyncMatrixEmpty")}</p>
+                                        </div>
+                                    ) : selectedProject ? (
+                                        <div className="project-target-matrix">
+                                            {targets.map((target) => {
+                                                const isSelected = selectedProject.targetIds.includes(target.id);
+                                                return (
+                                                    <button
+                                                        key={target.id}
+                                                        type="button"
+                                                        className={`project-target-row ${isSelected ? "active" : ""} ${target.enabled ? "" : "disabled"}`}
+                                                        onClick={() => toggleSelectedProjectTarget(target.id)}
+                                                        disabled={!target.enabled}
+                                                    >
+                                                        <div className="project-target-row-main">
+                                                            <div className="project-target-row-title">{target.name}</div>
+                                                            <div className="project-target-row-path">{target.path}</div>
+                                                        </div>
+                                                        <div className="project-target-row-meta">
+                                                            <span className={target.deployMode === "copy" ? "badge badge-blue" : "badge badge-orange"}>
+                                                                {target.deployMode === "copy" ? t("deployModeCopy") : t("deployModeMerge")}
+                                                            </span>
+                                                            <span className={target.enabled ? "badge badge-green" : "badge badge-gray"}>
+                                                                {target.enabled ? t("enabledYes") : t("enabledNo")}
+                                                            </span>
+                                                            <span className={getProjectSyncStatusClass(isSelected ? "synced" : "pending")}>
+                                                                <span className="pill-dot" />
+                                                                {isSelected ? t("projectSyncMatrixSelected") : t("projectSyncMatrixNotSelected")}
+                                                            </span>
+                                                        </div>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    ) : (
+                                        <div className="projects-note-card project-sync-empty">
+                                            <p>{t("projectsSubtitle")}</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </section>
+
+                            <section className="left-card">
+                                <header className="left-card-header">
+                                    <h3>{t("projectSyncHistoryTitle")}</h3>
+                                    {selectedProject ? (
+                                        <span className="badge badge-gray">
+                                            {selectedProject.syncHistory.length}
+                                        </span>
+                                    ) : null}
+                                </header>
+                                <div className="left-card-body">
+                                    <div className="projects-note-card">
+                                        <p>{t("projectSyncHistoryDesc")}</p>
+                                    </div>
+
+                                    {selectedProject ? (
+                                        selectedProject.syncHistory.length > 0 ? (
+                                            <div className="project-sync-history-list">
                                                     {selectedProject.syncHistory.map((entry) => (
                                                         <article
                                                             key={entry.id}
