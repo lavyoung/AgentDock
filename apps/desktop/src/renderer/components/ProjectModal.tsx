@@ -2,6 +2,7 @@ import {type JSX, useMemo, useState} from "react";
 
 import {Button} from "./Button";
 import {Modal} from "./Modal";
+import {agentdockClient} from "../client/agentdockClient";
 import {useI18n} from "../i18n/useI18n";
 import {type ProjectSyncMode, useAppStore} from "../stores/useAppStore";
 import "../pages/Pages.css";
@@ -49,6 +50,24 @@ export function ProjectModal({open, onClose}: ProjectModalProps): JSX.Element {
         }
 
         onClose();
+    }
+
+    async function handleBrowseProjectPath(): Promise<void> {
+        try {
+            const selectedPath = await agentdockClient.app.pickPath({
+                mode: "directory",
+                title: t("projectPathLabel"),
+                defaultPath: projectPath,
+                buttonLabel: t("targetsBrowse"),
+            });
+            if (!selectedPath) {
+                return;
+            }
+
+            setProjectPath(selectedPath);
+        } catch (error) {
+            pushToast("error", String(error));
+        }
     }
 
     async function handleCreate(): Promise<void> {
@@ -118,13 +137,23 @@ export function ProjectModal({open, onClose}: ProjectModalProps): JSX.Element {
                     </div>
                     <div className="field">
                         <label htmlFor="project-path">{t("projectPathLabel")}</label>
-                        <input
-                            id="project-path"
-                            type="text"
-                            value={projectPath}
-                            onChange={(event) => setProjectPath(event.target.value)}
-                            placeholder="D:\\Projects\\frontend-review"
-                        />
+                        <div className="settings-input-row">
+                            <input
+                                id="project-path"
+                                type="text"
+                                value={projectPath}
+                                onChange={(event) => setProjectPath(event.target.value)}
+                                placeholder="D:\\Projects\\frontend-review"
+                            />
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                size="sm"
+                                onClick={() => void handleBrowseProjectPath()}
+                            >
+                                {t("targetsBrowse")}
+                            </Button>
+                        </div>
                         <div className="field-hint">{t("projectPathHint")}</div>
                     </div>
                     <div className="field-row">

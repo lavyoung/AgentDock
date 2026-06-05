@@ -2,6 +2,7 @@ import {type JSX, useEffect, useState} from "react";
 
 import {Button} from "../components/Button";
 import {Modal} from "../components/Modal";
+import {agentdockClient} from "../client/agentdockClient";
 import {useI18n} from "../i18n/useI18n";
 import {getDeployModeLabelKey, useAppStore} from "../stores/useAppStore";
 import "./Pages.css";
@@ -54,6 +55,24 @@ export function TargetsPage(): JSX.Element {
         try {
             await deleteTarget();
             pushToast("success", t("targetDeleted"));
+        } catch (error) {
+            pushToast("error", String(error));
+        }
+    }
+
+    async function handleBrowseTargetPath(): Promise<void> {
+        try {
+            const selectedPath = await agentdockClient.app.pickPath({
+                mode: "directory",
+                title: t("targetPathLabel"),
+                defaultPath: targetPath || selectedTarget?.path,
+                buttonLabel: t("targetsBrowse"),
+            });
+            if (!selectedPath) {
+                return;
+            }
+
+            setTargetPath(selectedPath);
         } catch (error) {
             pushToast("error", String(error));
         }
@@ -122,11 +141,21 @@ export function TargetsPage(): JSX.Element {
                         </div>
                         <div className="field">
                             <label htmlFor="target-path">{t("targetPathLabel")}</label>
-                            <input
-                                id="target-path"
-                                value={targetPath}
-                                onChange={(event) => setTargetPath(event.target.value)}
-                            />
+                            <div className="settings-input-row">
+                                <input
+                                    id="target-path"
+                                    value={targetPath}
+                                    onChange={(event) => setTargetPath(event.target.value)}
+                                />
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    size="sm"
+                                    onClick={() => void handleBrowseTargetPath()}
+                                >
+                                    {t("targetsBrowse")}
+                                </Button>
+                            </div>
                             <p className="targets-field-hint">{t("targetPathHint")}</p>
                         </div>
                         <div className="field">
