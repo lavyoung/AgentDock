@@ -2411,6 +2411,18 @@
     gap: 20px;
 }
 
+.settings-agent-boundary-note {
+    font-size: 13px;
+    color: var(--fg-muted);
+    line-height: 1.7;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--bd-soft);
+    background:
+        linear-gradient(180deg, rgba(52, 211, 153, 0.06), rgba(52, 211, 153, 0.02)),
+        var(--bg-elevated);
+}
+
 .settings-agent-summary {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -3554,14 +3566,95 @@
 .scenario-binding-chip {
     display: inline-flex;
     align-items: center;
-    min-height: 28px;
-    padding: 0 10px;
+    gap: 8px;
+    min-height: 30px;
+    padding: 0 8px 0 10px;
     border-radius: 999px;
-    border: 1px solid rgba(52, 211, 153, 0.18);
-    background: rgba(16, 185, 129, 0.09);
-    color: #d1fae5;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--fg-primary);
     font-size: 12px;
     font-weight: 500;
+}
+.scenario-binding-chip--project {
+    border-color: rgba(96, 165, 250, 0.18);
+    background: rgba(59, 130, 246, 0.10);
+    color: #dbeafe;
+}
+.scenario-binding-chip--agent {
+    border-color: rgba(52, 211, 153, 0.18);
+    background: rgba(16, 185, 129, 0.10);
+    color: #d1fae5;
+}
+.scenario-binding-chip-text {
+    white-space: nowrap;
+}
+.scenario-binding-chip-remove {
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: inherit;
+    opacity: 0.72;
+    transition: background .15s, opacity .15s;
+}
+.scenario-binding-chip-remove:hover {
+    background: rgba(255, 255, 255, 0.12);
+    opacity: 1;
+}
+.scenario-sync-project-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.scenario-sync-project-card {
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid var(--bd-soft);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.022), rgba(255, 255, 255, 0)),
+        var(--bg-elevated);
+}
+.scenario-sync-project-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+.scenario-sync-project-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--fg-primary);
+}
+.scenario-sync-project-meta {
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--fg-muted);
+    word-break: break-all;
+}
+.scenario-sync-project-badges {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+.scenario-sync-project-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 12px;
+}
+.scenario-sync-project-toolbar-note {
+    font-size: 12px;
+    color: var(--fg-muted);
+    line-height: 1.6;
+}
+.scenario-sync-preview {
+    margin-top: 14px;
 }
 .detail-row-icon-project {
     background: rgba(59,130,246,.15);

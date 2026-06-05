@@ -311,6 +311,9 @@ export function SettingsPage(): JSX.Element {
                 <div className="settings-card">
                     <div className="settings-card-header">{t("settingsAgentTitle")}</div>
                     <div className="settings-card-body settings-agent-card">
+                        <div className="settings-agent-boundary-note">
+                            {t("settingsAgentBoundaryHint")}
+                        </div>
                         <div className="settings-agent-summary">
                             <article className="settings-agent-stat">
                                 <span>{t("settingsAgentSummaryActive")}</span>

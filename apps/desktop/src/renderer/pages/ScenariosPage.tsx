@@ -1,6 +1,7 @@
 import {type JSX, useEffect, useState} from "react";
 
 import {listSupportedApplications} from "../../../../../packages/core/src/application/applicationCatalog";
+import type {SyncPreviewResult, SyncRunResult} from "../../../../../packages/core/src/types/sync";
 import {Modal} from "../components/Modal";
 import {useI18n} from "../i18n/useI18n";
 import {useAppStore} from "../stores/useAppStore";
@@ -10,6 +11,78 @@ import "./Pages.css";
 
 function isActionKey(key: string): boolean {
     return key === "Enter" || key === " ";
+}
+
+function formatDate(value: string): string {
+    try {
+        return new Intl.DateTimeFormat(undefined, {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+        }).format(new Date(value));
+    } catch {
+        return value;
+    }
+}
+
+function getProjectSyncStatusClass(status: "pending" | "synced" | "conflict"): string {
+    if (status === "synced") {
+        return "sync-pill synced";
+    }
+
+    if (status === "conflict") {
+        return "sync-pill drift";
+    }
+
+    return "sync-pill pending";
+}
+
+function getProjectSyncStatusLabel(
+    t: (key: string) => string,
+    status: "pending" | "synced" | "conflict"
+): string {
+    if (status === "synced") {
+        return t("projectSyncStatusSynced");
+    }
+
+    if (status === "conflict") {
+        return t("projectSyncStatusConflict");
+    }
+
+    return t("projectSyncStatusPending");
+}
+
+function getOperationBadgeClass(operation: "create" | "update" | "merge"): string {
+    if (operation === "update") {
+        return "badge badge-blue";
+    }
+
+    if (operation === "merge") {
+        return "badge badge-orange";
+    }
+
+    return "badge badge-green";
+}
+
+function getOperationLabel(
+    t: (key: string) => string,
+    operation: "create" | "update" | "merge"
+): string {
+    if (operation === "update") {
+        return t("projectSyncOperationUpdate");
+    }
+
+    if (operation === "merge") {
+        return t("projectSyncOperationMerge");
+    }
+
+    return t("projectSyncOperationCreate");
+}
+
+function isSyncRunResult(preview: SyncPreviewResult | null): preview is SyncRunResult {
+    return Boolean(preview && "written_count" in preview && "conflicts" in preview);
 }
 
 type AvailableAgent = {
@@ -213,6 +286,37 @@ function AgentMini({
                 </div>
             )}
         </div>
+    );
+}
+
+function BindingChip({
+    label,
+    tone,
+    onRemove,
+}: {
+    label: string;
+    tone: "project" | "agent";
+    onRemove?: () => void;
+}): JSX.Element {
+    const {t} = useI18n();
+
+    return (
+        <span className={`scenario-binding-chip scenario-binding-chip--${tone}`}>
+            <span className="scenario-binding-chip-text">{label}</span>
+            {onRemove ? (
+                <button
+                    type="button"
+                    className="scenario-binding-chip-remove"
+                    onClick={onRemove}
+                    aria-label={t("scenarioRemoveAsset")}
+                >
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            ) : null}
+        </span>
     );
 }
 
@@ -600,6 +704,11 @@ function ScenarioDetail(): JSX.Element {
     const openAssetPicker = useAppStore((s) => s.openAssetPicker);
     const saveScenario = useAppStore((s) => s.saveScenario);
     const deleteScenario = useAppStore((s) => s.deleteScenario);
+    const removeAgentAppFromScenario = useAppStore((s) => s.removeAgentAppFromScenario);
+    const removeProjectFromScenario = useAppStore((s) => s.removeProjectFromScenario);
+    const previewProjectSync = useAppStore((s) => s.previewProjectSync);
+    const runProjectSync = useAppStore((s) => s.runProjectSync);
+    const pushToast = useAppStore((s) => s.pushToast);
     const scenarioName = useAppStore((s) => s.scenarioName);
     const setScenarioName = useAppStore((s) => s.setScenarioName);
     const setScenarioTitle = useAppStore((s) => s.setScenarioTitle);
@@ -608,10 +717,19 @@ function ScenarioDetail(): JSX.Element {
     const [showAgentPicker, setShowAgentPicker] = useState(false);
     const [showProjectPicker, setShowProjectPicker] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
+    const [syncPreviewByProjectId, setSyncPreviewByProjectId] = useState<Record<string, SyncPreviewResult | SyncRunResult>>({});
+    const [previewingProjectId, setPreviewingProjectId] = useState<string | null>(null);
+    const [runningProjectId, setRunningProjectId] = useState<string | null>(null);
 
     useEffect(() => {
         void refreshApplications();
     }, [refreshApplications]);
+
+    useEffect(() => {
+        setSyncPreviewByProjectId({});
+        setPreviewingProjectId(null);
+        setRunningProjectId(null);
+    }, [selectedScenario?.id]);
 
     if (!selectedScenario) return <div className="page-body"><p>{t("scenarioNotFound")}</p></div>;
 
@@ -630,6 +748,55 @@ function ScenarioDetail(): JSX.Element {
     function openEditModal(): void {
         resetScenarioDraft();
         setShowEditModal(true);
+    }
+
+    async function handlePreviewProjectSync(projectId: string): Promise<void> {
+        try {
+            setPreviewingProjectId(projectId);
+            const preview = await previewProjectSync(projectId);
+            setSyncPreviewByProjectId((current) => ({
+                ...current,
+                [projectId]: preview,
+            }));
+            pushToast("success", t("projectSyncPreviewReady"));
+        } catch (error) {
+            pushToast("error", String(error));
+        } finally {
+            setPreviewingProjectId((current) => (current === projectId ? null : current));
+        }
+    }
+
+    async function handleRunProjectSync(projectId: string): Promise<void> {
+        try {
+            setRunningProjectId(projectId);
+            const result = await runProjectSync(projectId);
+            setSyncPreviewByProjectId((current) => ({
+                ...current,
+                [projectId]: result,
+            }));
+
+            const successMessage = t("projectSyncRunSuccess").replace(
+                "{written}",
+                String(result.written_count)
+            );
+
+            if (result.conflicts.length > 0) {
+                pushToast(
+                    "error",
+                    `${successMessage} ${t("projectSyncRunConflict").replace(
+                        "{count}",
+                        String(result.conflicts.length)
+                    )}`
+                );
+                return;
+            }
+
+            pushToast("success", successMessage);
+        } catch (error) {
+            pushToast("error", String(error));
+        } finally {
+            setRunningProjectId((current) => (current === projectId ? null : current));
+        }
     }
 
     async function handleSaveScenario(): Promise<void> {
@@ -894,9 +1061,23 @@ function ScenarioDetail(): JSX.Element {
                                     {linkedProjects.length === 0 ? (
                                         <div className="scenario-empty-copy">{t("scenarioNoProjects")}</div>
                                     ) : (
-                                        <div className="scenario-binding-summary scenario-binding-summary--project">
-                                            {t("scenarioProjectsSummary").replace("{count}", String(linkedProjects.length))}
-                                        </div>
+                                        <>
+                                            <div className="scenario-binding-summary scenario-binding-summary--project">
+                                                {t("scenarioProjectsSummary").replace("{count}", String(linkedProjects.length))}
+                                            </div>
+                                            <div className="scenario-binding-chip-list">
+                                                {linkedProjects.map((project) => (
+                                                    <BindingChip
+                                                        key={project.id}
+                                                        label={project.name}
+                                                        tone="project"
+                                                        onRemove={() => {
+                                                            void removeProjectFromScenario(project.id);
+                                                        }}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </>
                                     )}
                                 </div>
                             </article>
@@ -939,9 +1120,14 @@ function ScenarioDetail(): JSX.Element {
                                             </div>
                                             <div className="scenario-binding-chip-list">
                                                 {linkedAgents.map((agent) => (
-                                                    <span key={agent.id} className="scenario-binding-chip">
-                                                        {agent.name}
-                                                    </span>
+                                                    <BindingChip
+                                                        key={agent.id}
+                                                        label={agent.name}
+                                                        tone="agent"
+                                                        onRemove={() => {
+                                                            void removeAgentAppFromScenario(agent.id);
+                                                        }}
+                                                    />
                                                 ))}
                                             </div>
                                         </>
@@ -951,6 +1137,184 @@ function ScenarioDetail(): JSX.Element {
                                 </div>
                             </article>
                         </div>
+                    </div>
+                </section>
+
+                <section className="left-card">
+                    <header className="left-card-header">
+                        <h3>
+                            <span className="scenario-section-title">{t("scenarioRunSyncTitle")}</span>
+                        </h3>
+                        <div className="scenario-section-meta scenario-section-meta--static">
+                            <span className="scenario-section-count">{linkedProjects.length}</span>
+                        </div>
+                    </header>
+                    <div className="left-card-body">
+                        <div className="scenario-binding-intro">
+                            {t("scenarioRunSyncDesc")}
+                        </div>
+                        {linkedProjects.length === 0 ? (
+                            <div className="projects-note-card project-sync-empty">
+                                <p>{t("scenarioRunSyncEmpty")}</p>
+                            </div>
+                        ) : (
+                            <div className="scenario-sync-project-list">
+                                {linkedProjects.map((project) => {
+                                    const preview = syncPreviewByProjectId[project.id] ?? null;
+                                    const syncConflicts = isSyncRunResult(preview) ? preview.conflicts : [];
+
+                                    return (
+                                        <article key={project.id} className="scenario-sync-project-card">
+                                            <div className="scenario-sync-project-header">
+                                                <div>
+                                                    <div className="scenario-sync-project-title">{project.name}</div>
+                                                    <div className="scenario-sync-project-meta">
+                                                        {project.path}
+                                                    </div>
+                                                </div>
+                                                <div className="scenario-sync-project-badges">
+                                                    <span className="badge badge-gray">
+                                                        {project.targetIds.length} {t("projectSyncTargets")}
+                                                    </span>
+                                                    <span className={getProjectSyncStatusClass(project.syncStatus)}>
+                                                        <span className="pill-dot" />
+                                                        {getProjectSyncStatusLabel(t, project.syncStatus)}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div className="scenario-sync-project-toolbar">
+                                                <div className="scenario-sync-project-toolbar-note">
+                                                    {project.lastSyncedAt
+                                                        ? t("scenarioRunSyncLastSynced").replace("{time}", formatDate(project.lastSyncedAt))
+                                                        : t("scenarioRunSyncNever")}
+                                                </div>
+                                                <div className="projects-workflow-actions">
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-secondary btn-sm"
+                                                        onClick={() => void handlePreviewProjectSync(project.id)}
+                                                        disabled={previewingProjectId === project.id || runningProjectId === project.id}
+                                                    >
+                                                        {previewingProjectId === project.id
+                                                            ? `${t("projectSyncPreviewAction")}...`
+                                                            : t("projectSyncPreviewAction")}
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-primary btn-sm"
+                                                        onClick={() => void handleRunProjectSync(project.id)}
+                                                        disabled={runningProjectId === project.id || previewingProjectId === project.id}
+                                                    >
+                                                        {runningProjectId === project.id
+                                                            ? `${t("projectSyncRunAction")}...`
+                                                            : t("projectSyncRunAction")}
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            {preview ? (
+                                                <div className="project-sync-preview scenario-sync-preview">
+                                                    <div className="projects-scenario-stats">
+                                                        <article className="scenario-stat-card">
+                                                            <div className="scenario-stat-label">{t("projectSyncTargets")}</div>
+                                                            <div className="scenario-stat-value">{preview.target_count}</div>
+                                                        </article>
+                                                        <article className="scenario-stat-card">
+                                                            <div className="scenario-stat-label">{t("projectSyncOperations")}</div>
+                                                            <div className="scenario-stat-value">{preview.operation_count}</div>
+                                                        </article>
+                                                        <article className="scenario-stat-card">
+                                                            <div className="scenario-stat-label">{t("projectSyncWarnings")}</div>
+                                                            <div className="scenario-stat-value">{preview.warnings.length}</div>
+                                                        </article>
+                                                        <article className="scenario-stat-card">
+                                                            <div className="scenario-stat-label">{t("projectSyncWritten")}</div>
+                                                            <div className="scenario-stat-value">
+                                                                {isSyncRunResult(preview) ? preview.written_count : 0}
+                                                            </div>
+                                                        </article>
+                                                    </div>
+
+                                                    {preview.warnings.length > 0 ? (
+                                                        <div className="project-sync-warning-list">
+                                                            {preview.warnings.slice(0, 3).map((warning) => (
+                                                                <div key={warning} className="project-sync-warning-item">
+                                                                    {warning}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    ) : null}
+
+                                                    {syncConflicts.length > 0 ? (
+                                                        <div className="project-sync-conflict-list" aria-live="polite">
+                                                            <div className="project-sync-conflict-summary">
+                                                                <span className="badge badge-red">
+                                                                    {t("projectSyncConflicts")} {syncConflicts.length}
+                                                                </span>
+                                                                <span className="project-sync-conflict-summary-text">
+                                                                    {t("projectSyncRunConflict").replace("{count}", String(syncConflicts.length))}
+                                                                </span>
+                                                            </div>
+                                                            {syncConflicts.slice(0, 2).map((conflict) => (
+                                                                <article
+                                                                    key={`${project.id}-${conflict.target_id}-${conflict.asset_id}-${conflict.output_path}`}
+                                                                    className="project-sync-conflict-item"
+                                                                >
+                                                                    <div className="project-sync-conflict-header">
+                                                                        <div>
+                                                                            <div className="project-sync-item-title">{conflict.asset_name}</div>
+                                                                            <div className="project-sync-item-meta">
+                                                                                {conflict.target_name} · {conflict.asset_type}
+                                                                            </div>
+                                                                        </div>
+                                                                        <span className="badge badge-red">
+                                                                            {t("projectSyncStatusConflict")}
+                                                                        </span>
+                                                                    </div>
+                                                                    <div className="project-sync-conflict-reason">
+                                                                        <strong>{t("projectSyncConflictReason")}</strong>
+                                                                        <span>{conflict.reason}</span>
+                                                                    </div>
+                                                                </article>
+                                                            ))}
+                                                        </div>
+                                                    ) : null}
+
+                                                    {preview.items.length > 0 ? (
+                                                        <div className="project-sync-item-list">
+                                                            {preview.items.slice(0, 4).map((item) => (
+                                                                <article
+                                                                    key={`${project.id}-${item.target_id}-${item.asset_id}-${item.output_path}`}
+                                                                    className="project-sync-item"
+                                                                >
+                                                                    <div className="project-sync-item-header">
+                                                                        <div>
+                                                                            <div className="project-sync-item-title">{item.asset_name}</div>
+                                                                            <div className="project-sync-item-meta">
+                                                                                {item.target_name} · {item.asset_type}
+                                                                            </div>
+                                                                        </div>
+                                                                        <span className={getOperationBadgeClass(item.operation)}>
+                                                                            {getOperationLabel(t, item.operation)}
+                                                                        </span>
+                                                                    </div>
+                                                                    <div className="project-sync-item-path">{item.output_path}</div>
+                                                                </article>
+                                                            ))}
+                                                        </div>
+                                                    ) : (
+                                                        <div className="projects-note-card project-sync-empty">
+                                                            <p>{t("projectSyncPreviewEmpty")}</p>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ) : null}
+                                        </article>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </div>
                 </section>
 

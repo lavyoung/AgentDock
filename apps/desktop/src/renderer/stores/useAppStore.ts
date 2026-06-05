@@ -17,7 +17,7 @@ import type {
     ScenarioRecord,
 } from "../../../../../packages/core/src/types/asset";
 import type {SnapshotRecord} from "../../../../../packages/core/src/types/snapshot";
-import type {SyncHistoryEntry, SyncPreviewResult} from "../../../../../packages/core/src/types/sync";
+import type {SyncHistoryEntry, SyncPreviewResult, SyncRunResult} from "../../../../../packages/core/src/types/sync";
 import type {TargetDeployMode, TargetRecord} from "../../../../../packages/core/src/types/target";
 import {agentdockClient} from "../client/agentdockClient";
 
@@ -479,11 +479,14 @@ type Actions = {
     addAgentAppToScenario(agentId: string): Promise<void>;
     removeAgentAppFromScenario(agentId: string): Promise<void>;
     addProjectToScenario(projectId: string): Promise<void>;
+    removeProjectFromScenario(projectId: string): Promise<void>;
 
     openProject(id: string): void;
     createProject(): Promise<ProjectRecord>;
     previewSelectedProjectSync(): Promise<void>;
     runSelectedProjectSync(): Promise<void>;
+    previewProjectSync(projectId: string): Promise<SyncPreviewResult>;
+    runProjectSync(projectId: string): Promise<SyncRunResult>;
     toggleSelectedProjectTarget(targetId: string): void;
     resetProjectForm(): void;
     setProjectName(value: string): void;
@@ -963,6 +966,38 @@ export const useAppStore = create<AppStore>((set, get) => ({
         await get().openScenario(selectedScenario.id);
     },
 
+    async removeProjectFromScenario(projectId) {
+        const {selectedScenario, projects, selectedProjectId} = get();
+        if (!selectedScenario) return;
+        if (!selectedScenario.projectIds.includes(projectId)) return;
+
+        await agentdockClient.scenarios.update(selectedScenario.id, {
+            projectIds: selectedScenario.projectIds.filter((id) => id !== projectId),
+        });
+
+        const now = new Date().toISOString();
+        const updatedProjects = projects.map((item) =>
+            item.id === projectId
+                ? {
+                    ...item,
+                    defaultScenarioId: item.defaultScenarioId === selectedScenario.id ? null : item.defaultScenarioId,
+                    updatedAt: now,
+                    syncStatus: "pending",
+                }
+                : item
+        );
+
+        persistProjects(updatedProjects);
+        set({
+            projects: updatedProjects,
+            selectedProjectId,
+            selectedProjectSyncPreview: null,
+        });
+
+        await get().refreshScenarios();
+        await get().openScenario(selectedScenario.id);
+    },
+
     openProject(id) {
         const project = get().projects.find((item) => item.id === id);
         if (!project) {
@@ -1048,9 +1083,8 @@ export const useAppStore = create<AppStore>((set, get) => ({
         return created;
     },
 
-    async previewSelectedProjectSync() {
-        const {projects, selectedProjectId} = get();
-        const project = projects.find((candidate) => candidate.id === selectedProjectId) ?? null;
+    async previewProjectSync(projectId) {
+        const project = get().projects.find((candidate) => candidate.id === projectId) ?? null;
 
         if (!project?.defaultScenarioId) {
             throw new Error(get()._t("projectSyncRequiresScenario"));
@@ -1060,12 +1094,25 @@ export const useAppStore = create<AppStore>((set, get) => ({
             scenario_id: project.defaultScenarioId,
             target_ids: project.targetIds,
         });
-        set({selectedProjectSyncPreview: preview});
+
+        if (get().selectedProjectId === projectId) {
+            set({selectedProjectSyncPreview: preview});
+        }
+
+        return preview;
     },
 
-    async runSelectedProjectSync() {
-        const {projects, selectedProjectId} = get();
-        const project = projects.find((candidate) => candidate.id === selectedProjectId) ?? null;
+    async previewSelectedProjectSync() {
+        const {selectedProjectId} = get();
+        if (!selectedProjectId) {
+            return;
+        }
+        await get().previewProjectSync(selectedProjectId);
+    },
+
+    async runProjectSync(projectId) {
+        const {projects} = get();
+        const project = projects.find((candidate) => candidate.id === projectId) ?? null;
 
         if (!project?.defaultScenarioId) {
             throw new Error(get()._t("projectSyncRequiresScenario"));
@@ -1075,12 +1122,11 @@ export const useAppStore = create<AppStore>((set, get) => ({
             throw new Error(get()._t("projectSyncRequiresTarget"));
         }
 
-        if (project.syncMode === "preview-first" || !get().selectedProjectSyncPreview) {
-            const preview = await agentdockClient.sync.preview({
-                scenario_id: project.defaultScenarioId,
-                target_ids: project.targetIds,
-            });
-            set({selectedProjectSyncPreview: preview});
+        if (project.syncMode === "preview-first" || get().selectedProjectId !== projectId || !get().selectedProjectSyncPreview) {
+            const preview = await get().previewProjectSync(projectId);
+            if (get().selectedProjectId === projectId) {
+                set({selectedProjectSyncPreview: preview});
+            }
         }
 
         const result = await agentdockClient.sync.run({
@@ -1130,10 +1176,26 @@ export const useAppStore = create<AppStore>((set, get) => ({
         );
 
         persistProjects(nextProjects);
-        set({
-            projects: nextProjects,
-            selectedProjectSyncPreview: result,
-        });
+        set(
+            get().selectedProjectId === projectId
+                ? {
+                    projects: nextProjects,
+                    selectedProjectSyncPreview: result,
+                }
+                : {
+                    projects: nextProjects,
+                }
+        );
+
+        return result;
+    },
+
+    async runSelectedProjectSync() {
+        const {selectedProjectId} = get();
+        if (!selectedProjectId) {
+            return;
+        }
+        await get().runProjectSync(selectedProjectId);
     },
 
     toggleSelectedProjectTarget(targetId) {

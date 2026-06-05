@@ -64,6 +64,7 @@ type MessageCatalog = {
     settingsAgentSyncConflict: string;
     settingsAgentList: string;
     settingsAgentLocations: string;
+    settingsAgentBoundaryHint: string;
     settingsAgentLocationsHint: string;
     settingsAgentNoApps: string;
     settingsAgentNoLocations: string;
@@ -183,6 +184,7 @@ type MessageCatalog = {
     projectCreatedAtLabel: string;
     projectUpdatedAtLabel: string;
     projectScenarioSummary: string;
+    projectScenarioSummaryDesc: string;
     projectScenarioSkills: string;
     projectScenarioRules: string;
     projectScenarioAgentFiles: string;
@@ -190,6 +192,7 @@ type MessageCatalog = {
     projectNoScenarioLinked: string;
     projectWorkflowTitle: string;
     projectWorkflowDesc: string;
+    projectWorkflowMovedDesc: string;
     projectSyncPreviewAction: string;
     projectSyncRunAction: string;
     projectSyncRequiresScenario: string;
@@ -244,6 +247,11 @@ type MessageCatalog = {
     scenarioProjectPickerTitle: string;
     scenarioProjectPickerHint: string;
     scenarioProjectPickerEmpty: string;
+    scenarioRunSyncTitle: string;
+    scenarioRunSyncDesc: string;
+    scenarioRunSyncEmpty: string;
+    scenarioRunSyncLastSynced: string;
+    scenarioRunSyncNever: string;
     scenarioRecentActivity: string;
     scenarioActivityNote: string;
     scenarioUsedSkills: string;
@@ -403,7 +411,8 @@ export const messages: Record<Locale, Catalog> = {
         settingsAgentSyncConflict: "\u5176\u4e2d\u6709 {count} \u4e2a\u6258\u7ba1\u533a\u5757\u51b2\u7a81\u9700\u8981\u624b\u52a8\u5904\u7406\u3002",
         settingsAgentList: "Agent \u5217\u8868",
         settingsAgentLocations: "\u6258\u7ba1\u4f4d\u7f6e",
-        settingsAgentLocationsHint: "\u57fa\u4e8e\u5f53\u524d\u76ee\u6807\u548c\u672c\u5730\u5de5\u4f5c\u533a\u626b\u63cf Agent \u5de5\u4f5c\u533a\u6839\u76ee\u5f55\uff0c\u540c\u6b65\u65f6\u4f1a\u518d\u63a8\u5bfc Skills / AGENTS.md \u7684\u5177\u4f53\u4f4d\u7f6e\u3002",
+        settingsAgentBoundaryHint: "\u8fd9\u91cc\u53ea\u8d1f\u8d23 Agent \u7684\u6ce8\u518c\u3001\u542f\u7528\u72b6\u6001\u548c\u6258\u7ba1\u76ee\u5f55\u914d\u7f6e\u3002\u5177\u4f53\u54ea\u4e9b\u573a\u666f\u5173\u8054\u54ea\u4e9b Agent\uff0c\u7edf\u4e00\u5728\u573a\u666f\u9875\u7ba1\u7406\u3002",
+        settingsAgentLocationsHint: "\u626b\u63cf\u5f53\u524d Agent \u7684\u5de5\u4f5c\u533a\u6839\u76ee\u5f55\uff0c\u540c\u6b65\u65f6\u518d\u63a8\u5bfc Skills / AGENTS.md \u7684\u5177\u4f53\u843d\u70b9\u3002",
         settingsAgentNoApps: "\u5f53\u524d\u8fd8\u6ca1\u6709\u53ef\u7ba1\u7406\u7684 Agent \u5e94\u7528\u3002",
         settingsAgentNoLocations: "\u8fd8\u6ca1\u6709\u68c0\u6d4b\u5230\u4efb\u4f55\u6258\u7ba1\u4f4d\u7f6e\uff0c\u53ef\u4ee5\u5148\u70b9\u201c\u91cd\u65b0\u68c0\u6d4b\u201d\u3002",
         settingsAgentKindSkills: "Skills",
@@ -522,6 +531,7 @@ export const messages: Record<Locale, Catalog> = {
         projectCreatedAtLabel: "\u521b\u5efa\u65f6\u95f4",
         projectUpdatedAtLabel: "\u66f4\u65b0\u65f6\u95f4",
         projectScenarioSummary: "\u5173\u8054\u573a\u666f\u6982\u89c8",
+        projectScenarioSummaryDesc: "\u8fd9\u91cc\u53ea\u4fdd\u7559\u5f53\u524d\u5173\u8054\u573a\u666f\u7684\u8d44\u4ea7\u6458\u8981\u3002\u5177\u4f53\u7684\u5173\u7cfb\u7ef4\u62a4\u7edf\u4e00\u6536\u655b\u5230\u573a\u666f\u9875\u5b8c\u6210\u3002",
         projectScenarioSkills: "\u6280\u80fd",
         projectScenarioRules: "\u89c4\u5219",
         projectScenarioAgentFiles: "Agent \u6587\u4ef6",
@@ -529,6 +539,7 @@ export const messages: Record<Locale, Catalog> = {
         projectNoScenarioLinked: "\u8fd8\u6ca1\u6709\u5173\u8054\u573a\u666f\uff0c\u8fd9\u4e2a\u9879\u76ee\u76ee\u524d\u53ea\u4f5c\u4e3a\u672c\u5730\u5de5\u4f5c\u533a\u8bb0\u5f55\u3002",
         projectWorkflowTitle: "\u540c\u6b65\u95ed\u73af",
         projectWorkflowDesc: "\u9879\u76ee\u7528\u6765\u627f\u63a5\u573a\u666f\u7684\u5b9e\u9645\u540c\u6b65\u95ed\u73af\u3002\u73b0\u5728\u53ef\u4ee5\u5148\u5728\u8fd9\u91cc\u9884\u89c8\u8981\u5199\u5165\u54ea\u4e9b\u540c\u6b65\u76ee\u5f55\uff0c\u518d\u624b\u52a8\u6267\u884c\u540c\u6b65\u3002",
+        projectWorkflowMovedDesc: "\u540c\u6b65\u5165\u53e3\u5df2\u6536\u655b\u5230\u573a\u666f\u8be6\u60c5\u9875\u3002\u8fd9\u91cc\u73b0\u5728\u53ea\u4fdd\u7559\u9879\u76ee\u914d\u7f6e\u4e0e\u540c\u6b65\u5386\u53f2\u3002",
         projectSyncPreviewAction: "\u9884\u89c8\u540c\u6b65",
         projectSyncRunAction: "\u6267\u884c\u540c\u6b65",
         projectSyncRequiresScenario: "\u8bf7\u5148\u4e3a\u9879\u76ee\u5173\u8054\u4e00\u4e2a\u573a\u666f\u3002",
@@ -583,8 +594,13 @@ export const messages: Record<Locale, Catalog> = {
         scenarioProjectPickerTitle: "\u5173\u8054\u9879\u76ee",
         scenarioProjectPickerHint: "\u9009\u62e9\u4e00\u4e2a\u5de5\u4f5c\u533a\u5173\u8054\u5230\u5f53\u524d\u573a\u666f\u3002\u5982\u679c\u8be5\u9879\u76ee\u5df2\u7ed1\u5b9a\u5230\u5176\u4ed6\u573a\u666f\uff0c\u4f1a\u81ea\u52a8\u5207\u6362\u8fc7\u6765\u3002",
         scenarioProjectPickerEmpty: "\u6682\u65e0\u53ef\u5173\u8054\u9879\u76ee",
+        scenarioRunSyncTitle: "\u573a\u666f\u540c\u6b65",
+        scenarioRunSyncDesc: "\u5bf9\u5df2\u5173\u8054\u7684\u9879\u76ee\u5728\u8fd9\u91cc\u76f4\u63a5\u9884\u89c8\u6216\u6267\u884c\u540c\u6b65\u3002\u9879\u76ee\u9875\u9762\u73b0\u5728\u53ea\u4fdd\u7559\u914d\u7f6e\u548c\u5386\u53f2\u3002",
+        scenarioRunSyncEmpty: "\u8fd8\u6ca1\u6709\u53ef\u7528\u7684\u540c\u6b65\u9879\u76ee\u3002\u5148\u4e3a\u8fd9\u4e2a\u573a\u666f\u5173\u8054\u9879\u76ee\uff0c\u518d\u5728\u8fd9\u91cc\u53d1\u8d77\u540c\u6b65\u3002",
+        scenarioRunSyncLastSynced: "\u4e0a\u6b21\u540c\u6b65\uff1a{time}",
+        scenarioRunSyncNever: "\u8fd8\u6ca1\u6709\u540c\u6b65\u8bb0\u5f55",
         scenarioRecentActivity: "\u6700\u8fd1\u6d3b\u52a8",
-        scenarioActivityNote: "\u573a\u666f\u53d8\u66f4\u540e\uff0c\u5173\u8054\u7684\u9879\u76ee\u4f1a\u5728\u4e0b\u6b21\u540c\u6b65\u65f6\u88ab\u91cd\u65b0\u8ba1\u7b97\u3002\u5982\u679c\u9879\u76ee\u5904\u4e8e\u201c\u5df2\u540c\u6b65\u201d\u72b6\u6001\uff0c\u9700\u8981\u5148\u5728\u9879\u76ee\u4e2d\u70b9\u201c\u672a\u540c\u6b65\u201d\u624d\u4f1a\u91cd\u65b0\u5e94\u7528\u3002",
+        scenarioActivityNote: "\u573a\u666f\u53d8\u66f4\u540e\uff0c\u5173\u8054\u7684\u9879\u76ee\u6216 Agent \u4f1a\u5728\u4e0b\u6b21\u540c\u6b65\u65f6\u88ab\u91cd\u65b0\u8ba1\u7b97\u3002\u5982\u679c\u8fd9\u4e2a\u573a\u666f\u6682\u65f6\u8fd8\u6ca1\u6709\u5173\u8054\u4efb\u4f55\u9879\u76ee\u6216 Agent\uff0c\u4ecd\u7136\u53ef\u4ee5\u4f5c\u4e3a\u4e00\u4e2a\u9884\u8bbe\u4fdd\u7559\u3002",
         scenarioUsedSkills: "\u4f7f\u7528\u7684\u6280\u80fd",
         scenarioAppliedRules: "\u5e94\u7528\u7684\u89c4\u5219",
         scenarioAddSkill: "\u6dfb\u52a0\u6280\u80fd",
@@ -595,13 +611,13 @@ export const messages: Record<Locale, Catalog> = {
         scenarioDeleteScenario: "\u5220\u9664\u573a\u666f",
         scenarioListSubtitle: "\u9884\u8bbe\u7684\u8d44\u4ea7\u4e0e Agent \u7ec4\u5408\uff0c\u521b\u5efa\u9879\u76ee\u65f6\u53ef\u4ee5\u76f4\u63a5\u9009\u7528\u3002",
         scenarioRemoveAsset: "\u79fb\u9664",
-        scenarioNoAgents: "\u8fd8\u672a\u9009\u62e9 Agent",
+        scenarioNoAgents: "\u6682\u672a\u5173\u8054 Agent\uff0c\u4f46\u8fd9\u4e2a\u573a\u666f\u4ecd\u53ef\u4ee5\u5148\u4f5c\u4e3a\u9884\u8bbe\u4fdd\u5b58\u3002",
         scenarioAgentPickerTitle: "\u9009\u62e9 Agent",
         scenarioAgentPickerHint: "\u7b2c\u4e00\u9636\u6bb5\u5148\u63d0\u4f9b\u53ef\u7528 Agent \u5217\u8868\uff0c\u540e\u7eed\u518d\u63a5\u5165\u5b8c\u6574\u9002\u914d\u5668\u3002",
         scenarioOpenProject: "\u6253\u5f00\u9879\u76ee",
         scenarioBackToScenarios: "\u573a\u666f",
         newScenarioTitle: "\u65b0\u5efa\u573a\u666f",
-        newScenarioHelp: "\u573a\u666f\u662f\u4e00\u7ec4\u9884\u8bbe\u914d\u7f6e\uff08\u5173\u8054\u7684 Agent + \u542f\u7528\u7684\u6280\u80fd\uff09\u3002\u4e00\u4e2a Agent \u53ef\u88ab\u591a\u4e2a\u573a\u666f\u5171\u7528\u3002",
+        newScenarioHelp: "\u573a\u666f\u662f\u4e00\u7ec4\u9884\u8bbe\u8d44\u4ea7\u7ec4\u5408\u3002\u521b\u5efa\u540e\u53ef\u4ee5\u518d\u9009\u62e9\u6027\u5730\u5173\u8054\u9879\u76ee\u6216 Agent\uff0c\u4e5f\u53ef\u4ee5\u6682\u65f6\u4e0d\u5173\u8054\u3002",
         newScenarioName: "\u573a\u666f\u540d\u79f0",
         newScenarioNamePlaceholder: "\u4f8b\u5982\uff1afrontend-review",
         newScenarioDescPlaceholder: "\u63cf\u8ff0\u6b64\u573a\u666f\u7684\u7528\u9014\u2026",
@@ -611,7 +627,7 @@ export const messages: Record<Locale, Catalog> = {
         newScenarioItemSuffix: "\u9879\u8d44\u4ea7",
         scenarioNotFound: "\u573a\u666f\u672a\u627e\u5230",
         breadcrumbAriaLabel: "\u9762\u5305\u5c51",
-        scenarioNoProjects: "\u6682\u65e0\u5173\u8054\u9879\u76ee",
+        scenarioNoProjects: "\u6682\u672a\u5173\u8054\u9879\u76ee\uff0c\u4f46\u8fd9\u4e2a\u573a\u666f\u4ecd\u53ef\u4ee5\u5148\u4f5c\u4e3a\u9884\u8bbe\u4fdd\u5b58\u3002",
         scenarioBadgeLabel: "\u573a\u666f",
         rulesTitle: "\u89c4\u5219",
         rulesEmpty: "\u6682\u65e0\u89c4\u5219\u3002\u521b\u5efa\u793a\u4f8b\u89c4\u5219\u5f00\u59cb\u4f7f\u7528\u3002",
@@ -738,7 +754,8 @@ export const messages: Record<Locale, Catalog> = {
         settingsAgentSyncConflict: "{count} managed block conflicts need manual review.",
         settingsAgentList: "Agent list",
         settingsAgentLocations: "Managed locations",
-        settingsAgentLocationsHint: "Scan the current targets and local workspaces for the Agent workspace root, then derive the concrete Skills and AGENTS.md paths from it during sync.",
+        settingsAgentBoundaryHint: "This page only manages Agent registration, enabled state, and managed root paths. Which scenarios link to which Agents is intentionally handled in the scenario page.",
+        settingsAgentLocationsHint: "Scan the current Agent workspace root, then derive the concrete Skills and AGENTS.md destinations from it during sync.",
         settingsAgentNoApps: "No manageable Agent applications are available yet.",
         settingsAgentNoLocations: "No managed locations have been detected yet. Try re-detecting first.",
         settingsAgentKindSkills: "Skills",
@@ -857,6 +874,7 @@ export const messages: Record<Locale, Catalog> = {
         projectCreatedAtLabel: "Created at",
         projectUpdatedAtLabel: "Updated at",
         projectScenarioSummary: "Scenario summary",
+        projectScenarioSummaryDesc: "This panel keeps only the asset snapshot of the currently linked scenario. Relationship management is now intentionally converged into the scenario page.",
         projectScenarioSkills: "Skills",
         projectScenarioRules: "Rules",
         projectScenarioAgentFiles: "Agent files",
@@ -864,6 +882,7 @@ export const messages: Record<Locale, Catalog> = {
         projectNoScenarioLinked: "No scenario is linked yet, so this project currently acts as a local workspace record only.",
         projectWorkflowTitle: "Sync workflow",
         projectWorkflowDesc: "Projects carry a scenario into a real sync loop. Preview which sync directories will receive writes here first, then run the sync manually.",
+        projectWorkflowMovedDesc: "Sync actions have been converged into the scenario detail page. This panel now keeps project configuration and sync history only.",
         projectSyncPreviewAction: "Preview sync",
         projectSyncRunAction: "Run sync",
         projectSyncRequiresScenario: "Link a scenario to this project before previewing sync.",
@@ -918,8 +937,13 @@ export const messages: Record<Locale, Catalog> = {
         scenarioProjectPickerTitle: "Link project",
         scenarioProjectPickerHint: "Choose a workspace to associate with this scenario. If the project is already linked to another scenario, it will be moved here.",
         scenarioProjectPickerEmpty: "No projects available to link",
+        scenarioRunSyncTitle: "Scenario sync",
+        scenarioRunSyncDesc: "Preview or run sync for linked projects directly here. The project page now keeps configuration and history only.",
+        scenarioRunSyncEmpty: "No syncable projects are linked yet. Link a project to this scenario first, then run sync from here.",
+        scenarioRunSyncLastSynced: "Last synced: {time}",
+        scenarioRunSyncNever: "No sync history yet",
         scenarioRecentActivity: "Recent activity",
-        scenarioActivityNote: "After changing a scenario, linked projects will be recalculated on the next sync. If a project is in the 'synced' state, you need to click 'unsync' in the project first to reapply.",
+        scenarioActivityNote: "After changing a scenario, linked projects or Agents will be recalculated on the next sync. If this scenario is not linked to anything yet, it can still be kept as a preset.",
         scenarioUsedSkills: "Active Skills",
         scenarioAppliedRules: "Applied Rules",
         scenarioAddSkill: "Add skill",
@@ -930,13 +954,13 @@ export const messages: Record<Locale, Catalog> = {
         scenarioDeleteScenario: "Delete scenario",
         scenarioListSubtitle: "Preset asset and Agent combinations that can be selected directly when creating a project.",
         scenarioRemoveAsset: "Remove",
-        scenarioNoAgents: "No agents selected yet",
+        scenarioNoAgents: "No Agents are linked yet, but this scenario can still be saved as a preset first.",
         scenarioAgentPickerTitle: "Choose agent",
         scenarioAgentPickerHint: "Phase 1 provides a lightweight list of available Agents; the full adapter picker will come later.",
         scenarioOpenProject: "Open project",
         scenarioBackToScenarios: "Scenarios",
         newScenarioTitle: "New scenario",
-        newScenarioHelp: "A scenario is a preset bundle (default Agent + which skills to enable). After creation, you can attach it to a project.",
+        newScenarioHelp: "A scenario is a preset asset bundle. After creation, you can optionally link projects or Agents later, or keep it unlinked for now.",
         newScenarioName: "Scenario name",
         newScenarioNamePlaceholder: "e.g. frontend-review",
         newScenarioDescPlaceholder: "Describe what this scenario is for...",
@@ -946,7 +970,7 @@ export const messages: Record<Locale, Catalog> = {
         newScenarioItemSuffix: "assets",
         scenarioNotFound: "Scenario not found",
         breadcrumbAriaLabel: "Breadcrumb",
-        scenarioNoProjects: "No linked projects",
+        scenarioNoProjects: "No projects are linked yet, but this scenario can still be saved as a preset first.",
         scenarioBadgeLabel: "Scenario",
         rulesTitle: "Rules",
         rulesEmpty: "No rules yet. Create a sample rule to get started.",
