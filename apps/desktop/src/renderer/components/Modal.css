@@ -74,6 +74,9 @@
     justify-content: space-between;
     padding: 16px 24px;
     border-bottom: 1px solid var(--bd-soft);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0)),
+        var(--bg-section);
     gap: 12px;
     flex-shrink: 0;
 }
@@ -88,21 +91,32 @@
 .modal-close {
     width: 32px;
     height: 32px;
-    border-radius: 6px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: transparent;
-    border: none;
+    background: var(--bg-elevated);
+    border: 1px solid var(--bd-soft);
     color: var(--fg-muted);
     cursor: pointer;
-    font-size: 18px;
-    transition: background 0.15s, color 0.15s;
+    transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.15s;
+}
+
+.modal-close svg {
+    width: 14px;
+    height: 14px;
 }
 
 .modal-close:hover {
-    background: var(--bg-hover);
+    background: color-mix(in srgb, var(--accent) 14%, var(--bg-hover));
+    border-color: color-mix(in srgb, var(--accent) 35%, var(--bd-soft));
     color: var(--fg-primary);
+    transform: translateY(-1px);
+}
+
+.modal-close:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
 }
 
 .modal-body {
@@ -116,7 +130,10 @@
     gap: 8px;
     justify-content: flex-end;
     align-items: center;
-    padding: 12px 24px;
+    padding: 14px 24px 16px;
     border-top: 1px solid var(--bd-soft);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.02)),
+        var(--bg-section);
     flex-shrink: 0;
 }

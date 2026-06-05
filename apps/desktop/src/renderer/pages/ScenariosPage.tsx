@@ -298,18 +298,19 @@ function EditScenarioModal({
             title={t("scenarioEditScenario")}
             onClose={onClose}
             size="md"
+            dialogClassName="scenario-edit-modal"
             footer={(
-                <>
-                    <button type="button" className="btn btn-ghost" onClick={onClose}>
+                <div className="scenario-edit-modal-actions">
+                    <button type="button" className="btn scenario-edit-modal-btn scenario-edit-modal-btn-secondary" onClick={onClose}>
                         {t("close")}
                     </button>
-                    <button type="button" className="btn btn-primary" onClick={onSave}>
+                    <button type="button" className="btn scenario-edit-modal-btn scenario-edit-modal-btn-primary" onClick={onSave}>
                         {t("save")}
                     </button>
-                </>
+                </div>
             )}
         >
-            <div className="new-scenario-form">
+            <div className="new-scenario-form scenario-edit-modal-form">
                 <div className="form-field">
                     <label className="form-label">{t("newScenarioName")}</label>
                     <input
@@ -591,11 +592,22 @@ function ScenarioDetail(): JSX.Element {
                         </div>
                     </div>
                     <div className="scenario-hero-actions">
-                        <button type="button" className="btn btn-secondary btn-sm" onClick={openEditModal}>
+                        <button type="button" className="btn btn-sm scenario-hero-action-btn scenario-hero-action-btn--edit" onClick={openEditModal}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M12 20h9"/>
+                                <path d="M16.5 3.5a2.12 2.12 0 1 1 3 3L7 19l-4 1 1-4Z"/>
+                            </svg>
                             {t("scenarioEditScenario")}
                         </button>
                         {!selectedScenario.isBuiltIn && (
-                            <button type="button" className="btn btn-danger btn-sm" onClick={() => { void deleteScenario(); }}>
+                            <button type="button" className="btn btn-sm scenario-hero-action-btn scenario-hero-action-btn--danger" onClick={() => { void deleteScenario(); }}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="3 6 5 6 21 6"/>
+                                    <path d="M19 6l-1 14H6L5 6"/>
+                                    <path d="M10 11v6"/>
+                                    <path d="M14 11v6"/>
+                                    <path d="M9 6V4h6v2"/>
+                                </svg>
                                 {t("scenarioDeleteScenario")}
                             </button>
                         )}
@@ -655,7 +667,7 @@ function ScenarioDetail(): JSX.Element {
                         </h3>
                         <div className="scenario-section-meta">
                             <span className="scenario-section-count">{selectedScenario.skillIds.length}</span>
-                            <button type="button" className="scenario-section-add" onClick={() => openAssetPicker("skillIds")} title={t("scenarioAddSkill")} aria-label={t("scenarioAddSkill")}>
+                            <button type="button" className="scenario-section-add scenario-section-add--skill" onClick={() => openAssetPicker("skillIds")} title={t("scenarioAddSkill")} aria-label={t("scenarioAddSkill")}>
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
                                 </svg>
@@ -690,7 +702,7 @@ function ScenarioDetail(): JSX.Element {
                         </h3>
                         <div className="scenario-section-meta">
                             <span className="scenario-section-count">{selectedScenario.ruleIds.length}</span>
-                            <button type="button" className="scenario-section-add" onClick={() => openAssetPicker("ruleIds")} title={t("scenarioAddRule")} aria-label={t("scenarioAddRule")}>
+                            <button type="button" className="scenario-section-add scenario-section-add--rule" onClick={() => openAssetPicker("ruleIds")} title={t("scenarioAddRule")} aria-label={t("scenarioAddRule")}>
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
                                 </svg>
@@ -724,7 +736,7 @@ function ScenarioDetail(): JSX.Element {
                         </h3>
                         <div className="scenario-section-meta">
                             <span className="scenario-section-count">{selectedScenario.agentFileIds.length}</span>
-                            <button type="button" className="scenario-section-add" onClick={() => openAssetPicker("agentFileIds")} title={t("scenarioAddAgentFile")} aria-label={t("scenarioAddAgentFile")}>
+                            <button type="button" className="scenario-section-add scenario-section-add--agent-file" onClick={() => openAssetPicker("agentFileIds")} title={t("scenarioAddAgentFile")} aria-label={t("scenarioAddAgentFile")}>
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
                                 </svg>
@@ -759,7 +771,7 @@ function ScenarioDetail(): JSX.Element {
                         </h3>
                         <div className="scenario-section-meta">
                             <span className="scenario-section-count">{selectedScenario.agentAppIds.length}</span>
-                            <button type="button" className="scenario-section-add" title={t("scenarioAddAgent")} aria-label={t("scenarioAddAgent")} onClick={() => setShowAgentPicker(true)}>
+                            <button type="button" className="scenario-section-add scenario-section-add--agent" title={t("scenarioAddAgent")} aria-label={t("scenarioAddAgent")} onClick={() => setShowAgentPicker(true)}>
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
                                 </svg>

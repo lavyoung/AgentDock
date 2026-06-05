@@ -9,6 +9,7 @@ type ModalProps = {
     children: ReactNode;
     footer?: ReactNode;
     size?: "sm" | "md" | "lg" | "xl";
+    dialogClassName?: string;
 };
 
 export function Modal({
@@ -18,6 +19,7 @@ export function Modal({
     children,
     footer,
     size = "md",
+    dialogClassName,
 }: ModalProps): ReactNode {
     const dialogRef = useRef<HTMLDivElement | null>(null);
 
@@ -43,7 +45,7 @@ export function Modal({
         >
             <div
                 ref={dialogRef}
-                className={`modal-dialog modal-dialog-${size}`}
+                className={`modal-dialog modal-dialog-${size}${dialogClassName ? ` ${dialogClassName}` : ""}`}
                 role="dialog"
                 aria-modal="true"
                 aria-label={title}
@@ -56,7 +58,16 @@ export function Modal({
                         aria-label="Close"
                         onClick={onClose}
                     >
-                        X
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            aria-hidden="true"
+                        >
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
                     </button>
                 </header>
                 <div className="modal-body">{children}</div>
