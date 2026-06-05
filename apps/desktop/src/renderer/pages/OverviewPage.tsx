@@ -29,7 +29,9 @@ export function OverviewPage(): JSX.Element {
     const enabledCount = assets.filter((asset) => asset.status === "active").length;
 
     const agentRows = useMemo<AgentRow[]>(() => {
-        return applications.map((application) => {
+        return applications
+            .filter((application) => application.enabled)
+            .map((application) => {
             const relatedScenarios = scenarios.filter((scenario) =>
                 scenario.agentAppIds.includes(application.id)
             );
@@ -54,7 +56,7 @@ export function OverviewPage(): JSX.Element {
                 refSkills,
                 refRules,
             };
-        });
+            });
     }, [applications, scenarios]);
 
     const activatedAgents = agentRows.filter((agent) => agent.active).length;
@@ -120,7 +122,7 @@ export function OverviewPage(): JSX.Element {
                         </div>
                         <div className="overview-stat-value">
                             {activatedAgents}
-                            <span className="overview-stat-ratio">/ {agentRows.length}</span>
+                            <span className="overview-stat-ratio">/ {agentRows.length || 0}</span>
                         </div>
                     </div>
                 </div>

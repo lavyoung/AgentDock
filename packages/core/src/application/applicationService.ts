@@ -111,11 +111,17 @@ export class ApplicationService {
             }
 
             if (current.source === "manual") {
+                const normalizedCurrent = this.normalizeLocationBasePath(current);
+                this.applicationRepository.updateLocation({
+                    ...normalizedCurrent,
+                    exists: await this.locationExists(normalizedCurrent),
+                    updated_at: now,
+                });
                 continue;
             }
 
             this.applicationRepository.updateLocation({
-                ...current,
+                ...this.normalizeLocationBasePath(current),
                 name: location.name,
                 path: location.path,
                 exists: location.exists,
@@ -165,22 +171,35 @@ export class ApplicationService {
             throw new Error("Application location path must be an absolute path.");
         }
 
-        const next: ApplicationLocationRecord = {
-            ...current,
-            name: nextName,
-            path: nextPath,
-            exists: await this.fileSystem.exists(nextPath),
-            enabled: input.enabled ?? current.enabled,
-            source:
-                input.name !== undefined || input.path !== undefined
-                    ? "manual"
-                    : current.source,
-            updated_at: new Date().toISOString(),
-        };
+        const now = new Date().toISOString();
+        const basePath = this.normalizeBasePathForKind(current.kind, nextPath);
+        const siblingLocations = this.applicationRepository
+            .listLocations(current.application_id)
+            .filter((location) => location.scope === current.scope && location.target_id === current.target_id);
+        let updatedLocation = current;
 
-        this.applicationRepository.updateLocation(next);
+        for (const location of siblingLocations) {
+            const next: ApplicationLocationRecord = {
+                ...location,
+                name: location.id === current.id ? nextName : location.name,
+                path: basePath,
+                exists: await this.locationExists({...location, path: basePath}),
+                enabled: location.id === current.id ? input.enabled ?? current.enabled : location.enabled,
+                source:
+                    input.name !== undefined || input.path !== undefined
+                        ? "manual"
+                        : location.source,
+                updated_at: now,
+            };
 
-        return next;
+            this.applicationRepository.updateLocation(next);
+
+            if (location.id === current.id) {
+                updatedLocation = next;
+            }
+        }
+
+        return updatedLocation;
     }
 
     private async detectLocations(
@@ -197,7 +216,7 @@ export class ApplicationService {
         const locations: ApplicationLocationRecord[] = [];
         const globalSkillsPath = this.path.join(
             this.homeDir,
-            ...definition.globalSkillSegments
+            ...definition.globalSkillSegments.slice(0, -1)
         );
 
         locations.push({
@@ -209,7 +228,21 @@ export class ApplicationService {
             kind: "skills",
             scope: "global",
             path: globalSkillsPath,
-            exists: await this.fileSystem.exists(globalSkillsPath),
+            exists: await this.locationExists({
+                id: "detected-global",
+                application_id: applicationId,
+                location_key: `${applicationId}:global:skills`,
+                target_id: null,
+                name: `${definition.name} Global Skills`,
+                kind: "skills",
+                scope: "global",
+                path: globalSkillsPath,
+                exists: false,
+                enabled: false,
+                source: "detected",
+                created_at: now,
+                updated_at: now,
+            }),
             enabled: false,
             source: "detected",
             created_at: now,
@@ -218,10 +251,10 @@ export class ApplicationService {
 
         for (const target of this.targetRepository.list()) {
             for (const kind of definition.projectSupports) {
-                const projectPath =
-                    kind === "skills"
-                        ? this.path.join(target.path, ...definition.projectSkillSegments)
-                        : this.path.join(target.path, "AGENTS.md");
+                const projectPath = this.path.join(
+                    target.path,
+                    ...definition.projectSkillSegments.slice(0, -1)
+                );
 
                 locations.push(
                     this.buildDetectedProjectLocation({
@@ -231,7 +264,21 @@ export class ApplicationService {
                         targetName: target.name,
                         kind,
                         path: projectPath,
-                        exists: await this.fileSystem.exists(projectPath),
+                        exists: await this.locationExists({
+                            id: "detected-project",
+                            application_id: applicationId,
+                            location_key: `${applicationId}:project:${target.id}:${kind}`,
+                            target_id: target.id,
+                            name: `${target.name} ${definition.name} ${kind}`,
+                            kind,
+                            scope: "project",
+                            path: projectPath,
+                            exists: false,
+                            enabled: false,
+                            source: "detected",
+                            created_at: now,
+                            updated_at: now,
+                        }),
                         now,
                     })
                 );
@@ -274,6 +321,7 @@ export class ApplicationService {
     private listLocations(applicationId: ApplicationId): ApplicationLocationRecord[] {
         return this.applicationRepository
             .listLocations(applicationId)
+            .map((location) => this.normalizeLocationBasePath(location))
             .sort((left, right) => {
                 if (left.scope !== right.scope) {
                     return left.scope === "global" ? -1 : 1;
@@ -338,5 +386,59 @@ export class ApplicationService {
             name: defaults.name,
             description: defaults.description,
         };
+    }
+
+    private normalizeLocationBasePath(location: ApplicationLocationRecord): ApplicationLocationRecord {
+        const normalizedPath = this.normalizeBasePathForKind(location.kind, location.path);
+
+        if (normalizedPath === location.path) {
+            return location;
+        }
+
+        return {
+            ...location,
+            path: normalizedPath,
+        };
+    }
+
+    private normalizeBasePathForKind(
+        kind: ApplicationLocationKind,
+        candidatePath: string
+    ): string {
+        const trimmedPath = candidatePath.trim();
+
+        if (!trimmedPath) {
+            return trimmedPath;
+        }
+
+        const baseName = this.path.basename(trimmedPath).toLowerCase();
+
+        if (kind === "skills" && baseName === "skills") {
+            return this.path.dirname(trimmedPath);
+        }
+
+        if (kind === "agents-md" && baseName === "agents.md") {
+            return this.path.dirname(trimmedPath);
+        }
+
+        return trimmedPath;
+    }
+
+    private resolveManagedPath(
+        kind: ApplicationLocationKind,
+        basePath: string
+    ): string {
+        return kind === "skills"
+            ? this.path.join(basePath, "skills")
+            : this.path.join(basePath, "AGENTS.md");
+    }
+
+    private locationExists(location: ApplicationLocationRecord): Promise<boolean> {
+        return this.fileSystem.exists(
+            this.resolveManagedPath(
+                location.kind,
+                this.normalizeBasePathForKind(location.kind, location.path)
+            )
+        );
     }
 }

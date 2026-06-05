@@ -38,4 +38,10 @@ export const nodePathPort: PathPort = {
     isAbsolute(targetPath) {
         return path.isAbsolute(targetPath);
     },
+    dirname(targetPath) {
+        return path.dirname(targetPath);
+    },
+    basename(targetPath) {
+        return path.basename(targetPath);
+    },
 };

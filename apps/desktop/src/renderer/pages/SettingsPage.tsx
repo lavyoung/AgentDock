@@ -148,7 +148,7 @@ export function SettingsPage(): JSX.Element {
 
         try {
             const selectedPath = await agentdockClient.app.pickPath({
-                mode: selectedLocation.kind === "agents-md" ? "agents-md-file" : "directory",
+                mode: "directory",
                 title: selectedLocation.name,
                 defaultPath: locationPath || selectedLocation.path,
                 buttonLabel: t("settingsBrowse"),

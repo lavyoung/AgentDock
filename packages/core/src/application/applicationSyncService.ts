@@ -79,11 +79,12 @@ export class ApplicationSyncService {
             return false;
         }
 
-        await this.fileSystem.ensureDir(location.path);
+        const skillsRoot = this.resolveManagedPath(location);
+        await this.fileSystem.ensureDir(skillsRoot);
 
         for (const asset of assets) {
             const content = await this.readAssetContent(asset);
-            const assetDir = this.path.join(location.path, asset.name);
+            const assetDir = this.path.join(skillsRoot, asset.name);
             await this.fileSystem.ensureDir(assetDir);
             await this.fileSystem.writeText(
                 this.path.join(assetDir, getAssetMainFileName(asset.type)),
@@ -103,9 +104,11 @@ export class ApplicationSyncService {
             return false;
         }
 
+        const agentsMdPath = this.resolveManagedPath(location);
+        await this.fileSystem.ensureDir(location.path);
         let originalContent = "";
-        if (await this.fileSystem.exists(location.path)) {
-            originalContent = await this.fileSystem.readText(location.path);
+        if (await this.fileSystem.exists(agentsMdPath)) {
+            originalContent = await this.fileSystem.readText(agentsMdPath);
         }
 
         let nextContent = originalContent;
@@ -131,7 +134,7 @@ export class ApplicationSyncService {
             nextContent = merged.content;
         }
 
-        await this.fileSystem.writeText(location.path, nextContent);
+        await this.fileSystem.writeText(agentsMdPath, nextContent);
         return true;
     }
 
@@ -139,5 +142,11 @@ export class ApplicationSyncService {
         return this.fileSystem.readText(
             this.path.join(asset.path, "current", getAssetMainFileName(asset.type))
         );
+    }
+
+    private resolveManagedPath(location: ApplicationLocationRecord): string {
+        return location.kind === "skills"
+            ? this.path.join(location.path, "skills")
+            : this.path.join(location.path, "AGENTS.md");
     }
 }
