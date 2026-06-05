@@ -440,16 +440,6 @@ export function ProjectsPage(): JSX.Element {
                                     </div>
                                 </section>
 
-                                <section className="left-card">
-                                    <header className="left-card-header">
-                                        <h3>{t("projectWorkflowTitle")}</h3>
-                                    </header>
-                                    <div className="left-card-body">
-                                        <div className="projects-note-card">
-                                            <p>{t("projectWorkflowMovedDesc")}</p>
-                                        </div>
-                                    </div>
-                                </section>
                             </div>
                         </div>
                     </>
