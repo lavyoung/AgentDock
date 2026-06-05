@@ -599,7 +599,7 @@ function ScenarioDetail(): JSX.Element {
                             <svg className="scenario-section-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
                             </svg>
-                            {t("scenarioUsedSkills")}
+                            <span className="scenario-section-title">{t("scenarioUsedSkills")}</span>
                         </h3>
                         <div className="scenario-section-meta">
                             <span className="scenario-section-count">{selectedScenario.skillIds.length}</span>
@@ -635,7 +635,7 @@ function ScenarioDetail(): JSX.Element {
                             <svg className="scenario-section-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                             </svg>
-                            {t("scenarioAppliedRules")}
+                            <span className="scenario-section-title">{t("scenarioAppliedRules")}</span>
                         </h3>
                         <div className="scenario-section-meta">
                             <span className="scenario-section-count">{selectedScenario.ruleIds.length}</span>
@@ -670,7 +670,7 @@ function ScenarioDetail(): JSX.Element {
                             <svg className="scenario-section-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
                             </svg>
-                            {t("scenarioAgentFiles")}
+                            <span className="scenario-section-title">{t("scenarioAgentFiles")}</span>
                         </h3>
                         <div className="scenario-section-meta">
                             <span className="scenario-section-count">{selectedScenario.agentFileIds.length}</span>
@@ -706,7 +706,7 @@ function ScenarioDetail(): JSX.Element {
                             <svg className="scenario-section-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
                             </svg>
-                            {t("scenarioAgent")}
+                            <span className="scenario-section-title">{t("scenarioAgent")}</span>
                         </h3>
                         <div className="scenario-section-meta">
                             <span className="scenario-section-count">{selectedScenario.agentAppIds.length}</span>
@@ -737,7 +737,9 @@ function ScenarioDetail(): JSX.Element {
                 {/* Projects section */}
                 <section className="left-card">
                     <header className="left-card-header">
-                        <h3>{t("scenarioProjects")}</h3>
+                        <h3>
+                            <span className="scenario-section-title">{t("scenarioProjects")}</span>
+                        </h3>
                         <div className="scenario-section-meta scenario-section-meta--static">
                             <span className="scenario-section-count">{linkedProjects.length}</span>
                         </div>
@@ -775,7 +777,9 @@ function ScenarioDetail(): JSX.Element {
                 {/* Activity note */}
                 <section className="left-card">
                     <header className="left-card-header">
-                        <h3>{t("scenarioRecentActivity")}</h3>
+                        <h3>
+                            <span className="scenario-section-title">{t("scenarioRecentActivity")}</span>
+                        </h3>
                         <div className="scenario-section-meta scenario-section-meta--empty" aria-hidden="true" />
                     </header>
                     <div className="left-card-body scenario-activity-copy">
