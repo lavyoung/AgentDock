@@ -6,7 +6,16 @@ import type {ScenarioRepository} from "../scenario/scenarioRepository";
 import type {TargetRepository} from "../target/targetRepository";
 import type {TargetRecord} from "../types/target";
 import type {AssetRepository} from "../asset/assetRepository";
-import type {SyncPlanItem, SyncPreviewInput, SyncPreviewResult, SyncRunConflict, SyncRunResult,} from "../types/sync";
+import type {
+    SyncInlineTarget,
+    SyncPlanItem,
+    SyncPreviewInput,
+    SyncPreviewResult,
+    SyncRunConflict,
+    SyncRunResult,
+} from "../types/sync";
+
+type ResolvedSyncTarget = Pick<TargetRecord, "id" | "name" | "path" | "deployMode" | "enabled">;
 
 type SyncServiceDependencies = {
     scenarioRepository: ScenarioRepository;
@@ -18,7 +27,7 @@ type SyncServiceDependencies = {
 
 type PreparedPlan = {
     scenario: ScenarioRecord;
-    targets: TargetRecord[];
+    targets: ResolvedSyncTarget[];
     assetsById: Map<string, AssetRecord>;
     warnings: string[];
     items: SyncPlanItem[];
@@ -100,17 +109,17 @@ export class SyncService {
 
         const allTargets = this.targetRepository.list().filter((target) => target.enabled);
         const selectedTargetIds = input.target_ids;
-        const targets = selectedTargetIds === undefined
+        const selectedTargets = selectedTargetIds === undefined
             ? allTargets
             : allTargets.filter((target) => selectedTargetIds.includes(target.id));
+        const inlineTargets = (input.inline_targets ?? []).map((target) => this.toResolvedTarget(target));
+        const targets = [...selectedTargets, ...inlineTargets].filter(
+            (target, index, list) => list.findIndex((candidate) => candidate.id === target.id) === index
+        );
         const warnings: string[] = [];
 
         if (targets.length === 0) {
-            warnings.push(
-                selectedTargetIds === undefined
-                    ? "No enabled targets are configured yet."
-                    : "No enabled targets are selected in the Sync Matrix."
-            );
+            warnings.push("No sync destinations are available for this scenario.");
         }
 
         const assets = this.assetRepository.list();
@@ -214,6 +223,16 @@ export class SyncService {
         return collected;
     }
 
+    private toResolvedTarget(target: SyncInlineTarget): ResolvedSyncTarget {
+        return {
+            id: target.id,
+            name: target.name,
+            path: target.path,
+            deployMode: target.deployMode,
+            enabled: true,
+        };
+    }
+
     private toPreviewResult(prepared: PreparedPlan): SyncPreviewResult {
         const createCount = prepared.items.filter((item) => item.operation === "create").length;
         const updateCount = prepared.items.filter((item) => item.operation === "update").length;
@@ -231,7 +250,7 @@ export class SyncService {
         };
     }
 
-    private async writeSkillAsset(target: TargetRecord, asset: AssetRecord): Promise<void> {
+    private async writeSkillAsset(target: ResolvedSyncTarget, asset: AssetRecord): Promise<void> {
         const content = await this.readAssetContent(asset);
         const assetDir = this.path.join(target.path, ".agentdock", "skills", asset.id);
         await this.fileSystem.ensureDir(assetDir);

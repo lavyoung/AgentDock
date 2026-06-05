@@ -85,6 +85,10 @@ function isSyncRunResult(preview: SyncPreviewResult | null): preview is SyncRunR
     return Boolean(preview && "written_count" in preview && "conflicts" in preview);
 }
 
+function getProjectSyncTargetCount(targetIds: string[]): number {
+    return targetIds.length > 0 ? targetIds.length : 1;
+}
+
 type AvailableAgent = {
     id: string;
     name: string;
@@ -1174,7 +1178,7 @@ function ScenarioDetail(): JSX.Element {
                                                 </div>
                                                 <div className="scenario-sync-project-badges">
                                                     <span className="badge badge-gray">
-                                                        {project.targetIds.length} {t("projectSyncTargets")}
+                                                        {getProjectSyncTargetCount(project.targetIds)} {t("projectSyncTargets")}
                                                     </span>
                                                     <span className={getProjectSyncStatusClass(project.syncStatus)}>
                                                         <span className="pill-dot" />
@@ -1188,6 +1192,7 @@ function ScenarioDetail(): JSX.Element {
                                                     {project.lastSyncedAt
                                                         ? t("scenarioRunSyncLastSynced").replace("{time}", formatDate(project.lastSyncedAt))
                                                         : t("scenarioRunSyncNever")}
+                                                    {project.targetIds.length === 0 ? ` · ${t("scenarioRunSyncUsesProjectRoot")}` : ""}
                                                 </div>
                                                 <div className="projects-workflow-actions">
                                                     <button

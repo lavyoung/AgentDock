@@ -53,17 +53,25 @@ function buildMockSyncPreview(input: SyncPreviewInput): SyncPreviewResult {
     const targets = mockTargets.filter((target) =>
         target.enabled && (input.target_ids === undefined || input.target_ids.includes(target.id))
     );
+    const inlineTargets = (input.inline_targets ?? []).map((target) => ({
+        id: target.id,
+        name: target.name,
+        path: target.path,
+        deployMode: target.deployMode,
+        enabled: true,
+        created_at: nowIso(),
+        updated_at: nowIso(),
+    }));
+    const resolvedTargets = [...targets, ...inlineTargets].filter(
+        (target, index, list) => list.findIndex((candidate) => candidate.id === target.id) === index
+    );
     const warnings: string[] = [];
 
-    if (targets.length === 0) {
-        warnings.push(
-            input.target_ids === undefined
-                ? "No enabled targets are configured yet."
-                : "No enabled targets are selected in the Sync Matrix."
-        );
+    if (resolvedTargets.length === 0) {
+        warnings.push("No sync destinations are available for this scenario.");
     }
 
-    const items = targets.flatMap((target) => {
+    const items = resolvedTargets.flatMap((target) => {
         const skillItems = scenario.skillIds
             .map((assetId) => mockAssets.find((asset) => asset.id === assetId) ?? null)
             .filter((asset): asset is AssetDetail => Boolean(asset) && asset.type === "skill" && asset.status === "active")
@@ -96,7 +104,7 @@ function buildMockSyncPreview(input: SyncPreviewInput): SyncPreviewResult {
 
     return {
         scenario_id: scenario.id,
-        target_count: targets.length,
+        target_count: resolvedTargets.length,
         operation_count: items.length,
         create_count: items.filter((item) => item.operation === "create").length,
         update_count: 0,

@@ -252,6 +252,7 @@ type MessageCatalog = {
     scenarioRunSyncEmpty: string;
     scenarioRunSyncLastSynced: string;
     scenarioRunSyncNever: string;
+    scenarioRunSyncUsesProjectRoot: string;
     scenarioRecentActivity: string;
     scenarioActivityNote: string;
     scenarioUsedSkills: string;
@@ -563,8 +564,8 @@ export const messages: Record<Locale, Catalog> = {
         projectSyncOperationUpdate: "\u66f4\u65b0",
         projectSyncOperationMerge: "\u5408\u5e76",
         projectSyncMatrixTitle: "\u540c\u6b65\u76ee\u5f55",
-        projectSyncMatrixDesc: "\u4e3a\u8fd9\u4e2a\u9879\u76ee\u9009\u62e9\u9700\u8981\u7eb3\u5165\u7684\u540c\u6b65\u76ee\u5f55\u3002\u573a\u666f\u540c\u6b65\u65f6\u4f1a\u57fa\u4e8e\u8fd9\u91cc\u7684\u76ee\u5f55\u914d\u7f6e\u751f\u6210\u5177\u4f53\u5199\u5165\u8ba1\u5212\u3002",
-        projectSyncMatrixEmpty: "\u6682\u65e0\u53ef\u7528\u7684\u540c\u6b65\u76ee\u5f55\u3002\u53ef\u4ee5\u5148\u8865\u5145\u76ee\u5f55\u914d\u7f6e\uff0c\u518d\u56de\u5230\u573a\u666f\u9875\u53d1\u8d77\u540c\u6b65\u3002",
+        projectSyncMatrixDesc: "\u8fd9\u91cc\u914d\u7f6e\u7684\u662f\u8fd9\u4e2a\u9879\u76ee\u7684\u989d\u5916\u540c\u6b65\u76ee\u5f55\u3002\u5982\u679c\u4e0d\u989d\u5916\u9009\u62e9\uff0c\u573a\u666f\u540c\u6b65\u65f6\u4f1a\u9ed8\u8ba4\u5199\u5165\u5230\u9879\u76ee\u6839\u76ee\u5f55\u3002",
+        projectSyncMatrixEmpty: "\u6682\u65e0\u53ef\u7528\u7684\u989d\u5916\u540c\u6b65\u76ee\u5f55\u3002\u4e0d\u914d\u7f6e\u4e5f\u53ef\u4ee5\u6b63\u5e38\u540c\u6b65\uff0c\u7cfb\u7edf\u4f1a\u9ed8\u8ba4\u5199\u5165\u9879\u76ee\u6839\u76ee\u5f55\u3002",
         projectSyncMatrixSelected: "\u5df2\u7eb3\u5165",
         projectSyncMatrixNotSelected: "\u672a\u7eb3\u5165",
         projectSyncHistoryTitle: "\u540c\u6b65\u8bb0\u5f55",
@@ -599,6 +600,7 @@ export const messages: Record<Locale, Catalog> = {
         scenarioRunSyncEmpty: "\u8fd8\u6ca1\u6709\u53ef\u7528\u7684\u540c\u6b65\u9879\u76ee\u3002\u5148\u4e3a\u8fd9\u4e2a\u573a\u666f\u5173\u8054\u9879\u76ee\uff0c\u518d\u5728\u8fd9\u91cc\u53d1\u8d77\u540c\u6b65\u3002",
         scenarioRunSyncLastSynced: "\u4e0a\u6b21\u540c\u6b65\uff1a{time}",
         scenarioRunSyncNever: "\u8fd8\u6ca1\u6709\u540c\u6b65\u8bb0\u5f55",
+        scenarioRunSyncUsesProjectRoot: "\u672a\u989d\u5916\u914d\u7f6e\u76ee\u5f55\u65f6\uff0c\u9ed8\u8ba4\u5199\u5165\u9879\u76ee\u6839\u76ee\u5f55",
         scenarioRecentActivity: "\u6700\u8fd1\u6d3b\u52a8",
         scenarioActivityNote: "\u573a\u666f\u53d8\u66f4\u540e\uff0c\u5173\u8054\u7684\u9879\u76ee\u6216 Agent \u4f1a\u5728\u4e0b\u6b21\u540c\u6b65\u65f6\u88ab\u91cd\u65b0\u8ba1\u7b97\u3002\u5982\u679c\u8fd9\u4e2a\u573a\u666f\u6682\u65f6\u8fd8\u6ca1\u6709\u5173\u8054\u4efb\u4f55\u9879\u76ee\u6216 Agent\uff0c\u4ecd\u7136\u53ef\u4ee5\u4f5c\u4e3a\u4e00\u4e2a\u9884\u8bbe\u4fdd\u7559\u3002",
         scenarioUsedSkills: "\u4f7f\u7528\u7684\u6280\u80fd",
@@ -906,8 +908,8 @@ export const messages: Record<Locale, Catalog> = {
         projectSyncOperationUpdate: "Update",
         projectSyncOperationMerge: "Merge",
         projectSyncMatrixTitle: "Sync directories",
-        projectSyncMatrixDesc: "Choose which sync directories belong to this project. Scenario sync uses this directory configuration when generating concrete write plans.",
-        projectSyncMatrixEmpty: "No sync directories are available yet. Add directory configuration first, then come back to the scenario page to run sync.",
+        projectSyncMatrixDesc: "These are optional extra sync directories for this project. If none are selected, scenario sync writes to the project root by default.",
+        projectSyncMatrixEmpty: "No extra sync directories are available yet. Sync still works and will default to the project root.",
         projectSyncMatrixSelected: "Included",
         projectSyncMatrixNotSelected: "Excluded",
         projectSyncHistoryTitle: "Sync history",
@@ -942,6 +944,7 @@ export const messages: Record<Locale, Catalog> = {
         scenarioRunSyncEmpty: "No syncable projects are linked yet. Link a project to this scenario first, then run sync from here.",
         scenarioRunSyncLastSynced: "Last synced: {time}",
         scenarioRunSyncNever: "No sync history yet",
+        scenarioRunSyncUsesProjectRoot: "If no extra directories are configured, the project root is used by default",
         scenarioRecentActivity: "Recent activity",
         scenarioActivityNote: "After changing a scenario, linked projects or Agents will be recalculated on the next sync. If this scenario is not linked to anything yet, it can still be kept as a preset.",
         scenarioUsedSkills: "Active Skills",

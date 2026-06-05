@@ -17,7 +17,12 @@ import type {
     ScenarioRecord,
 } from "../../../../../packages/core/src/types/asset";
 import type {SnapshotRecord} from "../../../../../packages/core/src/types/snapshot";
-import type {SyncHistoryEntry, SyncPreviewResult, SyncRunResult} from "../../../../../packages/core/src/types/sync";
+import type {
+    SyncHistoryEntry,
+    SyncInlineTarget,
+    SyncPreviewResult,
+    SyncRunResult
+} from "../../../../../packages/core/src/types/sync";
 import type {TargetDeployMode, TargetRecord} from "../../../../../packages/core/src/types/target";
 import {agentdockClient} from "../client/agentdockClient";
 
@@ -105,6 +110,19 @@ function createProjectId(name: string): string {
     }
 
     return `project-${Date.now()}`;
+}
+
+function buildProjectInlineSyncTargets(project: ProjectRecord): SyncInlineTarget[] {
+    if (project.targetIds.length > 0) {
+        return [];
+    }
+
+    return [{
+        id: `project-root:${project.id}`,
+        name: `${project.name} root`,
+        path: project.path,
+        deployMode: "merge",
+    }];
 }
 
 function normalizeSyncHistoryEntry(value: unknown): SyncHistoryEntry | null {
@@ -1093,6 +1111,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
         const preview = await agentdockClient.sync.preview({
             scenario_id: project.defaultScenarioId,
             target_ids: project.targetIds,
+            inline_targets: buildProjectInlineSyncTargets(project),
         });
 
         if (get().selectedProjectId === projectId) {
@@ -1118,10 +1137,6 @@ export const useAppStore = create<AppStore>((set, get) => ({
             throw new Error(get()._t("projectSyncRequiresScenario"));
         }
 
-        if (project.targetIds.length === 0) {
-            throw new Error(get()._t("projectSyncRequiresTarget"));
-        }
-
         if (project.syncMode === "preview-first" || get().selectedProjectId !== projectId || !get().selectedProjectSyncPreview) {
             const preview = await get().previewProjectSync(projectId);
             if (get().selectedProjectId === projectId) {
@@ -1132,6 +1147,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
         const result = await agentdockClient.sync.run({
             scenario_id: project.defaultScenarioId,
             target_ids: project.targetIds,
+            inline_targets: buildProjectInlineSyncTargets(project),
         });
         const historyEntry: SyncHistoryEntry = {
             id: `${project.id}-${result.synced_at}`,

@@ -13,9 +13,17 @@ export type SyncPlanItem = {
     operation: SyncOperationKind;
 };
 
+export type SyncInlineTarget = {
+    id: string;
+    name: string;
+    path: string;
+    deployMode: "copy" | "merge";
+};
+
 export type SyncPreviewInput = {
     scenario_id: string;
     target_ids?: string[];
+    inline_targets?: SyncInlineTarget[];
 };
 
 export type SyncPreviewResult = {
