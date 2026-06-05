@@ -175,6 +175,12 @@
     flex: 0 0 auto;
 }
 
+.scenario-detail-view .page-header {
+    padding: 20px 32px 0;
+    background: var(--bg-base);
+    border-bottom: 1px solid var(--bd-soft);
+}
+
 /* === Top bar (header) === */
 .page-topbar {
     min-height: 64px;
@@ -1629,6 +1635,130 @@
     gap: 8px;
 }
 
+.project-sync-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.project-sync-history-item {
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--bd);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0)),
+        var(--bg-card);
+}
+
+.project-sync-history-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.project-sync-history-time {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--fg-primary);
+}
+
+.project-sync-history-meta {
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--fg-muted);
+}
+
+.project-sync-history-metrics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.project-sync-history-metric {
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--bd-soft);
+    background: var(--bg-soft);
+    font-size: 11px;
+    color: var(--fg-secondary);
+}
+
+.project-sync-history-notes {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.project-sync-history-note {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.project-sync-history-note.warning {
+    border: 1px solid rgba(245, 158, 11, 0.22);
+    background: rgba(245, 158, 11, 0.08);
+    color: #fbbf24;
+}
+
+.project-sync-history-note.conflict {
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    background: rgba(239, 68, 68, 0.08);
+    color: #fca5a5;
+}
+
+.project-sync-history-note strong {
+    color: var(--fg-primary);
+    font-weight: 600;
+}
+
+.project-sync-history-outputs {
+    margin-top: 12px;
+}
+
+.project-sync-history-label {
+    margin-bottom: 8px;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fg-faint);
+}
+
+.project-sync-history-output-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.project-sync-history-output {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--bd-soft);
+    background: var(--bg-soft);
+}
+
+.project-sync-history-output-title {
+    font-size: 12px;
+    color: var(--fg-secondary);
+}
+
+.project-sync-history-output-path {
+    font-size: 11px;
+    color: var(--fg-faint);
+    font-family: ui-monospace, monospace;
+    word-break: break-all;
+}
+
 .project-sync-preview {
     display: flex;
     flex-direction: column;
@@ -2824,10 +2954,20 @@
     margin-bottom: 16px;
 }
 .scenario-breadcrumb button {
+    padding: 0;
+    border: none;
+    background: transparent;
     color: var(--fg-muted);
+    font: inherit;
+    cursor: pointer;
     transition: color .15s;
 }
 .scenario-breadcrumb button:hover { color: var(--fg-primary); }
+.scenario-breadcrumb button:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+    border-radius: 6px;
+}
 .scenario-breadcrumb-current { color: var(--fg-secondary); }
 
 .scenario-hero {
@@ -2908,6 +3048,7 @@
     align-items: center;
     gap: 8px;
     flex-shrink: 0;
+    padding-top: 4px;
 }
 
 /* === Left card (scenario sections) === */
@@ -3104,11 +3245,17 @@
 .scenario-section-meta {
     display: flex;
     align-items: center;
+    justify-content: flex-end;
     gap: 8px;
+    min-width: 56px;
 }
 .scenario-section-count {
     font-size: 11px;
     color: var(--fg-muted);
+}
+.scenario-section-meta--static,
+.scenario-section-meta--empty {
+    min-height: 24px;
 }
 .scenario-section-stack {
     display: flex;
@@ -3362,6 +3509,7 @@
 .left-card-body:empty::before {
     content: "";
     font-size: 0;
+    color: transparent;
 }
 .scenario-detail-view:not(.scenario-edit-mode) .skill-mini-remove { display: none; }
 

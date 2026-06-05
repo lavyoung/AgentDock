@@ -39,6 +39,33 @@ export type SyncRunConflict = {
     reason: string;
 };
 
+export type SyncHistoryStatus = "success" | "warning" | "conflict";
+
+export type SyncHistoryOutput = {
+    asset_id: string;
+    asset_name: string;
+    asset_type: AssetType;
+    target_id: string;
+    target_name: string;
+    output_path: string;
+    operation: SyncOperationKind;
+};
+
+export type SyncHistoryEntry = {
+    id: string;
+    scenario_id: string;
+    synced_at: string;
+    target_count: number;
+    operation_count: number;
+    written_count: number;
+    warning_count: number;
+    conflict_count: number;
+    status: SyncHistoryStatus;
+    warnings: string[];
+    conflicts: SyncRunConflict[];
+    outputs: SyncHistoryOutput[];
+};
+
 export type SyncRunResult = SyncPreviewResult & {
     written_count: number;
     conflicts: SyncRunConflict[];

@@ -17,7 +17,7 @@ import type {
     ScenarioRecord,
 } from "../../../../../packages/core/src/types/asset";
 import type {SnapshotRecord} from "../../../../../packages/core/src/types/snapshot";
-import type {SyncPreviewResult} from "../../../../../packages/core/src/types/sync";
+import type {SyncHistoryEntry, SyncPreviewResult} from "../../../../../packages/core/src/types/sync";
 import type {TargetDeployMode, TargetRecord} from "../../../../../packages/core/src/types/target";
 import {agentdockClient} from "../client/agentdockClient";
 
@@ -65,12 +65,14 @@ export type ProjectRecord = {
     syncStatus: ProjectSyncStatus;
     lastSyncedAt: string | null;
     agentLabel: string;
+    syncHistory: SyncHistoryEntry[];
     createdAt: string;
     updatedAt: string;
 };
 
 const PROJECTS_STORAGE_KEY = "agentdock:projects";
 const SETTINGS_STORAGE_KEY = "agentdock:settings";
+const MAX_PROJECT_SYNC_HISTORY = 8;
 const DEFAULT_STORED_SETTINGS: StoredSettings = {
     dataPath: "~/.agentdock",
     autoUpdate: true,
@@ -103,6 +105,108 @@ function createProjectId(name: string): string {
     }
 
     return `project-${Date.now()}`;
+}
+
+function normalizeSyncHistoryEntry(value: unknown): SyncHistoryEntry | null {
+    if (!value || typeof value !== "object") {
+        return null;
+    }
+
+    const candidate = value as Record<string, unknown>;
+    if (
+        typeof candidate.id !== "string" ||
+        typeof candidate.scenario_id !== "string" ||
+        typeof candidate.synced_at !== "string" ||
+        typeof candidate.target_count !== "number" ||
+        typeof candidate.operation_count !== "number" ||
+        typeof candidate.written_count !== "number" ||
+        typeof candidate.warning_count !== "number" ||
+        typeof candidate.conflict_count !== "number" ||
+        (candidate.status !== "success" && candidate.status !== "warning" && candidate.status !== "conflict")
+    ) {
+        return null;
+    }
+
+    const warnings = Array.isArray(candidate.warnings)
+        ? candidate.warnings.filter((warning): warning is string => typeof warning === "string")
+        : [];
+    const conflicts = Array.isArray(candidate.conflicts)
+        ? candidate.conflicts.flatMap((conflict) => {
+            if (!conflict || typeof conflict !== "object") {
+                return [];
+            }
+
+            const nextConflict = conflict as Record<string, unknown>;
+            if (
+                typeof nextConflict.asset_id !== "string" ||
+                typeof nextConflict.asset_name !== "string" ||
+                typeof nextConflict.asset_type !== "string" ||
+                typeof nextConflict.target_id !== "string" ||
+                typeof nextConflict.target_name !== "string" ||
+                typeof nextConflict.output_path !== "string" ||
+                typeof nextConflict.reason !== "string"
+            ) {
+                return [];
+            }
+
+            return [{
+                asset_id: nextConflict.asset_id,
+                asset_name: nextConflict.asset_name,
+                asset_type: nextConflict.asset_type as SyncHistoryEntry["conflicts"][number]["asset_type"],
+                target_id: nextConflict.target_id,
+                target_name: nextConflict.target_name,
+                output_path: nextConflict.output_path,
+                reason: nextConflict.reason,
+            }];
+        })
+        : [];
+    const outputs = Array.isArray(candidate.outputs)
+        ? candidate.outputs.flatMap((output) => {
+            if (!output || typeof output !== "object") {
+                return [];
+            }
+
+            const nextOutput = output as Record<string, unknown>;
+            if (
+                typeof nextOutput.asset_id !== "string" ||
+                typeof nextOutput.asset_name !== "string" ||
+                typeof nextOutput.asset_type !== "string" ||
+                typeof nextOutput.target_id !== "string" ||
+                typeof nextOutput.target_name !== "string" ||
+                typeof nextOutput.output_path !== "string" ||
+                (nextOutput.operation !== "create" &&
+                    nextOutput.operation !== "update" &&
+                    nextOutput.operation !== "merge")
+            ) {
+                return [];
+            }
+
+            return [{
+                asset_id: nextOutput.asset_id,
+                asset_name: nextOutput.asset_name,
+                asset_type: nextOutput.asset_type as SyncHistoryEntry["outputs"][number]["asset_type"],
+                target_id: nextOutput.target_id,
+                target_name: nextOutput.target_name,
+                output_path: nextOutput.output_path,
+                operation: nextOutput.operation as SyncHistoryEntry["outputs"][number]["operation"],
+            }];
+        })
+        : [];
+
+    return {
+        id: candidate.id,
+        scenario_id: candidate.scenario_id,
+        synced_at: candidate.synced_at,
+        target_count: candidate.target_count,
+        operation_count: candidate.operation_count,
+        written_count: candidate.written_count,
+        warning_count: candidate.warning_count,
+        conflict_count: candidate.conflict_count,
+        status: candidate.status as SyncHistoryEntry["status"],
+        warnings,
+        conflicts,
+        outputs,
+    };
 }
 
 function readStoredProjects(): ProjectRecord[] {
@@ -156,6 +260,14 @@ function readStoredProjects(): ProjectRecord[] {
                 lastSyncedAt:
                     typeof candidate.lastSyncedAt === "string" ? candidate.lastSyncedAt : null,
                 agentLabel: candidate.agentLabel,
+                syncHistory: Array.isArray(candidate.syncHistory)
+                    ? candidate.syncHistory
+                        .flatMap((entry) => {
+                            const normalizedEntry = normalizeSyncHistoryEntry(entry);
+                            return normalizedEntry ? [normalizedEntry] : [];
+                        })
+                        .slice(0, MAX_PROJECT_SYNC_HISTORY)
+                    : [],
                 createdAt: candidate.createdAt,
                 updatedAt: candidate.updatedAt,
             }];
@@ -617,7 +729,12 @@ export const useAppStore = create<AppStore>((set, get) => ({
         } catch (err) {
             // eslint-disable-next-line no-console
             console.error("[AgentDock] openDetailPanel.openAsset failed:", err);
-            get().pushToast("error", `Failed to open asset: ${err instanceof Error ? err.message : String(err)}`);
+            get().pushToast(
+                "error",
+                get()
+                    ._t("assetOpenFailed")
+                    .replace("{message}", err instanceof Error ? err.message : String(err))
+            );
             return;
         }
         set({detailPanelOpen: true, detailPanelTab: "overview"});
@@ -655,7 +772,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
     async saveRule() {
         const {selectedRule, ruleName, ruleTitle, ruleDescription, ruleSeverity, ruleEnabled} = get();
         if (!ruleName.trim()) {
-            get().pushToast("error", get()._t("toast.ruleNameRequired"));
+            get().pushToast("error", get()._t("toastRuleNameRequired"));
             return;
         }
         if (!selectedRule) {
@@ -703,7 +820,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
     async saveScenario() {
         const {selectedScenario, scenarioName, scenarioTitle, scenarioDescription} = get();
         if (!scenarioName.trim()) {
-            get().pushToast("error", get()._t("toast.scenarioNameRequired"));
+            get().pushToast("error", get()._t("toastScenarioNameRequired"));
             return;
         }
         if (!selectedScenario) {
@@ -846,6 +963,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
             syncStatus: "pending",
             lastSyncedAt: null,
             agentLabel: projectAgentLabel.trim() || "OpenCode Agent",
+            syncHistory: [],
             createdAt: now,
             updatedAt: now,
         };
@@ -900,12 +1018,43 @@ export const useAppStore = create<AppStore>((set, get) => ({
             scenario_id: project.defaultScenarioId,
             target_ids: project.targetIds,
         });
+        const historyEntry: SyncHistoryEntry = {
+            id: `${project.id}-${result.synced_at}`,
+            scenario_id: project.defaultScenarioId,
+            synced_at: result.synced_at,
+            target_count: result.target_count,
+            operation_count: result.operation_count,
+            written_count: result.written_count,
+            warning_count: result.warnings.length,
+            conflict_count: result.conflicts.length,
+            status:
+                result.conflicts.length > 0
+                    ? "conflict"
+                    : result.warnings.length > 0
+                        ? "warning"
+                        : "success",
+            warnings: result.warnings,
+            conflicts: result.conflicts,
+            outputs: result.items.slice(0, 3).map((item) => ({
+                asset_id: item.asset_id,
+                asset_name: item.asset_name,
+                asset_type: item.asset_type,
+                target_id: item.target_id,
+                target_name: item.target_name,
+                output_path: item.output_path,
+                operation: item.operation,
+            })),
+        };
         const nextProjects = projects.map((candidate) =>
             candidate.id === project.id
                 ? {
                     ...candidate,
                     syncStatus: result.conflicts.length > 0 ? "conflict" : "synced",
                     lastSyncedAt: result.synced_at,
+                    syncHistory: [historyEntry, ...candidate.syncHistory].slice(
+                        0,
+                        MAX_PROJECT_SYNC_HISTORY
+                    ),
                     updatedAt: result.synced_at,
                 }
                 : candidate

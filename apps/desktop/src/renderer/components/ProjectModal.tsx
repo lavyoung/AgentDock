@@ -131,7 +131,7 @@ export function ProjectModal({open, onClose}: ProjectModalProps): JSX.Element {
                             type="text"
                             value={projectName}
                             onChange={(event) => setProjectName(event.target.value)}
-                            placeholder="Frontend Review Workspace"
+                            placeholder={t("projectNamePlaceholder")}
                             autoFocus
                         />
                     </div>
@@ -143,7 +143,7 @@ export function ProjectModal({open, onClose}: ProjectModalProps): JSX.Element {
                                 type="text"
                                 value={projectPath}
                                 onChange={(event) => setProjectPath(event.target.value)}
-                                placeholder="D:\\Projects\\frontend-review"
+                                placeholder={t("projectPathPlaceholder")}
                             />
                             <Button
                                 type="button"
@@ -210,7 +210,7 @@ export function ProjectModal({open, onClose}: ProjectModalProps): JSX.Element {
                                 <strong>{projectName.trim() || "-"}</strong>
                             </div>
                             <div className="new-project-preview-item">
-                                <span>ID</span>
+                                <span>{t("panelFieldId")}</span>
                                 <strong>{createPreviewId(projectName) || "-"}</strong>
                             </div>
                             <div className="new-project-preview-item">

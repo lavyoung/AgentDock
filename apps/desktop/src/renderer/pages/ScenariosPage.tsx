@@ -738,7 +738,9 @@ function ScenarioDetail(): JSX.Element {
                 <section className="left-card">
                     <header className="left-card-header">
                         <h3>{t("scenarioProjects")}</h3>
-                        <span className="scenario-section-count">{linkedProjects.length}</span>
+                        <div className="scenario-section-meta scenario-section-meta--static">
+                            <span className="scenario-section-count">{linkedProjects.length}</span>
+                        </div>
                     </header>
                     <div className="left-card-body scenario-section-stack">
                         {linkedProjects.length === 0 ? (
@@ -774,6 +776,7 @@ function ScenarioDetail(): JSX.Element {
                 <section className="left-card">
                     <header className="left-card-header">
                         <h3>{t("scenarioRecentActivity")}</h3>
+                        <div className="scenario-section-meta scenario-section-meta--empty" aria-hidden="true" />
                     </header>
                     <div className="left-card-body scenario-activity-copy">
                         {t("scenarioActivityNote")}

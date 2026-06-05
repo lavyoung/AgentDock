@@ -217,6 +217,14 @@ type MessageCatalog = {
     projectSyncMatrixEmpty: string;
     projectSyncMatrixSelected: string;
     projectSyncMatrixNotSelected: string;
+    projectSyncHistoryTitle: string;
+    projectSyncHistoryDesc: string;
+    projectSyncHistoryEmpty: string;
+    projectSyncHistorySuccess: string;
+    projectSyncHistoryWarning: string;
+    projectSyncHistoryOutputs: string;
+    projectNamePlaceholder: string;
+    projectPathPlaceholder: string;
     scenariosTitle: string;
     scenariosEmpty: string;
     scenariosComingSoon: string;
@@ -264,6 +272,7 @@ type MessageCatalog = {
     toastRuleNameRequired: string;
     toastScenarioNameRequired: string;
     toastScenarioCreated: string;
+    assetOpenFailed: string;
     severityError: string;
     severityWarning: string;
     severityInfo: string;
@@ -511,7 +520,7 @@ export const messages: Record<Locale, Catalog> = {
         projectScenarioAgents: "Agent",
         projectNoScenarioLinked: "\u8fd8\u6ca1\u6709\u5173\u8054\u573a\u666f\uff0c\u8fd9\u4e2a\u9879\u76ee\u76ee\u524d\u53ea\u4f5c\u4e3a\u672c\u5730\u5de5\u4f5c\u533a\u8bb0\u5f55\u3002",
         projectWorkflowTitle: "\u540c\u6b65\u95ed\u73af",
-        projectWorkflowDesc: "\u9879\u76ee\u7528\u6765\u627f\u63a5\u573a\u666f\u548c\u76ee\u6807\u7684\u771f\u5b9e\u95ed\u73af\u3002\u73b0\u5728\u53ef\u4ee5\u5148\u5728\u8fd9\u91cc\u9884\u89c8\u540c\u6b65\u8ba1\u5212\uff0c\u518d\u624b\u52a8\u6267\u884c run sync\u3002",
+        projectWorkflowDesc: "\u9879\u76ee\u7528\u6765\u627f\u63a5\u573a\u666f\u548c\u76ee\u6807\u7684\u771f\u5b9e\u95ed\u73af\u3002\u73b0\u5728\u53ef\u4ee5\u5148\u5728\u8fd9\u91cc\u9884\u89c8\u540c\u6b65\u8ba1\u5212\uff0c\u518d\u624b\u52a8\u6267\u884c\u540c\u6b65\u3002",
         projectSyncPreviewAction: "\u9884\u89c8\u540c\u6b65",
         projectSyncRunAction: "\u6267\u884c\u540c\u6b65",
         projectSyncRequiresScenario: "\u8bf7\u5148\u4e3a\u9879\u76ee\u5173\u8054\u4e00\u4e2a\u573a\u666f\u3002",
@@ -534,11 +543,19 @@ export const messages: Record<Locale, Catalog> = {
         projectSyncOperationCreate: "\u521b\u5efa",
         projectSyncOperationUpdate: "\u66f4\u65b0",
         projectSyncOperationMerge: "\u5408\u5e76",
-        projectSyncMatrixTitle: "Sync Matrix",
-        projectSyncMatrixDesc: "\u4e3a\u8fd9\u4e2a\u9879\u76ee\u9009\u51fa\u8981\u53c2\u4e0e preview / run sync \u7684\u76ee\u6807\u3002",
-        projectSyncMatrixEmpty: "\u8fd8\u6ca1\u6709\u53ef\u9009\u7684 targets\uff0c\u53ef\u4ee5\u5148\u53bb Targets \u9875\u6dfb\u52a0\u76ee\u6807\u76ee\u5f55\u3002",
+        projectSyncMatrixTitle: "\u540c\u6b65\u77e9\u9635",
+        projectSyncMatrixDesc: "\u4e3a\u8fd9\u4e2a\u9879\u76ee\u9009\u51fa\u9884\u89c8\u6216\u6267\u884c\u540c\u6b65\u65f6\u8981\u5305\u542b\u7684\u76ee\u6807\u3002",
+        projectSyncMatrixEmpty: "\u8fd8\u6ca1\u6709\u53ef\u9009\u7684\u76ee\u6807\uff0c\u53ef\u4ee5\u5148\u5230\u300c\u76ee\u6807\u300d\u9875\u9762\u6dfb\u52a0\u76ee\u5f55\u3002",
         projectSyncMatrixSelected: "\u5df2\u9009\u4e2d",
         projectSyncMatrixNotSelected: "\u672a\u9009\u4e2d",
+        projectSyncHistoryTitle: "\u540c\u6b65\u8bb0\u5f55",
+        projectSyncHistoryDesc: "\u4fdd\u7559\u6700\u8fd1\u7684\u624b\u52a8\u540c\u6b65\u7ed3\u679c\uff0c\u65b9\u4fbf\u56de\u770b\u5199\u5165\u60c5\u51b5\u4e0e\u51b2\u7a81\u63d0\u793a\u3002",
+        projectSyncHistoryEmpty: "\u8fd8\u6ca1\u6709\u540c\u6b65\u8bb0\u5f55\uff0c\u5148\u6267\u884c\u4e00\u6b21\u540c\u6b65\u540e\u518d\u56de\u6765\u67e5\u770b\u3002",
+        projectSyncHistorySuccess: "\u6210\u529f",
+        projectSyncHistoryWarning: "\u542b\u63d0\u9192",
+        projectSyncHistoryOutputs: "\u8fd1\u671f\u5199\u5165",
+        projectNamePlaceholder: "\u4f8b\u5982\uff1aFrontend Review Workspace",
+        projectPathPlaceholder: "D:\\Projects\\frontend-review",
         scenariosTitle: "\u573a\u666f",
         scenariosEmpty: "\u6682\u65e0\u573a\u666f\u3002",
         scenariosComingSoon: "\u573a\u666f\u8ba9\u4f60\u53ef\u4ee5\u5c06\u8d44\u4ea7\u5206\u7ec4\u5e76\u6309\u573a\u666f\u542f\u7528/\u7981\u7528\u3002\u8fd9\u662f\u7b2c\u4e8c\u9636\u6bb5\u7684\u529f\u80fd\u3002",
@@ -586,6 +603,7 @@ export const messages: Record<Locale, Catalog> = {
         toastRuleNameRequired: "\u8bf7\u586b\u5199\u89c4\u5219\u540d\u79f0",
         toastScenarioNameRequired: "\u8bf7\u586b\u5199\u573a\u666f\u540d\u79f0",
         toastScenarioCreated: "\u573a\u666f \u201c{name}\u201d \u5df2\u521b\u5efa",
+        assetOpenFailed: "\u6253\u5f00\u8d44\u4ea7\u5931\u8d25\uff1a{message}",
         severityError: "\u9519\u8bef",
         severityWarning: "\u8b66\u544a",
         severityInfo: "\u63d0\u793a",
@@ -857,6 +875,14 @@ export const messages: Record<Locale, Catalog> = {
         projectSyncMatrixEmpty: "No targets are available yet. Add one in the Targets page first.",
         projectSyncMatrixSelected: "Selected",
         projectSyncMatrixNotSelected: "Not selected",
+        projectSyncHistoryTitle: "Sync history",
+        projectSyncHistoryDesc: "Keep the latest manual sync results here so it is easy to review writes, warnings, and conflicts.",
+        projectSyncHistoryEmpty: "No sync history yet. Run a sync once to populate this panel.",
+        projectSyncHistorySuccess: "Successful",
+        projectSyncHistoryWarning: "Warnings",
+        projectSyncHistoryOutputs: "Recent outputs",
+        projectNamePlaceholder: "e.g. Frontend Review Workspace",
+        projectPathPlaceholder: "D:\\Projects\\frontend-review",
         scenariosTitle: "Scenarios",
         scenariosEmpty: "No scenarios yet.",
         scenariosComingSoon: "Scenarios let you group assets and enable/disable them by scenario. This is a Phase 2 feature.",
@@ -904,6 +930,7 @@ export const messages: Record<Locale, Catalog> = {
         toastRuleNameRequired: "Please fill in the rule name",
         toastScenarioNameRequired: "Please fill in the scenario name",
         toastScenarioCreated: 'Scenario "{name}" created',
+        assetOpenFailed: 'Failed to open asset: {message}',
         severityError: "Error",
         severityWarning: "Warning",
         severityInfo: "Info",

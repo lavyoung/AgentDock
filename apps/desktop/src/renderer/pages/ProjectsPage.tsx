@@ -1,6 +1,6 @@
 import {type JSX, useEffect, useMemo, useState} from "react";
 
-import type {SyncPreviewResult, SyncRunResult} from "../../../../../packages/core/src/types/sync";
+import type {SyncHistoryEntry, SyncPreviewResult, SyncRunResult} from "../../../../../packages/core/src/types/sync";
 import {ProjectModal} from "../components/ProjectModal";
 import {useI18n} from "../i18n/useI18n";
 import {useAppStore} from "../stores/useAppStore";
@@ -76,6 +76,33 @@ function getOperationLabel(
 
 function isSyncRunResult(preview: SyncPreviewResult | null): preview is SyncRunResult {
     return Boolean(preview && "written_count" in preview && "conflicts" in preview);
+}
+
+function getHistoryStatusBadgeClass(status: SyncHistoryEntry["status"]): string {
+    if (status === "conflict") {
+        return "badge badge-red";
+    }
+
+    if (status === "warning") {
+        return "badge badge-orange";
+    }
+
+    return "badge badge-green";
+}
+
+function getHistoryStatusLabel(
+    t: (key: string) => string,
+    status: SyncHistoryEntry["status"]
+): string {
+    if (status === "conflict") {
+        return t("projectSyncStatusConflict");
+    }
+
+    if (status === "warning") {
+        return t("projectSyncHistoryWarning");
+    }
+
+    return t("projectSyncHistorySuccess");
 }
 
 export function ProjectsPage(): JSX.Element {
@@ -290,7 +317,7 @@ export function ProjectsPage(): JSX.Element {
 
                                                 <div className="project-detail-grid">
                                                     <div className="field">
-                                                        <label>ID</label>
+                                                        <label>{t("panelFieldId")}</label>
                                                         <div className="field-readonly">{selectedProject.id}</div>
                                                     </div>
                                                     <div className="field">
@@ -419,6 +446,124 @@ export function ProjectsPage(): JSX.Element {
                                                     );
                                                 })}
                                             </div>
+                                        ) : (
+                                            <div className="projects-note-card project-sync-empty">
+                                                <p>{t("projectsSubtitle")}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </section>
+
+                                <section className="left-card">
+                                    <header className="left-card-header">
+                                        <h3>{t("projectSyncHistoryTitle")}</h3>
+                                        {selectedProject ? (
+                                            <span className="badge badge-gray">
+                                                {selectedProject.syncHistory.length}
+                                            </span>
+                                        ) : null}
+                                    </header>
+                                    <div className="left-card-body">
+                                        <div className="projects-note-card">
+                                            <p>{t("projectSyncHistoryDesc")}</p>
+                                        </div>
+
+                                        {selectedProject ? (
+                                            selectedProject.syncHistory.length > 0 ? (
+                                                <div className="project-sync-history-list">
+                                                    {selectedProject.syncHistory.map((entry) => (
+                                                        <article
+                                                            key={entry.id}
+                                                            className="project-sync-history-item"
+                                                        >
+                                                            <div className="project-sync-history-header">
+                                                                <div>
+                                                                    <div className="project-sync-history-time">
+                                                                        {formatDate(entry.synced_at)}
+                                                                    </div>
+                                                                    <div className="project-sync-history-meta">
+                                                                        {entry.target_count} {t("projectSyncTargets")} ·{" "}
+                                                                        {entry.operation_count} {t("projectSyncOperations")}
+                                                                    </div>
+                                                                </div>
+                                                                <span
+                                                                    className={getHistoryStatusBadgeClass(
+                                                                        entry.status
+                                                                    )}
+                                                                >
+                                                                    {getHistoryStatusLabel(t, entry.status)}
+                                                                </span>
+                                                            </div>
+
+                                                            <div className="project-sync-history-metrics">
+                                                                <span className="project-sync-history-metric">
+                                                                    {t("projectSyncWritten")}: {entry.written_count}
+                                                                </span>
+                                                                <span className="project-sync-history-metric">
+                                                                    {t("projectSyncWarnings")}: {entry.warning_count}
+                                                                </span>
+                                                                <span className="project-sync-history-metric">
+                                                                    {t("projectSyncConflicts")}: {entry.conflict_count}
+                                                                </span>
+                                                            </div>
+
+                                                            {entry.warnings.length > 0 ? (
+                                                                <div className="project-sync-history-notes">
+                                                                    {entry.warnings.slice(0, 2).map((warning) => (
+                                                                        <div
+                                                                            key={warning}
+                                                                            className="project-sync-history-note warning"
+                                                                        >
+                                                                            {warning}
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            ) : null}
+
+                                                            {entry.conflicts.length > 0 ? (
+                                                                <div className="project-sync-history-notes">
+                                                                    {entry.conflicts.slice(0, 2).map((conflict) => (
+                                                                        <div
+                                                                            key={`${entry.id}-${conflict.asset_id}-${conflict.output_path}`}
+                                                                            className="project-sync-history-note conflict"
+                                                                        >
+                                                                            <strong>{conflict.asset_name}</strong>
+                                                                            <span>{conflict.reason}</span>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            ) : null}
+
+                                                            {entry.outputs.length > 0 ? (
+                                                                <div className="project-sync-history-outputs">
+                                                                    <div className="project-sync-history-label">
+                                                                        {t("projectSyncHistoryOutputs")}
+                                                                    </div>
+                                                                    <div className="project-sync-history-output-list">
+                                                                        {entry.outputs.map((output) => (
+                                                                            <div
+                                                                                key={`${entry.id}-${output.target_id}-${output.asset_id}`}
+                                                                                className="project-sync-history-output"
+                                                                            >
+                                                                                <span className="project-sync-history-output-title">
+                                                                                    {output.asset_name} · {output.target_name}
+                                                                                </span>
+                                                                                <span className="project-sync-history-output-path">
+                                                                                    {output.output_path}
+                                                                                </span>
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            ) : null}
+                                                        </article>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <div className="projects-note-card project-sync-empty">
+                                                    <p>{t("projectSyncHistoryEmpty")}</p>
+                                                </div>
+                                            )
                                         ) : (
                                             <div className="projects-note-card project-sync-empty">
                                                 <p>{t("projectsSubtitle")}</p>
