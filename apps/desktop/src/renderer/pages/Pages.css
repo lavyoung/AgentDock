@@ -1352,6 +1352,9 @@
 .left-card-body {
     padding: 12px 16px;
 }
+.left-card-body.is-empty::before {
+    content: "";
+}
 
 .install-page-body,
 .projects-page-body {
@@ -2844,6 +2847,10 @@
     flex: 1;
     min-width: 0;
 }
+.scenario-hero-content {
+    flex: 1;
+    min-width: 0;
+}
 .scenario-hero-icon {
     width: 56px;
     height: 56px;
@@ -2857,13 +2864,13 @@
     font-size: 24px;
     font-weight: 600;
     color: var(--fg-primary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    overflow-wrap: anywhere;
 }
 .scenario-hero-meta {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 12px;
     margin-top: 6px;
 }
@@ -2872,12 +2879,14 @@
     color: var(--fg-secondary);
     margin-top: 12px;
     line-height: 1.6;
-    max-width: 600px;
+    width: 100%;
+    max-width: none;
 }
 .scenario-hero-input {
     font-size: 24px;
     font-weight: 600;
-    max-width: 400px;
+    width: 100%;
+    min-height: 52px;
 }
 .scenario-hero-id {
     font-size: 12px;
@@ -2889,8 +2898,10 @@
     color: #22c55e;
 }
 .scenario-hero-textarea {
-    max-width: 500px;
+    width: 100%;
     margin-top: 12px;
+    min-height: 120px;
+    resize: vertical;
 }
 .scenario-hero-actions {
     display: flex;
@@ -3347,6 +3358,11 @@
 /* === Scenario edit mode === */
 .scenario-detail-view.scenario-edit-mode .scenario-section-add { display: flex; }
 .scenario-detail-view:not(.scenario-edit-mode) .scenario-section-add { display: none; }
+
+.left-card-body:empty::before {
+    content: "";
+    font-size: 0;
+}
 .scenario-detail-view:not(.scenario-edit-mode) .skill-mini-remove { display: none; }
 
 /* ============================================================

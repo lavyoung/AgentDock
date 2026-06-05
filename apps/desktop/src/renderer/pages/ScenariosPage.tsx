@@ -245,7 +245,7 @@ function NewScenarioModal({onClose, onCreate}: {onClose: () => void; onCreate: (
                                 type="text"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
-                                placeholder="e.g. frontend-review"
+                                placeholder={t("newScenarioNamePlaceholder")}
                                 autoFocus
                             />
                         </div>
@@ -491,13 +491,14 @@ function ScenarioDetail(): JSX.Element {
                                 <path d="M12 3l1.5 4.5H18l-3.75 2.73 1.43 4.41L12 12l-3.68 2.64 1.43-4.41L6 7.5h4.5L12 3z"/>
                             </svg>
                         </div>
-                        <div>
+                        <div className="scenario-hero-content">
                             {isEdit ? (
                                 <input
-                                    className="form-input"
+                                    type="text"
+                                    className="form-input scenario-hero-input"
                                     value={scenarioName}
                                     onChange={(e) => setScenarioName(e.target.value)}
-                                    className="form-input scenario-hero-input"
+                                    placeholder={t("newScenarioNamePlaceholder")}
                                 />
                             ) : (
                                 <h1 className="scenario-hero-title">{selectedScenario.title || selectedScenario.name}</h1>
@@ -511,12 +512,11 @@ function ScenarioDetail(): JSX.Element {
                             </div>
                             {isEdit ? (
                                 <textarea
-                                    className="form-textarea"
+                                    className="form-textarea scenario-hero-textarea"
                                     value={scenarioDescription}
                                     onChange={(e) => setScenarioDescription(e.target.value)}
                                     placeholder={t("newScenarioDescPlaceholder")}
-                                    rows={2}
-                                    className="form-textarea scenario-hero-textarea"
+                                    rows={4}
                                 />
                             ) : (
                                 selectedScenario.description && (

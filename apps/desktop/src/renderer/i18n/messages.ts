@@ -248,6 +248,7 @@ type MessageCatalog = {
     newScenarioTitle: string;
     newScenarioHelp: string;
     newScenarioName: string;
+    newScenarioNamePlaceholder: string;
     newScenarioDescPlaceholder: string;
     newScenarioPreviewHint: string;
     newScenarioDescLabel: string;
@@ -543,10 +544,10 @@ export const messages: Record<Locale, Catalog> = {
         scenariosComingSoon: "\u573a\u666f\u8ba9\u4f60\u53ef\u4ee5\u5c06\u8d44\u4ea7\u5206\u7ec4\u5e76\u6309\u573a\u666f\u542f\u7528/\u7981\u7528\u3002\u8fd9\u662f\u7b2c\u4e8c\u9636\u6bb5\u7684\u529f\u80fd\u3002",
         newScenario: "\u65b0\u5efa\u573a\u666f",
         scenarioBuiltIn: "\u5185\u7f6e\u9ed8\u8ba4\u573a\u666f",
-        scenarioBuiltInDesc: "\u9ed8\u8ba4\u573a\u666f\u662f AgentDock \u5185\u7f6e\u7684\u5f00\u7bb1\u5373\u7528\u914d\u7f6e\uff0c\u5305\u542b 12 \u4e2a\u5e38\u7528 Skills \u4e0e OpenCode \u4f5c\u4e3a\u9ed8\u8ba4 Agent\u3002",
+        scenarioBuiltInDesc: "\u9ed8\u8ba4\u573a\u666f\u662f AgentDock \u5185\u7f6e\u7684\u5f00\u7bb1\u5373\u7528\u914d\u7f6e\uff0c\u5305\u542b 12 \u4e2a\u5e38\u7528\u6280\u80fd\uff0c\u5e76\u4f7f\u7528 OpenCode \u4f5c\u4e3a\u9ed8\u8ba4 Agent\u3002",
         scenarioSkills: "\u6280\u80fd",
         scenarioRules: "\u89c4\u5219",
-        scenarioAgentFiles: "Agent \u6587\u4ef6",
+        scenarioAgentFiles: "AGENTS.md \u6587\u4ef6",
         scenarioAgent: "Agent",
         scenarioProjects: "\u5173\u8054\u9879\u76ee",
         scenarioRecentActivity: "\u6700\u8fd1\u6d3b\u52a8",
@@ -559,7 +560,7 @@ export const messages: Record<Locale, Catalog> = {
         scenarioAddAgent: "\u6dfb\u52a0 Agent",
         scenarioEditScenario: "\u7f16\u8f91\u573a\u666f",
         scenarioDeleteScenario: "\u5220\u9664\u573a\u666f",
-        scenarioListSubtitle: "\u9884\u8bbe\u7684\u8d44\u4ea7 + Agent \u7ec4\u5408\uff0c\u521b\u5efa\u9879\u76ee\u65f6\u53ef\u76f4\u63a5\u9009\u7528",
+        scenarioListSubtitle: "\u9884\u8bbe\u7684\u8d44\u4ea7\u4e0e Agent \u7ec4\u5408\uff0c\u521b\u5efa\u9879\u76ee\u65f6\u53ef\u4ee5\u76f4\u63a5\u9009\u7528\u3002",
         scenarioRemoveAsset: "\u79fb\u9664",
         scenarioNoAgents: "\u8fd8\u672a\u9009\u62e9 Agent",
         scenarioAgentPickerTitle: "\u9009\u62e9 Agent",
@@ -569,6 +570,7 @@ export const messages: Record<Locale, Catalog> = {
         newScenarioTitle: "\u65b0\u5efa\u573a\u666f",
         newScenarioHelp: "\u573a\u666f\u662f\u4e00\u7ec4\u9884\u8bbe\u914d\u7f6e\uff08\u5173\u8054\u7684 Agent + \u542f\u7528\u7684\u6280\u80fd\uff09\u3002\u4e00\u4e2a Agent \u53ef\u88ab\u591a\u4e2a\u573a\u666f\u5171\u7528\u3002",
         newScenarioName: "\u573a\u666f\u540d\u79f0",
+        newScenarioNamePlaceholder: "\u4f8b\u5982\uff1afrontend-review",
         newScenarioDescPlaceholder: "\u63cf\u8ff0\u6b64\u573a\u666f\u7684\u7528\u9014\u2026",
         newScenarioPreviewHint: "\u573a\u666f\u521b\u5efa\u540e\u4f1a\u51fa\u73b0\u5728\u4fa7\u680f\u201c\u573a\u666f\u201d\u5206\u7c7b\u4e0b\u3002",
         newScenarioDescLabel: "\u63cf\u8ff0",
@@ -886,6 +888,7 @@ export const messages: Record<Locale, Catalog> = {
         newScenarioTitle: "New scenario",
         newScenarioHelp: "A scenario is a preset bundle (default Agent + which skills to enable). After creation, you can attach it to a project.",
         newScenarioName: "Scenario name",
+        newScenarioNamePlaceholder: "e.g. frontend-review",
         newScenarioDescPlaceholder: "Describe what this scenario is for...",
         newScenarioPreviewHint: "The scenario will appear under 'Scenarios' in the sidebar after creation.",
         newScenarioDescLabel: "Description",
