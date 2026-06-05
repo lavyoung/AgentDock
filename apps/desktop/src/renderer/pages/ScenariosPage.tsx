@@ -1,6 +1,7 @@
 import {type JSX, useEffect, useState} from "react";
 
 import {listSupportedApplications} from "../../../../../packages/core/src/application/applicationCatalog";
+import {Modal} from "../components/Modal";
 import {useI18n} from "../i18n/useI18n";
 import {useAppStore} from "../stores/useAppStore";
 import "./Pages.css";
@@ -221,6 +222,7 @@ function NewScenarioModal({onClose, onCreate}: {onClose: () => void; onCreate: (
     const name = useAppStore((s) => s.scenarioName);
     const description = useAppStore((s) => s.scenarioDescription);
     const setName = useAppStore((s) => s.setScenarioName);
+    const setTitle = useAppStore((s) => s.setScenarioTitle);
     const setDescription = useAppStore((s) => s.setScenarioDescription);
 
     return (
@@ -244,7 +246,10 @@ function NewScenarioModal({onClose, onCreate}: {onClose: () => void; onCreate: (
                                 className="form-input"
                                 type="text"
                                 value={name}
-                                onChange={(e) => setName(e.target.value)}
+                                onChange={(e) => {
+                                    setName(e.target.value);
+                                    setTitle(e.target.value);
+                                }}
                                 placeholder={t("newScenarioNamePlaceholder")}
                                 autoFocus
                             />
@@ -268,6 +273,69 @@ function NewScenarioModal({onClose, onCreate}: {onClose: () => void; onCreate: (
                 </div>
             </div>
         </div>
+    );
+}
+
+function EditScenarioModal({
+    open,
+    onClose,
+    onSave,
+}: {
+    open: boolean;
+    onClose: () => void;
+    onSave: () => void;
+}): JSX.Element {
+    const {t} = useI18n();
+    const scenarioName = useAppStore((s) => s.scenarioName);
+    const scenarioDescription = useAppStore((s) => s.scenarioDescription);
+    const setScenarioName = useAppStore((s) => s.setScenarioName);
+    const setScenarioTitle = useAppStore((s) => s.setScenarioTitle);
+    const setScenarioDescription = useAppStore((s) => s.setScenarioDescription);
+
+    return (
+        <Modal
+            open={open}
+            title={t("scenarioEditScenario")}
+            onClose={onClose}
+            size="md"
+            footer={(
+                <>
+                    <button type="button" className="btn btn-ghost" onClick={onClose}>
+                        {t("close")}
+                    </button>
+                    <button type="button" className="btn btn-primary" onClick={onSave}>
+                        {t("save")}
+                    </button>
+                </>
+            )}
+        >
+            <div className="new-scenario-form">
+                <div className="form-field">
+                    <label className="form-label">{t("newScenarioName")}</label>
+                    <input
+                        className="form-input"
+                        type="text"
+                        value={scenarioName}
+                        onChange={(event) => {
+                            setScenarioName(event.target.value);
+                            setScenarioTitle(event.target.value);
+                        }}
+                        placeholder={t("newScenarioNamePlaceholder")}
+                        autoFocus
+                    />
+                </div>
+                <div className="form-field">
+                    <label className="form-label">{t("newScenarioDescLabel")}</label>
+                    <textarea
+                        className="form-textarea"
+                        value={scenarioDescription}
+                        onChange={(event) => setScenarioDescription(event.target.value)}
+                        placeholder={t("newScenarioDescPlaceholder")}
+                        rows={4}
+                    />
+                </div>
+            </div>
+        </Modal>
     );
 }
 
@@ -439,25 +507,22 @@ function AgentPicker({onClose}: {onClose: () => void}): JSX.Element {
 function ScenarioDetail(): JSX.Element {
     const {t} = useI18n();
     const selectedScenario = useAppStore((s) => s.selectedScenario);
-    const scenarioDetailView = useAppStore((s) => s.scenarioDetailView);
     const assets = useAppStore((s) => s.assets);
     const rules = useAppStore((s) => s.rules);
     const projects = useAppStore((s) => s.projects);
     const refreshApplications = useAppStore((s) => s.refreshApplications);
     const setView = useAppStore((s) => s.setView);
     const openProject = useAppStore((s) => s.openProject);
-    const setScenarioDetailView = useAppStore((s) => s.setScenarioDetailView);
-    const removeAssetFromScenario = useAppStore((s) => s.removeAssetFromScenario);
-    const removeAgentAppFromScenario = useAppStore((s) => s.removeAgentAppFromScenario);
     const openAssetPicker = useAppStore((s) => s.openAssetPicker);
     const saveScenario = useAppStore((s) => s.saveScenario);
     const deleteScenario = useAppStore((s) => s.deleteScenario);
     const scenarioName = useAppStore((s) => s.scenarioName);
-    const scenarioDescription = useAppStore((s) => s.scenarioDescription);
     const setScenarioName = useAppStore((s) => s.setScenarioName);
+    const setScenarioTitle = useAppStore((s) => s.setScenarioTitle);
     const setScenarioDescription = useAppStore((s) => s.setScenarioDescription);
     const availableAgents = useAvailableAgents();
     const [showAgentPicker, setShowAgentPicker] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
 
     useEffect(() => {
         void refreshApplications();
@@ -471,10 +536,30 @@ function ScenarioDetail(): JSX.Element {
     const linkedProjects = projects.filter((project) => selectedScenario.projectIds.includes(project.id));
     const linkedAgents = availableAgents.filter((agent) => selectedScenario.agentAppIds.includes(agent.id));
 
-    const isEdit = scenarioDetailView === "edit";
+    function resetScenarioDraft(): void {
+        const nextName = selectedScenario.title || selectedScenario.name;
+        setScenarioName(nextName);
+        setScenarioTitle(nextName);
+        setScenarioDescription(selectedScenario.description);
+    }
+
+    function openEditModal(): void {
+        resetScenarioDraft();
+        setShowEditModal(true);
+    }
+
+    async function handleSaveScenario(): Promise<void> {
+        if (!scenarioName.trim()) {
+            await saveScenario();
+            return;
+        }
+
+        await saveScenario();
+        setShowEditModal(false);
+    }
 
     return (
-        <div className={`page page-scenarios-view scenario-detail-view ${isEdit ? "scenario-edit-mode" : ""}`}>
+        <div className="page page-scenarios-view scenario-detail-view">
             <div className="page-header">
                 <nav className="scenario-breadcrumb" aria-label={t("breadcrumbAriaLabel")}>
                     <button type="button" onClick={() => setView("scenarios")}>{t("scenarioBackToScenarios")}</button>
@@ -492,17 +577,7 @@ function ScenarioDetail(): JSX.Element {
                             </svg>
                         </div>
                         <div className="scenario-hero-content">
-                            {isEdit ? (
-                                <input
-                                    type="text"
-                                    className="form-input scenario-hero-input"
-                                    value={scenarioName}
-                                    onChange={(e) => setScenarioName(e.target.value)}
-                                    placeholder={t("newScenarioNamePlaceholder")}
-                                />
-                            ) : (
-                                <h1 className="scenario-hero-title">{selectedScenario.title || selectedScenario.name}</h1>
-                            )}
+                            <h1 className="scenario-hero-title">{selectedScenario.title || selectedScenario.name}</h1>
                             <div className="scenario-hero-meta">
                                 <span className="scenario-hero-id">{selectedScenario.id}</span>
                                 <span className="scenario-badge scenario-badge-skills">{t("scenarioBadgeLabel")}</span>
@@ -510,42 +585,19 @@ function ScenarioDetail(): JSX.Element {
                                     <span className="scenario-built-in-label">{t("scenarioBuiltIn")}</span>
                                 )}
                             </div>
-                            {isEdit ? (
-                                <textarea
-                                    className="form-textarea scenario-hero-textarea"
-                                    value={scenarioDescription}
-                                    onChange={(e) => setScenarioDescription(e.target.value)}
-                                    placeholder={t("newScenarioDescPlaceholder")}
-                                    rows={4}
-                                />
-                            ) : (
-                                selectedScenario.description && (
-                                    <p className="scenario-hero-desc">{selectedScenario.description}</p>
-                                )
+                            {selectedScenario.description && (
+                                <p className="scenario-hero-desc">{selectedScenario.description}</p>
                             )}
                         </div>
                     </div>
                     <div className="scenario-hero-actions">
-                        {isEdit ? (
-                            <>
-                                <button type="button" className="btn btn-primary btn-sm" onClick={() => { void saveScenario(); setScenarioDetailView("view"); }}>
-                                    {t("save")}
-                                </button>
-                                <button type="button" className="btn btn-ghost btn-sm" onClick={() => setScenarioDetailView("view")}>
-                                    {t("close")}
-                                </button>
-                            </>
-                        ) : (
-                            <>
-                                <button type="button" className="btn btn-secondary btn-sm" onClick={() => setScenarioDetailView("edit")}>
-                                    {t("scenarioEditScenario")}
-                                </button>
-                                {!selectedScenario.isBuiltIn && (
-                                    <button type="button" className="btn btn-danger btn-sm" onClick={() => { void deleteScenario(); }}>
-                                        {t("scenarioDeleteScenario")}
-                                    </button>
-                                )}
-                            </>
+                        <button type="button" className="btn btn-secondary btn-sm" onClick={openEditModal}>
+                            {t("scenarioEditScenario")}
+                        </button>
+                        {!selectedScenario.isBuiltIn && (
+                            <button type="button" className="btn btn-danger btn-sm" onClick={() => { void deleteScenario(); }}>
+                                {t("scenarioDeleteScenario")}
+                            </button>
                         )}
                     </div>
                 </header>
@@ -619,8 +671,7 @@ function ScenarioDetail(): JSX.Element {
                                         name={asset.title || asset.name}
                                         meta={asset.name}
                                         tone="skill"
-                                        showRemove={isEdit}
-                                        onRemove={() => { void removeAssetFromScenario("skillIds", asset.id); }}
+                                        showRemove={false}
                                     />
                                 ))}
                             </div>
@@ -654,8 +705,7 @@ function ScenarioDetail(): JSX.Element {
                                         key={rule.id}
                                         title={rule.title || rule.name}
                                         severity={rule.severity}
-                                        showRemove={isEdit}
-                                        onRemove={() => { void removeAssetFromScenario("ruleIds", rule.id); }}
+                                        showRemove={false}
                                     />
                                 ))}
                             </div>
@@ -690,8 +740,7 @@ function ScenarioDetail(): JSX.Element {
                                         name={asset.title || asset.name}
                                         meta={asset.name}
                                         tone="agent-file"
-                                        showRemove={isEdit}
-                                        onRemove={() => { void removeAssetFromScenario("agentFileIds", asset.id); }}
+                                        showRemove={false}
                                     />
                                 ))}
                             </div>
@@ -724,8 +773,7 @@ function ScenarioDetail(): JSX.Element {
                                     key={agent.id}
                                     name={agent.name}
                                     desc={agent.description}
-                                    showRemove={isEdit}
-                                    onRemove={() => { void removeAgentAppFromScenario(agent.id); }}
+                                    showRemove={false}
                                 />
                             ))
                         ) : (
@@ -791,6 +839,14 @@ function ScenarioDetail(): JSX.Element {
             {showAgentPicker ? (
                 <AgentPicker onClose={() => setShowAgentPicker(false)} />
             ) : null}
+            <EditScenarioModal
+                open={showEditModal}
+                onClose={() => {
+                    resetScenarioDraft();
+                    setShowEditModal(false);
+                }}
+                onSave={() => { void handleSaveScenario(); }}
+            />
         </div>
     );
 }

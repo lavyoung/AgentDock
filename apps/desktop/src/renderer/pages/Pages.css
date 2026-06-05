@@ -3528,16 +3528,12 @@
     color: var(--fg-primary);
 }
 
-/* === Scenario edit mode === */
-.scenario-detail-view.scenario-edit-mode .scenario-section-add { display: flex; }
-.scenario-detail-view:not(.scenario-edit-mode) .scenario-section-add { display: none; }
-
 .left-card-body:empty::before {
     content: "";
     font-size: 0;
     color: transparent;
 }
-.scenario-detail-view:not(.scenario-edit-mode) .skill-mini-remove { display: none; }
+.scenario-detail-view .skill-mini-remove { display: none; }
 
 /* ============================================================
    Rules
