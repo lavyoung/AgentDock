@@ -84,13 +84,16 @@ export function ProjectsPage(): JSX.Element {
     const selectedProjectId = useAppStore((s) => s.selectedProjectId);
     const selectedProjectSyncPreview = useAppStore((s) => s.selectedProjectSyncPreview);
     const scenarios = useAppStore((s) => s.scenarios);
+    const targets = useAppStore((s) => s.targets);
     const openProject = useAppStore((s) => s.openProject);
     const openScenario = useAppStore((s) => s.openScenario);
     const refreshScenarios = useAppStore((s) => s.refreshScenarios);
+    const refreshTargets = useAppStore((s) => s.refreshTargets);
     const setView = useAppStore((s) => s.setView);
     const resetProjectForm = useAppStore((s) => s.resetProjectForm);
     const previewSelectedProjectSync = useAppStore((s) => s.previewSelectedProjectSync);
     const runSelectedProjectSync = useAppStore((s) => s.runSelectedProjectSync);
+    const toggleSelectedProjectTarget = useAppStore((s) => s.toggleSelectedProjectTarget);
     const pushToast = useAppStore((s) => s.pushToast);
     const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
     const [isPreviewing, setIsPreviewing] = useState(false);
@@ -112,7 +115,8 @@ export function ProjectsPage(): JSX.Element {
 
     useEffect(() => {
         refreshScenarios().catch((error) => pushToast("error", String(error)));
-    }, [pushToast, refreshScenarios]);
+        refreshTargets().catch((error) => pushToast("error", String(error)));
+    }, [pushToast, refreshScenarios, refreshTargets]);
 
     function openCreateModal(): void {
         resetProjectForm();
@@ -363,6 +367,58 @@ export function ProjectsPage(): JSX.Element {
                                         ) : (
                                             <div className="projects-note-card">
                                                 <p>{t("projectNoScenarioLinked")}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </section>
+
+                                <section className="left-card">
+                                    <header className="left-card-header">
+                                        <h3>{t("projectSyncMatrixTitle")}</h3>
+                                    </header>
+                                    <div className="left-card-body">
+                                        <div className="projects-note-card">
+                                            <p>{t("projectSyncMatrixDesc")}</p>
+                                        </div>
+                                        {targets.length === 0 ? (
+                                            <div className="projects-note-card project-sync-empty">
+                                                <p>{t("projectSyncMatrixEmpty")}</p>
+                                            </div>
+                                        ) : selectedProject ? (
+                                            <div className="project-target-matrix">
+                                                {targets.map((target) => {
+                                                    const isSelected = selectedProject.targetIds.includes(target.id);
+                                                    return (
+                                                        <button
+                                                            key={target.id}
+                                                            type="button"
+                                                            className={`project-target-row ${isSelected ? "active" : ""} ${target.enabled ? "" : "disabled"}`}
+                                                            onClick={() => toggleSelectedProjectTarget(target.id)}
+                                                            disabled={!target.enabled}
+                                                        >
+                                                            <div className="project-target-row-main">
+                                                                <div className="project-target-row-title">{target.name}</div>
+                                                                <div className="project-target-row-path">{target.path}</div>
+                                                            </div>
+                                                            <div className="project-target-row-meta">
+                                                                <span className={target.deployMode === "copy" ? "badge badge-blue" : "badge badge-orange"}>
+                                                                    {target.deployMode === "copy" ? t("deployModeCopy") : t("deployModeMerge")}
+                                                                </span>
+                                                                <span className={target.enabled ? "badge badge-green" : "badge badge-gray"}>
+                                                                    {target.enabled ? t("enabledYes") : t("enabledNo")}
+                                                                </span>
+                                                                <span className={getProjectSyncStatusClass(isSelected ? "synced" : "pending")}>
+                                                                    <span className="pill-dot" />
+                                                                    {isSelected ? t("projectSyncMatrixSelected") : t("projectSyncMatrixNotSelected")}
+                                                                </span>
+                                                            </div>
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        ) : (
+                                            <div className="projects-note-card project-sync-empty">
+                                                <p>{t("projectsSubtitle")}</p>
                                             </div>
                                         )}
                                     </div>

@@ -60,6 +60,7 @@ export type ProjectRecord = {
     name: string;
     path: string;
     defaultScenarioId: string | null;
+    targetIds: string[];
     syncMode: ProjectSyncMode;
     syncStatus: ProjectSyncStatus;
     lastSyncedAt: string | null;
@@ -144,6 +145,9 @@ function readStoredProjects(): ProjectRecord[] {
                 name: candidate.name,
                 path: candidate.path,
                 defaultScenarioId: candidate.defaultScenarioId,
+                targetIds: Array.isArray(candidate.targetIds)
+                    ? candidate.targetIds.filter((value): value is string => typeof value === "string")
+                    : [],
                 syncMode: candidate.syncMode,
                 syncStatus:
                     candidate.syncStatus === "synced" || candidate.syncStatus === "conflict"
@@ -364,6 +368,7 @@ type Actions = {
     createProject(): Promise<ProjectRecord>;
     previewSelectedProjectSync(): Promise<void>;
     runSelectedProjectSync(): Promise<void>;
+    toggleSelectedProjectTarget(targetId: string): void;
     resetProjectForm(): void;
     setProjectName(value: string): void;
     setProjectPath(value: string): void;
@@ -794,6 +799,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
         const {
             projects,
             scenarios,
+            targets: storedTargets,
             projectName,
             projectPath,
             projectDefaultScenarioId,
@@ -803,6 +809,10 @@ export const useAppStore = create<AppStore>((set, get) => ({
 
         const trimmedName = projectName.trim();
         const trimmedPath = projectPath.trim();
+        const targets = storedTargets.length > 0 ? storedTargets : await agentdockClient.targets.list();
+        const defaultTargetIds = targets
+            .filter((target) => target.enabled)
+            .map((target) => target.id);
         const now = new Date().toISOString();
         const idBase = createProjectId(trimmedName);
         let nextId = idBase;
@@ -831,6 +841,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
             name: trimmedName,
             path: trimmedPath,
             defaultScenarioId: projectDefaultScenarioId,
+            targetIds: defaultTargetIds,
             syncMode: projectSyncMode,
             syncStatus: "pending",
             lastSyncedAt: null,
@@ -860,6 +871,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
 
         const preview = await agentdockClient.sync.preview({
             scenario_id: project.defaultScenarioId,
+            target_ids: project.targetIds,
         });
         set({selectedProjectSyncPreview: preview});
     },
@@ -872,15 +884,21 @@ export const useAppStore = create<AppStore>((set, get) => ({
             throw new Error(get()._t("projectSyncRequiresScenario"));
         }
 
+        if (project.targetIds.length === 0) {
+            throw new Error(get()._t("projectSyncRequiresTarget"));
+        }
+
         if (project.syncMode === "preview-first" || !get().selectedProjectSyncPreview) {
             const preview = await agentdockClient.sync.preview({
                 scenario_id: project.defaultScenarioId,
+                target_ids: project.targetIds,
             });
             set({selectedProjectSyncPreview: preview});
         }
 
         const result = await agentdockClient.sync.run({
             scenario_id: project.defaultScenarioId,
+            target_ids: project.targetIds,
         });
         const nextProjects = projects.map((candidate) =>
             candidate.id === project.id
@@ -897,6 +915,36 @@ export const useAppStore = create<AppStore>((set, get) => ({
         set({
             projects: nextProjects,
             selectedProjectSyncPreview: result,
+        });
+    },
+
+    toggleSelectedProjectTarget(targetId) {
+        const {projects, selectedProjectId} = get();
+        if (!selectedProjectId) {
+            return;
+        }
+
+        const now = new Date().toISOString();
+        const nextProjects = projects.map((project) => {
+            if (project.id !== selectedProjectId) {
+                return project;
+            }
+
+            const hasTarget = project.targetIds.includes(targetId);
+            return {
+                ...project,
+                targetIds: hasTarget
+                    ? project.targetIds.filter((id) => id !== targetId)
+                    : [...project.targetIds, targetId],
+                syncStatus: "pending" as const,
+                updatedAt: now,
+            };
+        });
+
+        persistProjects(nextProjects);
+        set({
+            projects: nextProjects,
+            selectedProjectSyncPreview: null,
         });
     },
 

@@ -51,12 +51,16 @@ function buildMockSyncPreview(input: SyncPreviewInput): SyncPreviewResult {
     }
 
     const targets = mockTargets.filter((target) =>
-        target.enabled && (!input.target_ids?.length || input.target_ids.includes(target.id))
+        target.enabled && (input.target_ids === undefined || input.target_ids.includes(target.id))
     );
     const warnings: string[] = [];
 
     if (targets.length === 0) {
-        warnings.push("No enabled targets are configured yet.");
+        warnings.push(
+            input.target_ids === undefined
+                ? "No enabled targets are configured yet."
+                : "No enabled targets are selected in the Sync Matrix."
+        );
     }
 
     const items = targets.flatMap((target) => {

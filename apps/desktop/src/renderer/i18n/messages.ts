@@ -192,6 +192,7 @@ type MessageCatalog = {
     projectSyncPreviewAction: string;
     projectSyncRunAction: string;
     projectSyncRequiresScenario: string;
+    projectSyncRequiresTarget: string;
     projectSyncPreviewReady: string;
     projectSyncRunSuccess: string;
     projectSyncRunConflict: string;
@@ -207,6 +208,11 @@ type MessageCatalog = {
     projectSyncOperationCreate: string;
     projectSyncOperationUpdate: string;
     projectSyncOperationMerge: string;
+    projectSyncMatrixTitle: string;
+    projectSyncMatrixDesc: string;
+    projectSyncMatrixEmpty: string;
+    projectSyncMatrixSelected: string;
+    projectSyncMatrixNotSelected: string;
     scenariosTitle: string;
     scenariosEmpty: string;
     scenariosComingSoon: string;
@@ -503,6 +509,7 @@ export const messages: Record<Locale, Catalog> = {
         projectSyncPreviewAction: "\u9884\u89c8\u540c\u6b65",
         projectSyncRunAction: "\u6267\u884c\u540c\u6b65",
         projectSyncRequiresScenario: "\u8bf7\u5148\u4e3a\u9879\u76ee\u5173\u8054\u4e00\u4e2a\u573a\u666f\u3002",
+        projectSyncRequiresTarget: "\u8bf7\u5148\u5728 Sync Matrix \u4e2d\u9009\u62e9\u81f3\u5c11\u4e00\u4e2a\u76ee\u6807\u3002",
         projectSyncPreviewReady: "\u540c\u6b65\u9884\u89c8\u5df2\u751f\u6210\u3002",
         projectSyncRunSuccess: "\u5df2\u5199\u5165 {written} \u4e2a\u540c\u6b65\u64cd\u4f5c\u3002",
         projectSyncRunConflict: "\u5176\u4e2d\u6709 {count} \u4e2a AGENTS.md \u6258\u7ba1\u533a\u5757\u51b2\u7a81\u9700\u8981\u624b\u52a8\u5904\u7406\u3002",
@@ -518,6 +525,11 @@ export const messages: Record<Locale, Catalog> = {
         projectSyncOperationCreate: "\u521b\u5efa",
         projectSyncOperationUpdate: "\u66f4\u65b0",
         projectSyncOperationMerge: "\u5408\u5e76",
+        projectSyncMatrixTitle: "Sync Matrix",
+        projectSyncMatrixDesc: "\u4e3a\u8fd9\u4e2a\u9879\u76ee\u9009\u51fa\u8981\u53c2\u4e0e preview / run sync \u7684\u76ee\u6807\u3002",
+        projectSyncMatrixEmpty: "\u8fd8\u6ca1\u6709\u53ef\u9009\u7684 targets\uff0c\u53ef\u4ee5\u5148\u53bb Targets \u9875\u6dfb\u52a0\u76ee\u6807\u76ee\u5f55\u3002",
+        projectSyncMatrixSelected: "\u5df2\u9009\u4e2d",
+        projectSyncMatrixNotSelected: "\u672a\u9009\u4e2d",
         scenariosTitle: "\u573a\u666f",
         scenariosEmpty: "\u6682\u65e0\u573a\u666f\u3002",
         scenariosComingSoon: "\u573a\u666f\u8ba9\u4f60\u53ef\u4ee5\u5c06\u8d44\u4ea7\u5206\u7ec4\u5e76\u6309\u573a\u666f\u542f\u7528/\u7981\u7528\u3002\u8fd9\u662f\u7b2c\u4e8c\u9636\u6bb5\u7684\u529f\u80fd\u3002",
@@ -810,6 +822,7 @@ export const messages: Record<Locale, Catalog> = {
         projectSyncPreviewAction: "Preview sync",
         projectSyncRunAction: "Run sync",
         projectSyncRequiresScenario: "Link a scenario to this project before previewing sync.",
+        projectSyncRequiresTarget: "Select at least one target in the Sync Matrix before running sync.",
         projectSyncPreviewReady: "Sync preview generated.",
         projectSyncRunSuccess: "Wrote {written} sync operations.",
         projectSyncRunConflict: "{count} AGENTS.md managed block conflicts need manual review.",
@@ -825,6 +838,11 @@ export const messages: Record<Locale, Catalog> = {
         projectSyncOperationCreate: "Create",
         projectSyncOperationUpdate: "Update",
         projectSyncOperationMerge: "Merge",
+        projectSyncMatrixTitle: "Sync Matrix",
+        projectSyncMatrixDesc: "Choose which targets this project should include when previewing or running sync.",
+        projectSyncMatrixEmpty: "No targets are available yet. Add one in the Targets page first.",
+        projectSyncMatrixSelected: "Selected",
+        projectSyncMatrixNotSelected: "Not selected",
         scenariosTitle: "Scenarios",
         scenariosEmpty: "No scenarios yet.",
         scenariosComingSoon: "Scenarios let you group assets and enable/disable them by scenario. This is a Phase 2 feature.",
