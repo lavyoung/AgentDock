@@ -823,16 +823,22 @@ export const useAppStore = create<AppStore>((set, get) => ({
 
     async saveScenario() {
         const {selectedScenario, scenarioName, scenarioTitle, scenarioDescription} = get();
-        if (!scenarioName.trim()) {
+        const effectiveName = selectedScenario?.isBuiltIn ? selectedScenario.name : scenarioName.trim();
+        const effectiveTitle = scenarioTitle.trim() || effectiveName;
+
+        if (!effectiveName.trim()) {
             get().pushToast("error", get()._t("toastScenarioNameRequired"));
             return;
         }
         if (!selectedScenario) {
-            const created = await agentdockClient.scenarios.create({name: scenarioName, title: scenarioTitle, description: scenarioDescription});
+            const created = await agentdockClient.scenarios.create({name: effectiveName, title: effectiveTitle, description: scenarioDescription});
             set({selectedScenario: created});
-            get().pushToast("success", get()._t("toast.scenarioCreated").replace("{name}", scenarioName));
+            get().pushToast("success", get()._t("toast.scenarioCreated").replace("{name}", effectiveName));
         } else {
-            const updated = await agentdockClient.scenarios.update(selectedScenario.id, {name: scenarioName, title: scenarioTitle, description: scenarioDescription});
+            const updateInput = selectedScenario.isBuiltIn
+                ? {title: effectiveTitle, description: scenarioDescription}
+                : {name: effectiveName, title: effectiveTitle, description: scenarioDescription};
+            const updated = await agentdockClient.scenarios.update(selectedScenario.id, updateInput);
             set({selectedScenario: updated});
         }
         await get().refreshScenarios();

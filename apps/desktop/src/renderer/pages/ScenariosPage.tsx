@@ -285,11 +285,14 @@ function EditScenarioModal({
     onSave: () => void;
 }): JSX.Element {
     const {t} = useI18n();
+    const selectedScenario = useAppStore((s) => s.selectedScenario);
     const scenarioName = useAppStore((s) => s.scenarioName);
+    const scenarioTitle = useAppStore((s) => s.scenarioTitle);
     const scenarioDescription = useAppStore((s) => s.scenarioDescription);
     const setScenarioName = useAppStore((s) => s.setScenarioName);
     const setScenarioTitle = useAppStore((s) => s.setScenarioTitle);
     const setScenarioDescription = useAppStore((s) => s.setScenarioDescription);
+    const editableName = selectedScenario?.isBuiltIn ? scenarioTitle : scenarioName;
 
     return (
         <Modal
@@ -315,10 +318,12 @@ function EditScenarioModal({
                     <input
                         className="form-input"
                         type="text"
-                        value={scenarioName}
+                        value={editableName}
                         onChange={(event) => {
-                            setScenarioName(event.target.value);
                             setScenarioTitle(event.target.value);
+                            if (!selectedScenario?.isBuiltIn) {
+                                setScenarioName(event.target.value);
+                            }
                         }}
                         placeholder={t("newScenarioNamePlaceholder")}
                         autoFocus
@@ -537,9 +542,8 @@ function ScenarioDetail(): JSX.Element {
     const linkedAgents = availableAgents.filter((agent) => selectedScenario.agentAppIds.includes(agent.id));
 
     function resetScenarioDraft(): void {
-        const nextName = selectedScenario.title || selectedScenario.name;
-        setScenarioName(nextName);
-        setScenarioTitle(nextName);
+        setScenarioName(selectedScenario.name);
+        setScenarioTitle(selectedScenario.title || selectedScenario.name);
         setScenarioDescription(selectedScenario.description);
     }
 
