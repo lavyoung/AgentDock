@@ -363,6 +363,11 @@ export function ProjectsPage(): JSX.Element {
                             <section className="left-card">
                                 <header className="left-card-header">
                                     <h3>{t("projectSyncMatrixTitle")}</h3>
+                                    {selectedProject ? (
+                                        <span className="badge badge-gray">
+                                            {selectedProject.targetIds.length}
+                                        </span>
+                                    ) : null}
                                 </header>
                                 <div className="left-card-body">
                                     <div className="projects-note-card">

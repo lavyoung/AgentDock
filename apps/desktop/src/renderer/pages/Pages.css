@@ -3457,6 +3457,91 @@
     font-size: 13px;
     color: var(--fg-muted);
 }
+.scenario-binding-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 12px;
+}
+.scenario-binding-card {
+    border: 1px solid var(--bd-soft);
+    border-radius: 12px;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0)),
+        var(--bg-elevated);
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 148px;
+}
+.scenario-binding-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+.scenario-binding-card-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+.scenario-binding-card-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.scenario-binding-card-icon--project {
+    background: rgba(59,130,246,.14);
+    color: #60a5fa;
+}
+.scenario-binding-card-icon--agent {
+    background: rgba(52,211,153,.14);
+    color: #34d399;
+}
+.scenario-binding-card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--fg-primary);
+    line-height: 1.35;
+}
+.scenario-binding-card-count {
+    margin-top: 3px;
+    font-size: 12px;
+    color: var(--fg-muted);
+}
+.scenario-binding-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+}
+.scenario-binding-summary {
+    font-size: 13px;
+    color: var(--fg-secondary);
+    line-height: 1.65;
+}
+.scenario-binding-chip-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.scenario-binding-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 0 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(52, 211, 153, 0.18);
+    background: rgba(16, 185, 129, 0.09);
+    color: #d1fae5;
+    font-size: 12px;
+    font-weight: 500;
+}
 .scenario-project-summary {
     padding: 12px 14px;
     border-radius: 10px;

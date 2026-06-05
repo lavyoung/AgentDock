@@ -843,75 +843,111 @@ function ScenarioDetail(): JSX.Element {
                     </div>
                 </section>
 
-                {/* Agents section */}
+                {/* Sync destinations section */}
                 <section className="left-card">
                     <header className="left-card-header">
                         <h3>
-                            <svg className="scenario-section-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
-                            </svg>
-                            <span className="scenario-section-title">{t("scenarioAgent")}</span>
+                            <span className="scenario-section-title">{t("scenarioSyncTargets")}</span>
                         </h3>
-                        <div className="scenario-section-meta">
-                            <span className="scenario-section-count">{selectedScenario.agentAppIds.length}</span>
-                            <button type="button" className="scenario-section-add scenario-section-add--agent" title={t("scenarioAddAgent")} aria-label={t("scenarioAddAgent")} onClick={() => setShowAgentPicker(true)}>
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-                                </svg>
-                            </button>
+                        <div className="scenario-section-meta scenario-section-meta--static">
+                            <span className="scenario-section-count">
+                                {linkedProjects.length + linkedAgents.length}
+                            </span>
                         </div>
                     </header>
-                    <div className="left-card-body scenario-section-stack">
-                        {linkedAgents.length > 0 ? (
-                            linkedAgents.map((agent) => (
-                                <AgentMini
-                                    key={agent.id}
-                                    name={agent.name}
-                                    desc={agent.description}
-                                    showRemove={false}
-                                />
-                            ))
-                        ) : (
-                            <div className="scenario-empty-copy">{t("scenarioNoAgents")}</div>
-                        )}
-                    </div>
-                </section>
+                    <div className="left-card-body">
+                        <div className="scenario-binding-grid">
+                            <article className="scenario-binding-card scenario-binding-card--project">
+                                <div className="scenario-binding-card-header">
+                                    <div className="scenario-binding-card-title-wrap">
+                                        <div className="scenario-binding-card-icon scenario-binding-card-icon--project">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M3 7l9-4 9 4-9 4-9-4z"/>
+                                                <path d="M3 17l9 4 9-4"/>
+                                                <path d="M3 12l9 4 9-4"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <div className="scenario-binding-card-title">{t("scenarioProjects")}</div>
+                                            <div className="scenario-binding-card-count">
+                                                {linkedProjects.length}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        className="scenario-section-add scenario-section-add--project"
+                                        title={t("scenarioAddProject")}
+                                        aria-label={t("scenarioAddProject")}
+                                        onClick={() => setShowProjectPicker(true)}
+                                    >
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <line x1="12" y1="5" x2="12" y2="19"/>
+                                            <line x1="5" y1="12" x2="19" y2="12"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div className="scenario-binding-card-body">
+                                    {linkedProjects.length === 0 ? (
+                                        <div className="scenario-empty-copy">{t("scenarioNoProjects")}</div>
+                                    ) : (
+                                        <div className="scenario-project-summary">
+                                            {t("scenarioProjectsSummary").replace("{count}", String(linkedProjects.length))}
+                                        </div>
+                                    )}
+                                </div>
+                            </article>
 
-                {/* Projects section */}
-                <section className="left-card">
-                    <header className="left-card-header">
-                        <h3>
-                            <svg className="scenario-section-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M3 7l9-4 9 4-9 4-9-4z"/>
-                                <path d="M3 17l9 4 9-4"/>
-                                <path d="M3 12l9 4 9-4"/>
-                            </svg>
-                            <span className="scenario-section-title">{t("scenarioProjects")}</span>
-                        </h3>
-                        <div className="scenario-section-meta">
-                            <span className="scenario-section-count">{linkedProjects.length}</span>
-                            <button
-                                type="button"
-                                className="scenario-section-add scenario-section-add--project"
-                                title={t("scenarioAddProject")}
-                                aria-label={t("scenarioAddProject")}
-                                onClick={() => setShowProjectPicker(true)}
-                            >
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <line x1="12" y1="5" x2="12" y2="19"/>
-                                    <line x1="5" y1="12" x2="19" y2="12"/>
-                                </svg>
-                            </button>
+                            <article className="scenario-binding-card scenario-binding-card--agent">
+                                <div className="scenario-binding-card-header">
+                                    <div className="scenario-binding-card-title-wrap">
+                                        <div className="scenario-binding-card-icon scenario-binding-card-icon--agent">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                                                <line x1="8" y1="21" x2="16" y2="21"/>
+                                                <line x1="12" y1="17" x2="12" y2="21"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <div className="scenario-binding-card-title">{t("scenarioAgent")}</div>
+                                            <div className="scenario-binding-card-count">
+                                                {linkedAgents.length}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        className="scenario-section-add scenario-section-add--agent"
+                                        title={t("scenarioAddAgent")}
+                                        aria-label={t("scenarioAddAgent")}
+                                        onClick={() => setShowAgentPicker(true)}
+                                    >
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <line x1="12" y1="5" x2="12" y2="19"/>
+                                            <line x1="5" y1="12" x2="19" y2="12"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div className="scenario-binding-card-body">
+                                    {linkedAgents.length > 0 ? (
+                                        <>
+                                            <div className="scenario-binding-summary">
+                                                {t("scenarioAgentsSummary").replace("{count}", String(linkedAgents.length))}
+                                            </div>
+                                            <div className="scenario-binding-chip-list">
+                                                {linkedAgents.map((agent) => (
+                                                    <span key={agent.id} className="scenario-binding-chip">
+                                                        {agent.name}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <div className="scenario-empty-copy">{t("scenarioNoAgents")}</div>
+                                    )}
+                                </div>
+                            </article>
                         </div>
-                    </header>
-                    <div className="left-card-body scenario-section-stack">
-                        {linkedProjects.length === 0 ? (
-                            <div className="scenario-empty-copy">{t("scenarioNoProjects")}</div>
-                        ) : (
-                            <div className="scenario-project-summary">
-                                {t("scenarioProjectsSummary").replace("{count}", String(linkedProjects.length))}
-                            </div>
-                        )}
                     </div>
                 </section>
 
