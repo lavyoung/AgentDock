@@ -69,7 +69,10 @@ export class SyncService {
                 if (merged.status === "conflict") {
                     conflicts.push({
                         asset_id: asset.id,
+                        asset_name: asset.title || asset.name,
+                        asset_type: asset.type,
                         target_id: target.id,
+                        target_name: target.name,
                         output_path: item.output_path,
                         reason: merged.reason,
                     });

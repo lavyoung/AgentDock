@@ -108,6 +108,9 @@ export function ProjectsPage(): JSX.Element {
                 : null,
         [scenarios, selectedProject]
     );
+    const syncConflicts = isSyncRunResult(selectedProjectSyncPreview)
+        ? selectedProjectSyncPreview.conflicts
+        : [];
 
     const linkedScenarioCount = projects.filter((project) => project.defaultScenarioId).length;
     const manualCount = projects.filter((project) => project.syncMode === "manual").length;
@@ -484,6 +487,50 @@ export function ProjectsPage(): JSX.Element {
                                                             <div key={warning} className="project-sync-warning-item">
                                                                 {warning}
                                                             </div>
+                                                        ))}
+                                                    </div>
+                                                ) : null}
+
+                                                {syncConflicts.length > 0 ? (
+                                                    <div className="project-sync-conflict-list" aria-live="polite">
+                                                        <div className="project-sync-conflict-summary">
+                                                            <span className="badge badge-red">
+                                                                {t("projectSyncConflicts")} {syncConflicts.length}
+                                                            </span>
+                                                            <span className="project-sync-conflict-summary-text">
+                                                                {t("projectSyncRunConflict").replace(
+                                                                    "{count}",
+                                                                    String(syncConflicts.length)
+                                                                )}
+                                                            </span>
+                                                        </div>
+                                                        {syncConflicts.map((conflict) => (
+                                                            <article
+                                                                key={`${conflict.target_id}-${conflict.asset_id}-${conflict.output_path}`}
+                                                                className="project-sync-conflict-item"
+                                                            >
+                                                                <div className="project-sync-conflict-header">
+                                                                    <div>
+                                                                        <div className="project-sync-item-title">
+                                                                            {conflict.asset_name}
+                                                                        </div>
+                                                                        <div className="project-sync-item-meta">
+                                                                            {conflict.target_name} · {conflict.asset_type}
+                                                                        </div>
+                                                                    </div>
+                                                                    <span className="badge badge-red">
+                                                                        {t("projectSyncStatusConflict")}
+                                                                    </span>
+                                                                </div>
+                                                                <div className="project-sync-conflict-reason">
+                                                                    <strong>{t("projectSyncConflictReason")}</strong>
+                                                                    <span>{conflict.reason}</span>
+                                                                </div>
+                                                                <div className="project-sync-item-path">
+                                                                    <strong>{t("projectSyncConflictPath")}</strong>
+                                                                    <span>{conflict.output_path}</span>
+                                                                </div>
+                                                            </article>
                                                         ))}
                                                     </div>
                                                 ) : null}

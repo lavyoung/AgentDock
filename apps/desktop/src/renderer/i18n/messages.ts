@@ -99,6 +99,7 @@ type MessageCatalog = {
     overviewStatusUninstalled: string;
     overviewAgentActive: string;
     overviewAgentInactive: string;
+    overviewNoEnabledAgents: string;
     demoSkillTitle: string;
     demoSkillDescription: string;
     demoSkillContent: string;
@@ -203,6 +204,9 @@ type MessageCatalog = {
     projectSyncTargets: string;
     projectSyncOperations: string;
     projectSyncWarnings: string;
+    projectSyncConflicts: string;
+    projectSyncConflictReason: string;
+    projectSyncConflictPath: string;
     projectSyncWritten: string;
     projectSyncPreviewEmpty: string;
     projectSyncOperationCreate: string;
@@ -416,6 +420,7 @@ export const messages: Record<Locale, Catalog> = {
         overviewStatusUninstalled: "\u672a\u5b89\u88c5",
         overviewAgentActive: "\u5df2\u6fc0\u6d3b",
         overviewAgentInactive: "\u672a\u6fc0\u6d3b",
+        overviewNoEnabledAgents: "\u8fd8\u6ca1\u6709\u542f\u7528\u4efb\u4f55 Agent\u3002\u8bf7\u5148\u5728\u7cfb\u7edf\u8bbe\u7f6e\u4e2d\u542f\u7528\u5e76\u914d\u7f6e Agent \u6839\u76ee\u5f55\u3002",
         demoSkillTitle: "\u524d\u7aef\u4ee3\u7801\u5ba1\u67e5",
         demoSkillDescription: "\u793a\u4f8b Skill \u8d44\u4ea7\uff0c\u7528\u4e8e\u524d\u7aef\u4ee3\u7801\u5ba1\u67e5\u3002",
         demoSkillContent: "# Frontend Review\n\n## Use case\n\nUse when reviewing React and TypeScript projects.\n\n## Focus areas\n\n- Component structure\n- Type safety\n- Maintainability\n",
@@ -520,6 +525,9 @@ export const messages: Record<Locale, Catalog> = {
         projectSyncTargets: "\u76ee\u6807",
         projectSyncOperations: "\u64cd\u4f5c",
         projectSyncWarnings: "\u63d0\u9192",
+        projectSyncConflicts: "\u51b2\u7a81",
+        projectSyncConflictReason: "\u539f\u56e0",
+        projectSyncConflictPath: "\u8f93\u51fa\u8def\u5f84",
         projectSyncWritten: "\u5df2\u5199\u5165",
         projectSyncPreviewEmpty: "\u8fd8\u6ca1\u6709\u751f\u6210\u9884\u89c8\u3002\u5148\u70b9\u201c\u9884\u89c8\u540c\u6b65\u201d\u770b\u770b\u8981\u5199\u5230\u54ea\u4e9b\u76ee\u6807\u3002",
         projectSyncOperationCreate: "\u521b\u5efa",
@@ -729,6 +737,7 @@ export const messages: Record<Locale, Catalog> = {
         overviewStatusUninstalled: "Uninstalled",
         overviewAgentActive: "Active",
         overviewAgentInactive: "Inactive",
+        overviewNoEnabledAgents: "No Agents are enabled yet. Turn one on and configure its root in Settings first.",
         demoSkillTitle: "Frontend Review",
         demoSkillDescription: "Sample Skill asset for frontend code review.",
         demoSkillContent: "# Frontend Review\n\n## Use case\n\nUse when reviewing React and TypeScript projects.\n\n## Focus areas\n\n- Component structure\n- Type safety\n- Maintainability\n",
@@ -833,6 +842,9 @@ export const messages: Record<Locale, Catalog> = {
         projectSyncTargets: "Targets",
         projectSyncOperations: "Operations",
         projectSyncWarnings: "Warnings",
+        projectSyncConflicts: "Conflicts",
+        projectSyncConflictReason: "Reason",
+        projectSyncConflictPath: "Output path",
         projectSyncWritten: "Written",
         projectSyncPreviewEmpty: "No preview yet. Generate one first to inspect what will be written to each target.",
         projectSyncOperationCreate: "Create",

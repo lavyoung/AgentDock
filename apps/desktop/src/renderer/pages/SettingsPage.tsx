@@ -6,6 +6,10 @@ import {useI18n} from "../i18n/useI18n";
 import {useAppStore} from "../stores/useAppStore";
 import "./Pages.css";
 
+function isActionKey(key: string): boolean {
+    return key === "Enter" || key === " ";
+}
+
 function getLocationKindLabel(
     t: (key: string) => string,
     kind: ApplicationLocationRecord["kind"]
@@ -216,6 +220,7 @@ export function SettingsPage(): JSX.Element {
                                     type="button"
                                     className={`lang-option ${locale === "zh-CN" ? "active" : ""}`}
                                     onClick={() => setLocale("zh-CN")}
+                                    aria-pressed={locale === "zh-CN"}
                                 >
                                     <span className="lang-char">中</span>
                                     <span className="lang-label">{t("settingsLanguageZh")}</span>
@@ -224,6 +229,7 @@ export function SettingsPage(): JSX.Element {
                                     type="button"
                                     className={`lang-option ${locale === "en" ? "active" : ""}`}
                                     onClick={() => setLocale("en")}
+                                    aria-pressed={locale === "en"}
                                 >
                                     <span className="lang-char">A</span>
                                     <span className="lang-label">English</span>
@@ -258,6 +264,7 @@ export function SettingsPage(): JSX.Element {
                                     type="button"
                                     className={`theme-option ${theme === "dark" ? "active" : ""}`}
                                     onClick={() => setTheme("dark")}
+                                    aria-pressed={theme === "dark"}
                                 >
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="theme-icon" aria-hidden="true">
                                         <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
@@ -268,6 +275,7 @@ export function SettingsPage(): JSX.Element {
                                     type="button"
                                     className={`theme-option ${theme === "light" ? "active" : ""}`}
                                     onClick={() => setTheme("light")}
+                                    aria-pressed={theme === "light"}
                                 >
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="theme-icon" aria-hidden="true">
                                         <circle cx="12" cy="12" r="5" />
@@ -286,6 +294,7 @@ export function SettingsPage(): JSX.Element {
                                     type="button"
                                     className={`theme-option ${theme === "system" ? "active" : ""}`}
                                     onClick={() => setTheme("system")}
+                                    aria-pressed={theme === "system"}
                                 >
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="theme-icon" aria-hidden="true">
                                         <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
@@ -349,11 +358,19 @@ export function SettingsPage(): JSX.Element {
                                             {applications.map((application) => {
                                                 const isActive = selectedApplicationId === application.id;
                                                 return (
-                                                    <button
+                                                    <div
                                                         key={application.id}
-                                                        type="button"
                                                         className={`settings-agent-row ${isActive ? "active" : ""}`}
                                                         onClick={() => void openApplication(application.id)}
+                                                        onKeyDown={(event) => {
+                                                            if (isActionKey(event.key)) {
+                                                                event.preventDefault();
+                                                                void openApplication(application.id);
+                                                            }
+                                                        }}
+                                                        role="button"
+                                                        tabIndex={0}
+                                                        aria-pressed={isActive}
                                                     >
                                                         <div className="settings-agent-row-body">
                                                             <div className="settings-agent-row-title">{application.name}</div>
@@ -376,7 +393,7 @@ export function SettingsPage(): JSX.Element {
                                                         >
                                                             <span />
                                                         </button>
-                                                    </button>
+                                                    </div>
                                                 );
                                             })}
                                         </div>
@@ -398,6 +415,15 @@ export function SettingsPage(): JSX.Element {
                                                             key={location.id}
                                                             className={`settings-agent-location-row ${isSelected ? "active" : ""}`}
                                                             onClick={() => selectLocation(location)}
+                                                            onKeyDown={(event) => {
+                                                                if (isActionKey(event.key)) {
+                                                                    event.preventDefault();
+                                                                    selectLocation(location);
+                                                                }
+                                                            }}
+                                                            role="button"
+                                                            tabIndex={0}
+                                                            aria-pressed={isSelected}
                                                         >
                                                             <div className="settings-agent-location-body">
                                                                 <div className="settings-agent-location-header">

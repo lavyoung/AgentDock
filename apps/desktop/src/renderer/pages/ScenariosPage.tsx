@@ -7,6 +7,10 @@ import "./Pages.css";
 
 // --- Helper sub-components ---
 
+function isActionKey(key: string): boolean {
+    return key === "Enter" || key === " ";
+}
+
 type AvailableAgent = {
     id: string;
     name: string;
@@ -47,8 +51,18 @@ function ScenarioCard({
     const {t} = useI18n();
     const total = scenario.skillIds.length + scenario.ruleIds.length + scenario.agentFileIds.length;
     return (
-        <div className="scenario-card" onClick={onClick} role="button" tabIndex={0}
-            onKeyDown={(e) => e.key === "Enter" && onClick()}>
+        <div
+            className="scenario-card"
+            onClick={onClick}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(event) => {
+                if (isActionKey(event.key)) {
+                    event.preventDefault();
+                    onClick();
+                }
+            }}
+        >
             <div className="scenario-card-header">
                 <div className="scenario-card-icon scenario-card-icon--default">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -215,7 +229,7 @@ function NewScenarioModal({onClose, onCreate}: {onClose: () => void; onCreate: (
             <div className="asset-picker-panel">
                 <div className="asset-picker-header">
                     <span className="asset-picker-title">{t("newScenarioTitle")}</span>
-                    <button className="icon-btn" onClick={onClose} aria-label={t("close")}>
+                    <button type="button" className="icon-btn" onClick={onClose} aria-label={t("close")}>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
                         </svg>
@@ -247,8 +261,8 @@ function NewScenarioModal({onClose, onCreate}: {onClose: () => void; onCreate: (
                         </div>
                         <div className="form-hint">{t("newScenarioPreviewHint")}</div>
                         <div className="form-actions">
-                            <button className="btn btn-primary" onClick={onCreate}>{t("newScenario")}</button>
-                            <button className="btn btn-ghost" onClick={onClose}>{t("close")}</button>
+                            <button type="button" className="btn btn-primary" onClick={onCreate}>{t("newScenario")}</button>
+                            <button type="button" className="btn btn-ghost" onClick={onClose}>{t("close")}</button>
                         </div>
                     </div>
                 </div>
@@ -287,7 +301,7 @@ function AssetPicker({
             <div className="asset-picker-panel">
                 <div className="asset-picker-header">
                     <span className="asset-picker-title">{t("assetPickerTitle")} - {fieldLabel}</span>
-                    <button className="icon-btn" onClick={onClose} aria-label={t("close")}>
+                    <button type="button" className="icon-btn" onClick={onClose} aria-label={t("close")}>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
                         </svg>
@@ -309,6 +323,16 @@ function AssetPicker({
                                             onClose();
                                         }
                                     }}
+                                    onKeyDown={(event) => {
+                                        if (!isAlready && isActionKey(event.key)) {
+                                            event.preventDefault();
+                                            void addAssetToScenario(field, asset.id);
+                                            onClose();
+                                        }
+                                    }}
+                                    role="button"
+                                    tabIndex={0}
+                                    aria-disabled={isAlready}
                                 >
                                     <div className={`picker-item-icon ${field === "skillIds" ? "picker-item-icon-skill" : field === "ruleIds" ? "picker-item-icon-rule" : "picker-item-icon-agent-file"}`}>
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -350,7 +374,7 @@ function AgentPicker({onClose}: {onClose: () => void}): JSX.Element {
             <div className="asset-picker-panel">
                 <div className="asset-picker-header">
                     <span className="asset-picker-title">{t("scenarioAgentPickerTitle")}</span>
-                    <button className="icon-btn" onClick={onClose} aria-label={t("close")}>
+                    <button type="button" className="icon-btn" onClick={onClose} aria-label={t("close")}>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <line x1="18" y1="6" x2="6" y2="18"/>
                             <line x1="6" y1="6" x2="18" y2="18"/>
@@ -371,6 +395,16 @@ function AgentPicker({onClose}: {onClose: () => void}): JSX.Element {
                                         onClose();
                                     }
                                 }}
+                                onKeyDown={(event) => {
+                                    if (!isAlready && agent.enabled && isActionKey(event.key)) {
+                                        event.preventDefault();
+                                        void addAgentAppToScenario(agent.id);
+                                        onClose();
+                                    }
+                                }}
+                                role="button"
+                                tabIndex={0}
+                                aria-disabled={isAlready || !agent.enabled}
                             >
                                 <div className="picker-item-icon picker-item-icon-agent">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -443,7 +477,7 @@ function ScenarioDetail(): JSX.Element {
         <div className={`page page-scenarios-view scenario-detail-view ${isEdit ? "scenario-edit-mode" : ""}`}>
             <div className="page-header">
                 <nav className="scenario-breadcrumb" aria-label={t("breadcrumbAriaLabel")}>
-                    <button onClick={() => setView("scenarios")}>{t("scenarioBackToScenarios")}</button>
+                    <button type="button" onClick={() => setView("scenarios")}>{t("scenarioBackToScenarios")}</button>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="9 18 15 12 9 6"/>
                     </svg>
@@ -494,20 +528,20 @@ function ScenarioDetail(): JSX.Element {
                     <div className="scenario-hero-actions">
                         {isEdit ? (
                             <>
-                                <button className="btn btn-primary btn-sm" onClick={() => { void saveScenario(); setScenarioDetailView("view"); }}>
+                                <button type="button" className="btn btn-primary btn-sm" onClick={() => { void saveScenario(); setScenarioDetailView("view"); }}>
                                     {t("save")}
                                 </button>
-                                <button className="btn btn-ghost btn-sm" onClick={() => setScenarioDetailView("view")}>
+                                <button type="button" className="btn btn-ghost btn-sm" onClick={() => setScenarioDetailView("view")}>
                                     {t("close")}
                                 </button>
                             </>
                         ) : (
                             <>
-                                <button className="btn btn-secondary btn-sm" onClick={() => setScenarioDetailView("edit")}>
+                                <button type="button" className="btn btn-secondary btn-sm" onClick={() => setScenarioDetailView("edit")}>
                                     {t("scenarioEditScenario")}
                                 </button>
                                 {!selectedScenario.isBuiltIn && (
-                                    <button className="btn btn-danger btn-sm" onClick={() => { void deleteScenario(); }}>
+                                    <button type="button" className="btn btn-danger btn-sm" onClick={() => { void deleteScenario(); }}>
                                         {t("scenarioDeleteScenario")}
                                     </button>
                                 )}
@@ -569,7 +603,7 @@ function ScenarioDetail(): JSX.Element {
                         </h3>
                         <div className="scenario-section-meta">
                             <span className="scenario-section-count">{selectedScenario.skillIds.length}</span>
-                            <button className="scenario-section-add" onClick={() => openAssetPicker("skillIds")} title={t("scenarioAddSkill")}>
+                            <button type="button" className="scenario-section-add" onClick={() => openAssetPicker("skillIds")} title={t("scenarioAddSkill")} aria-label={t("scenarioAddSkill")}>
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
                                 </svg>
@@ -605,7 +639,7 @@ function ScenarioDetail(): JSX.Element {
                         </h3>
                         <div className="scenario-section-meta">
                             <span className="scenario-section-count">{selectedScenario.ruleIds.length}</span>
-                            <button className="scenario-section-add" onClick={() => openAssetPicker("ruleIds")} title={t("scenarioAddRule")}>
+                            <button type="button" className="scenario-section-add" onClick={() => openAssetPicker("ruleIds")} title={t("scenarioAddRule")} aria-label={t("scenarioAddRule")}>
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
                                 </svg>
@@ -640,7 +674,7 @@ function ScenarioDetail(): JSX.Element {
                         </h3>
                         <div className="scenario-section-meta">
                             <span className="scenario-section-count">{selectedScenario.agentFileIds.length}</span>
-                            <button className="scenario-section-add" onClick={() => openAssetPicker("agentFileIds")} title={t("scenarioAddAgentFile")}>
+                            <button type="button" className="scenario-section-add" onClick={() => openAssetPicker("agentFileIds")} title={t("scenarioAddAgentFile")} aria-label={t("scenarioAddAgentFile")}>
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
                                 </svg>
@@ -676,7 +710,7 @@ function ScenarioDetail(): JSX.Element {
                         </h3>
                         <div className="scenario-section-meta">
                             <span className="scenario-section-count">{selectedScenario.agentAppIds.length}</span>
-                            <button className="scenario-section-add" title={t("scenarioAddAgent")} onClick={() => setShowAgentPicker(true)}>
+                            <button type="button" className="scenario-section-add" title={t("scenarioAddAgent")} aria-label={t("scenarioAddAgent")} onClick={() => setShowAgentPicker(true)}>
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
                                 </svg>
@@ -797,7 +831,7 @@ export function ScenariosPage(): JSX.Element {
                         <h1 className="scenarios-list-title">{t("scenariosTitle")}</h1>
                         <p className="scenarios-list-subtitle">{t("scenarioListSubtitle")}</p>
                     </div>
-                    <button className="btn btn-primary" onClick={() => {
+                    <button type="button" className="btn btn-primary" onClick={() => {
                         resetScenarioForm();
                         setShowNewModal(true);
                     }}>

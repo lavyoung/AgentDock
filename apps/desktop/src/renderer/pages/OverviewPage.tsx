@@ -133,37 +133,43 @@ export function OverviewPage(): JSX.Element {
                         <h2>{t("overviewAgentBreakdown")}</h2>
                     </div>
 
-                    <div className="overview-agent-row header">
-                        <div>AGENT</div>
-                        <div>{t("overviewRefSkills")}</div>
-                        <div>{t("overviewRefRules")}</div>
-                        <div className="overview-agent-status-header">{t("overviewStatusEnabled")}</div>
-                    </div>
+                    {agentRows.length === 0 ? (
+                        <div className="overview-empty-state">{t("overviewNoEnabledAgents")}</div>
+                    ) : (
+                        <>
+                            <div className="overview-agent-row header">
+                                <div>AGENT</div>
+                                <div>{t("overviewRefSkills")}</div>
+                                <div>{t("overviewRefRules")}</div>
+                                <div className="overview-agent-status-header">{t("overviewStatusEnabled")}</div>
+                            </div>
 
-                    {agentRows.map((agent) => (
-                        <div key={agent.id} className="overview-agent-row">
-                            <div className="overview-agent-name">
-                                <span
-                                    className={`mini-radio ${agent.active ? "active" : "empty"}`}
-                                    aria-label={agent.active ? t("overviewAgentActive") : t("overviewAgentInactive")}
-                                />
-                                <span className="overview-agent-name-text">{agent.name}</span>
-                            </div>
-                            <div className={`overview-agent-value ${agent.refSkills > 0 ? "has-value" : ""}`}>
-                                {agent.refSkills || ""}
-                            </div>
-                            <div className="overview-agent-value">{agent.refRules || ""}</div>
-                            <div className="overview-agent-status">
-                                {agent.active ? (
-                                    <span className="badge badge-green">{t("overviewStatusEnabled")}</span>
-                                ) : agent.hasUsableLocation ? (
-                                    <span className="badge badge-gray">{t("enabledNo")}</span>
-                                ) : (
-                                    <span className="badge badge-gray">{t("overviewStatusUninstalled")}</span>
-                                )}
-                            </div>
-                        </div>
-                    ))}
+                            {agentRows.map((agent) => (
+                                <div key={agent.id} className="overview-agent-row">
+                                    <div className="overview-agent-name">
+                                        <span
+                                            className={`mini-radio ${agent.active ? "active" : "empty"}`}
+                                            aria-label={agent.active ? t("overviewAgentActive") : t("overviewAgentInactive")}
+                                        />
+                                        <span className="overview-agent-name-text">{agent.name}</span>
+                                    </div>
+                                    <div className={`overview-agent-value ${agent.refSkills > 0 ? "has-value" : ""}`}>
+                                        {agent.refSkills || ""}
+                                    </div>
+                                    <div className="overview-agent-value">{agent.refRules || ""}</div>
+                                    <div className="overview-agent-status">
+                                        {agent.active ? (
+                                            <span className="badge badge-green">{t("overviewStatusEnabled")}</span>
+                                        ) : agent.hasUsableLocation ? (
+                                            <span className="badge badge-gray">{t("enabledNo")}</span>
+                                        ) : (
+                                            <span className="badge badge-gray">{t("overviewStatusUninstalled")}</span>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </>
+                    )}
                 </section>
             </div>
         </div>

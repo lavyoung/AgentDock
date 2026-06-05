@@ -31,7 +31,10 @@ export type SyncPreviewResult = {
 
 export type SyncRunConflict = {
     asset_id: string;
+    asset_name: string;
+    asset_type: AssetType;
     target_id: string;
+    target_name: string;
     output_path: string;
     reason: string;
 };
