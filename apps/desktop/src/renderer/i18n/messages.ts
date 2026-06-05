@@ -237,6 +237,7 @@ type MessageCatalog = {
     scenarioAgent: string;
     scenarioProjects: string;
     scenarioSyncTargets: string;
+    scenarioSyncTargetsSummary: string;
     scenarioAddProject: string;
     scenarioProjectsSummary: string;
     scenarioAgentsSummary: string;
@@ -572,12 +573,13 @@ export const messages: Record<Locale, Catalog> = {
         scenarioSkills: "\u6280\u80fd",
         scenarioRules: "\u89c4\u5219",
         scenarioAgentFiles: "AGENTS.md \u6587\u4ef6",
-        scenarioAgent: "Agent",
-        scenarioProjects: "\u5173\u8054\u9879\u76ee",
-        scenarioSyncTargets: "\u540c\u6b65\u843d\u70b9",
+        scenarioAgent: "\u573a\u666f\u5173\u8054 Agent",
+        scenarioProjects: "\u573a\u666f\u5173\u8054\u9879\u76ee",
+        scenarioSyncTargets: "\u540c\u6b65\u76ee\u6807",
+        scenarioSyncTargetsSummary: "\u573a\u666f\u4e0d\u53ea\u7ba1\u7406\u8d44\u4ea7\uff0c\u4e5f\u51b3\u5b9a\u8fd9\u4e9b\u8d44\u4ea7\u8981\u540c\u6b65\u5230\u54ea\u4e9b\u9879\u76ee\u6216 Agent \u6839\u76ee\u5f55\u3002",
         scenarioAddProject: "\u5173\u8054\u9879\u76ee",
-        scenarioProjectsSummary: "\u5df2\u5173\u8054 {count} \u4e2a\u9879\u76ee\uff0c\u53ef\u4ece\u5de6\u4fa7\u5de5\u4f5c\u533a\u76f4\u63a5\u67e5\u770b\u548c\u5207\u6362\u3002",
-        scenarioAgentsSummary: "\u5df2\u5173\u8054 {count} \u4e2a Agent\uff0c\u8fd9\u4e2a\u573a\u666f\u4f1a\u51b3\u5b9a\u8981\u540c\u6b65\u5230\u54ea\u4e9b\u5de5\u5177\u6839\u76ee\u5f55\u3002",
+        scenarioProjectsSummary: "\u5f53\u524d\u5df2\u5173\u8054 {count} \u4e2a\u9879\u76ee\uff0c\u53ef\u4ece\u5de6\u4fa7\u5de5\u4f5c\u533a\u76f4\u63a5\u67e5\u770b\u548c\u5207\u6362\u3002",
+        scenarioAgentsSummary: "\u5f53\u524d\u5df2\u5173\u8054 {count} \u4e2a Agent\uff0c\u8fd9\u4e2a\u573a\u666f\u4f1a\u51b3\u5b9a\u8981\u540c\u6b65\u5230\u54ea\u4e9b\u5de5\u5177\u6839\u76ee\u5f55\u3002",
         scenarioProjectPickerTitle: "\u5173\u8054\u9879\u76ee",
         scenarioProjectPickerHint: "\u9009\u62e9\u4e00\u4e2a\u5de5\u4f5c\u533a\u5173\u8054\u5230\u5f53\u524d\u573a\u666f\u3002\u5982\u679c\u8be5\u9879\u76ee\u5df2\u7ed1\u5b9a\u5230\u5176\u4ed6\u573a\u666f\uff0c\u4f1a\u81ea\u52a8\u5207\u6362\u8fc7\u6765\u3002",
         scenarioProjectPickerEmpty: "\u6682\u65e0\u53ef\u5173\u8054\u9879\u76ee",
@@ -906,12 +908,13 @@ export const messages: Record<Locale, Catalog> = {
         scenarioSkills: "Skills",
         scenarioRules: "Rules",
         scenarioAgentFiles: "Agent files",
-        scenarioAgent: "Agent",
-        scenarioProjects: "Linked projects",
-        scenarioSyncTargets: "Sync destinations",
+        scenarioAgent: "Scenario-linked Agents",
+        scenarioProjects: "Scenario-linked projects",
+        scenarioSyncTargets: "Sync targets",
+        scenarioSyncTargetsSummary: "A scenario does not only group assets. It also decides which projects or Agent roots should receive the synced output.",
         scenarioAddProject: "Link project",
-        scenarioProjectsSummary: "{count} linked project(s). View and switch them from the left workspace list.",
-        scenarioAgentsSummary: "{count} linked agent(s). This scenario decides which tool roots receive sync output.",
+        scenarioProjectsSummary: "{count} project(s) are linked right now. View and switch them from the left workspace list.",
+        scenarioAgentsSummary: "{count} agent(s) are linked right now. This scenario decides which tool roots receive sync output.",
         scenarioProjectPickerTitle: "Link project",
         scenarioProjectPickerHint: "Choose a workspace to associate with this scenario. If the project is already linked to another scenario, it will be moved here.",
         scenarioProjectPickerEmpty: "No projects available to link",

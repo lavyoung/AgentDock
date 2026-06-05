@@ -856,6 +856,9 @@ function ScenarioDetail(): JSX.Element {
                         </div>
                     </header>
                     <div className="left-card-body">
+                        <div className="scenario-binding-intro">
+                            {t("scenarioSyncTargetsSummary")}
+                        </div>
                         <div className="scenario-binding-grid">
                             <article className="scenario-binding-card scenario-binding-card--project">
                                 <div className="scenario-binding-card-header">
@@ -891,7 +894,7 @@ function ScenarioDetail(): JSX.Element {
                                     {linkedProjects.length === 0 ? (
                                         <div className="scenario-empty-copy">{t("scenarioNoProjects")}</div>
                                     ) : (
-                                        <div className="scenario-project-summary">
+                                        <div className="scenario-binding-summary scenario-binding-summary--project">
                                             {t("scenarioProjectsSummary").replace("{count}", String(linkedProjects.length))}
                                         </div>
                                     )}
@@ -931,7 +934,7 @@ function ScenarioDetail(): JSX.Element {
                                 <div className="scenario-binding-card-body">
                                     {linkedAgents.length > 0 ? (
                                         <>
-                                            <div className="scenario-binding-summary">
+                                            <div className="scenario-binding-summary scenario-binding-summary--agent">
                                                 {t("scenarioAgentsSummary").replace("{count}", String(linkedAgents.length))}
                                             </div>
                                             <div className="scenario-binding-chip-list">
