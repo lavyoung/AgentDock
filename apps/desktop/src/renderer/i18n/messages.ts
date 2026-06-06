@@ -215,6 +215,7 @@ type MessageCatalog = {
     projectSyncOperationCreate: string;
     projectSyncOperationUpdate: string;
     projectSyncOperationMerge: string;
+    projectSyncOperationDelete: string;
     projectSyncMatrixTitle: string;
     projectSyncMatrixDesc: string;
     projectSyncMatrixEmpty: string;
@@ -547,7 +548,7 @@ export const messages: Record<Locale, Catalog> = {
         projectSyncRequiresScenario: "\u8bf7\u5148\u4e3a\u9879\u76ee\u5173\u8054\u4e00\u4e2a\u573a\u666f\u3002",
         projectSyncRequiresTarget: "\u8bf7\u5148\u9009\u62e9\u81f3\u5c11\u4e00\u4e2a\u540c\u6b65\u76ee\u5f55\u3002",
         projectSyncPreviewReady: "\u540c\u6b65\u9884\u89c8\u5df2\u751f\u6210\u3002",
-        projectSyncRunSuccess: "\u5df2\u5199\u5165 {written} \u4e2a\u540c\u6b65\u64cd\u4f5c\u3002",
+        projectSyncRunSuccess: "\u5df2\u5904\u7406 {written} \u4e2a\u540c\u6b65\u64cd\u4f5c\u3002",
         projectSyncRunConflict: "\u5176\u4e2d\u6709 {count} \u4e2a AGENTS.md \u6258\u7ba1\u533a\u5757\u51b2\u7a81\u9700\u8981\u624b\u52a8\u5904\u7406\u3002",
         projectSyncStatusPending: "\u5f85\u540c\u6b65",
         projectSyncStatusSynced: "\u5df2\u540c\u6b65",
@@ -564,6 +565,7 @@ export const messages: Record<Locale, Catalog> = {
         projectSyncOperationCreate: "\u521b\u5efa",
         projectSyncOperationUpdate: "\u66f4\u65b0",
         projectSyncOperationMerge: "\u5408\u5e76",
+        projectSyncOperationDelete: "\u5220\u9664",
         projectSyncMatrixTitle: "\u540c\u6b65\u76ee\u5f55",
         projectSyncMatrixDesc: "\u8fd9\u91cc\u914d\u7f6e\u7684\u662f\u8fd9\u4e2a\u9879\u76ee\u7684\u989d\u5916\u540c\u6b65\u76ee\u5f55\u3002\u5982\u679c\u4e0d\u989d\u5916\u9009\u62e9\uff0c\u573a\u666f\u540c\u6b65\u65f6\u4f1a\u9ed8\u8ba4\u5199\u5165\u5230\u9879\u76ee\u6839\u76ee\u5f55\u3002",
         projectSyncMatrixEmpty: "\u6682\u65e0\u53ef\u7528\u7684\u989d\u5916\u540c\u6b65\u76ee\u5f55\u3002\u4e0d\u914d\u7f6e\u4e5f\u53ef\u4ee5\u6b63\u5e38\u540c\u6b65\uff0c\u7cfb\u7edf\u4f1a\u9ed8\u8ba4\u5199\u5165\u9879\u76ee\u6839\u76ee\u5f55\u3002",
@@ -892,7 +894,7 @@ export const messages: Record<Locale, Catalog> = {
         projectSyncRequiresScenario: "Link a scenario to this project before previewing sync.",
         projectSyncRequiresTarget: "Select at least one sync directory before running sync.",
         projectSyncPreviewReady: "Sync preview generated.",
-        projectSyncRunSuccess: "Wrote {written} sync operations.",
+        projectSyncRunSuccess: "Processed {written} sync operations.",
         projectSyncRunConflict: "{count} AGENTS.md managed block conflicts need manual review.",
         projectSyncStatusPending: "Pending",
         projectSyncStatusSynced: "Synced",
@@ -909,6 +911,7 @@ export const messages: Record<Locale, Catalog> = {
         projectSyncOperationCreate: "Create",
         projectSyncOperationUpdate: "Update",
         projectSyncOperationMerge: "Merge",
+        projectSyncOperationDelete: "Delete",
         projectSyncMatrixTitle: "Sync directories",
         projectSyncMatrixDesc: "These are optional extra sync directories for this project. If none are selected, scenario sync writes to the project root by default.",
         projectSyncMatrixEmpty: "No extra sync directories are available yet. Sync still works and will default to the project root.",

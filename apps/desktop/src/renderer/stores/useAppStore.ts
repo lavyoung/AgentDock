@@ -125,6 +125,13 @@ function buildProjectInlineSyncTargets(project: ProjectRecord): SyncInlineTarget
     }];
 }
 
+function getLatestScenarioSyncOutputs(
+    project: ProjectRecord,
+    scenarioId: string
+): SyncHistoryEntry["outputs"] {
+    return project.syncHistory.find((entry) => entry.scenario_id === scenarioId)?.outputs ?? [];
+}
+
 function normalizeSyncHistoryEntry(value: unknown): SyncHistoryEntry | null {
     if (!value || typeof value !== "object") {
         return null;
@@ -989,6 +996,17 @@ export const useAppStore = create<AppStore>((set, get) => ({
         if (!selectedScenario) return;
         if (!selectedScenario.projectIds.includes(projectId)) return;
 
+        const project = projects.find((item) => item.id === projectId) ?? null;
+        const trackedOutputs = project
+            ? getLatestScenarioSyncOutputs(project, selectedScenario.id)
+            : [];
+
+        if (trackedOutputs.length > 0) {
+            await agentdockClient.sync.cleanup({
+                tracked_outputs: trackedOutputs,
+            });
+        }
+
         await agentdockClient.scenarios.update(selectedScenario.id, {
             projectIds: selectedScenario.projectIds.filter((id) => id !== projectId),
         });
@@ -1106,6 +1124,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
             scenario_id: project.defaultScenarioId,
             target_ids: project.targetIds,
             inline_targets: buildProjectInlineSyncTargets(project),
+            tracked_outputs: getLatestScenarioSyncOutputs(project, project.defaultScenarioId),
         });
 
         if (get().selectedProjectId === projectId) {
@@ -1142,6 +1161,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
             scenario_id: project.defaultScenarioId,
             target_ids: project.targetIds,
             inline_targets: buildProjectInlineSyncTargets(project),
+            tracked_outputs: getLatestScenarioSyncOutputs(project, project.defaultScenarioId),
         });
         const historyEntry: SyncHistoryEntry = {
             id: `${project.id}-${result.synced_at}`,
@@ -1160,7 +1180,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
                         : "success",
             warnings: result.warnings,
             conflicts: result.conflicts,
-            outputs: result.items.slice(0, 3).map((item) => ({
+            outputs: result.items.map((item) => ({
                 asset_id: item.asset_id,
                 asset_name: item.asset_name,
                 asset_type: item.asset_type,

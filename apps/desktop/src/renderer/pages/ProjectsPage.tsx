@@ -404,7 +404,7 @@ export function ProjectsPage(): JSX.Element {
                                                                         {t("projectSyncHistoryOutputs")}
                                                                     </div>
                                                                     <div className="project-sync-history-output-list">
-                                                                        {entry.outputs.map((output) => (
+                                                                        {entry.outputs.slice(0, 4).map((output) => (
                                                                             <div
                                                                                 key={`${entry.id}-${output.target_id}-${output.asset_id}`}
                                                                                 className="project-sync-history-output"

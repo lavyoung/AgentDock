@@ -13,7 +13,7 @@ import {
 } from "../../../../packages/core/src/scenario/scenarioService";
 import {SnapshotService} from "../../../../packages/core/src/snapshot/snapshotService";
 import {SyncService} from "../../../../packages/core/src/sync/syncService";
-import type {SyncPreviewInput} from "../../../../packages/core/src/types/sync";
+import type {SyncCleanupInput, SyncPreviewInput} from "../../../../packages/core/src/types/sync";
 import {TargetService} from "../../../../packages/core/src/target/targetService";
 import {
     createApplicationRepository,
@@ -69,6 +69,7 @@ export function registerIpc() {
     });
     const applicationSyncService = new ApplicationSyncService({
         applicationRepository,
+        scenarioRepository,
         assetRepository,
         fileSystem: nodeFileSystemPort,
         path: nodePathPort,
@@ -217,12 +218,24 @@ export function registerIpc() {
         return applicationSyncService.syncApplication(id);
     });
 
+    ipcMain.handle("applications:preview-scenario-sync", async (_event, id: ApplicationId, scenarioId: string) => {
+        return applicationSyncService.previewScenarioSync(id, scenarioId);
+    });
+
+    ipcMain.handle("applications:run-scenario-sync", async (_event, id: ApplicationId, scenarioId: string) => {
+        return applicationSyncService.runScenarioSync(id, scenarioId);
+    });
+
     ipcMain.handle("sync:preview", async (_event, input: SyncPreviewInput) => {
         return syncService.previewScenarioSync(input);
     });
 
     ipcMain.handle("sync:run", async (_event, input: SyncPreviewInput) => {
         return syncService.runScenarioSync(input);
+    });
+
+    ipcMain.handle("sync:cleanup", async (_event, input: SyncCleanupInput) => {
+        return syncService.cleanupTrackedOutputs(input);
     });
 
     // ---------- scenarios ----------

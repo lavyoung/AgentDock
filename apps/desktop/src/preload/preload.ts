@@ -52,10 +52,15 @@ const agentdockApi: AgentdockApi = {
         updateLocation: (id, input) =>
             ipcRenderer.invoke("applications:update-location", id, input),
         runSync: (id) => ipcRenderer.invoke("applications:run-sync", id),
+        previewScenarioSync: (id, scenarioId) =>
+            ipcRenderer.invoke("applications:preview-scenario-sync", id, scenarioId),
+        runScenarioSync: (id, scenarioId) =>
+            ipcRenderer.invoke("applications:run-scenario-sync", id, scenarioId),
     },
     sync: {
         preview: (input) => ipcRenderer.invoke("sync:preview", input),
         run: (input) => ipcRenderer.invoke("sync:run", input),
+        cleanup: (input) => ipcRenderer.invoke("sync:cleanup", input),
     },
 };
 

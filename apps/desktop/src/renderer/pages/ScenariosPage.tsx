@@ -54,7 +54,7 @@ function getProjectSyncStatusLabel(
     return t("projectSyncStatusPending");
 }
 
-function getOperationBadgeClass(operation: "create" | "update" | "merge"): string {
+function getOperationBadgeClass(operation: "create" | "update" | "merge" | "delete"): string {
     if (operation === "update") {
         return "badge badge-blue";
     }
@@ -63,12 +63,16 @@ function getOperationBadgeClass(operation: "create" | "update" | "merge"): strin
         return "badge badge-orange";
     }
 
+    if (operation === "delete") {
+        return "badge badge-red";
+    }
+
     return "badge badge-green";
 }
 
 function getOperationLabel(
     t: (key: string) => string,
-    operation: "create" | "update" | "merge"
+    operation: "create" | "update" | "merge" | "delete"
 ): string {
     if (operation === "update") {
         return t("projectSyncOperationUpdate");
@@ -76,6 +80,10 @@ function getOperationLabel(
 
     if (operation === "merge") {
         return t("projectSyncOperationMerge");
+    }
+
+    if (operation === "delete") {
+        return t("projectSyncOperationDelete");
     }
 
     return t("projectSyncOperationCreate");

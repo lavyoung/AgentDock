@@ -17,7 +17,13 @@ import type {
     UpdateAssetInput,
 } from "../../core/src/types/asset";
 import type {SnapshotRecord} from "../../core/src/types/snapshot";
-import type {SyncPreviewInput, SyncPreviewResult, SyncRunResult} from "../../core/src/types/sync";
+import type {
+    SyncCleanupInput,
+    SyncCleanupResult,
+    SyncPreviewInput,
+    SyncPreviewResult,
+    SyncRunResult,
+} from "../../core/src/types/sync";
 import type {CreateTargetInput, TargetRecord, UpdateTargetInput,} from "../../core/src/types/target";
 
 export type PickPathMode = "directory" | "agents-md-file";
@@ -83,9 +89,12 @@ export interface AgentdockApi {
             input: UpdateApplicationLocationInput
         ): Promise<ApplicationLocationRecord>;
         runSync(id: ApplicationId): Promise<ApplicationSyncResult>;
+        previewScenarioSync(id: ApplicationId, scenarioId: string): Promise<SyncPreviewResult>;
+        runScenarioSync(id: ApplicationId, scenarioId: string): Promise<SyncRunResult>;
     };
     sync: {
         preview(input: SyncPreviewInput): Promise<SyncPreviewResult>;
         run(input: SyncPreviewInput): Promise<SyncRunResult>;
+        cleanup(input: SyncCleanupInput): Promise<SyncCleanupResult>;
     };
 }

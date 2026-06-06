@@ -2,11 +2,15 @@ import {type AssetRecord, getAssetMainFileName, type ScenarioRecord} from "../ty
 import type {FileSystemPort} from "../ports/fileSystemPort";
 import type {PathPort} from "../ports/pathPort";
 import {mergeManagedBlock} from "../managed-block/mergeManagedBlock";
+import {removeManagedBlock} from "../managed-block/removeManagedBlock";
 import type {ScenarioRepository} from "../scenario/scenarioRepository";
 import type {TargetRepository} from "../target/targetRepository";
 import type {TargetRecord} from "../types/target";
 import type {AssetRepository} from "../asset/assetRepository";
 import type {
+    SyncCleanupInput,
+    SyncCleanupResult,
+    SyncHistoryOutput,
     SyncInlineTarget,
     SyncPlanItem,
     SyncPreviewInput,
@@ -59,6 +63,26 @@ export class SyncService {
         let writtenCount = 0;
 
         for (const item of prepared.items) {
+            if (item.operation === "delete") {
+                const removal = await this.removeSyncedOutput(item);
+
+                if (removal.status === "conflict") {
+                    conflicts.push({
+                        asset_id: item.asset_id,
+                        asset_name: item.asset_name,
+                        asset_type: item.asset_type,
+                        target_id: item.target_id,
+                        target_name: item.target_name,
+                        output_path: item.output_path,
+                        reason: removal.reason,
+                    });
+                    continue;
+                }
+
+                writtenCount += 1;
+                continue;
+            }
+
             const asset = prepared.assetsById.get(item.asset_id);
             const target = prepared.targets.find((candidate) => candidate.id === item.target_id);
 
@@ -97,6 +121,47 @@ export class SyncService {
             written_count: writtenCount,
             conflicts,
             synced_at: new Date().toISOString(),
+        };
+    }
+
+    async cleanupTrackedOutputs(input: SyncCleanupInput): Promise<SyncCleanupResult> {
+        const conflicts: SyncRunConflict[] = [];
+        const warnings: string[] = [];
+        let cleanedCount = 0;
+
+        for (const output of input.tracked_outputs) {
+            const removal = await this.removeSyncedOutput({
+                ...output,
+                target_root: this.path.dirname(output.output_path),
+                operation: "delete",
+            });
+
+            if (removal.status === "conflict") {
+                conflicts.push({
+                    asset_id: output.asset_id,
+                    asset_name: output.asset_name,
+                    asset_type: output.asset_type,
+                    target_id: output.target_id,
+                    target_name: output.target_name,
+                    output_path: output.output_path,
+                    reason: removal.reason,
+                });
+                continue;
+            }
+
+            cleanedCount += 1;
+        }
+
+        if (input.tracked_outputs.length === 0) {
+            warnings.push("No tracked outputs were available to clean.");
+        }
+
+        return {
+            cleaned_count: cleanedCount,
+            conflict_count: conflicts.length,
+            warnings,
+            conflicts,
+            cleaned_at: new Date().toISOString(),
         };
     }
 
@@ -182,6 +247,13 @@ export class SyncService {
             }
         }
 
+        const currentItemKeys = new Set(items.map((item) => this.getPlanItemKey(item)));
+        const deleteItems = this.buildDeleteItems(
+            input.tracked_outputs ?? [],
+            currentItemKeys
+        );
+        items.push(...deleteItems);
+
         return {
             scenario,
             targets,
@@ -240,6 +312,7 @@ export class SyncService {
         const createCount = prepared.items.filter((item) => item.operation === "create").length;
         const updateCount = prepared.items.filter((item) => item.operation === "update").length;
         const mergeCount = prepared.items.filter((item) => item.operation === "merge").length;
+        const deleteCount = prepared.items.filter((item) => item.operation === "delete").length;
 
         return {
             scenario_id: prepared.scenario.id,
@@ -248,6 +321,7 @@ export class SyncService {
             create_count: createCount,
             update_count: updateCount,
             merge_count: mergeCount,
+            delete_count: deleteCount,
             warnings: prepared.warnings,
             items: prepared.items,
         };
@@ -290,6 +364,65 @@ export class SyncService {
             status: "ok",
             content: merged.content,
         };
+    }
+
+    private buildDeleteItems(
+        trackedOutputs: SyncHistoryOutput[],
+        currentItemKeys: Set<string>
+    ): SyncPlanItem[] {
+        return trackedOutputs
+            .filter((output) => !currentItemKeys.has(this.getHistoryOutputKey(output)))
+            .map((output) => ({
+                asset_id: output.asset_id,
+                asset_name: output.asset_name,
+                asset_type: output.asset_type,
+                target_id: output.target_id,
+                target_name: output.target_name,
+                target_root: this.path.dirname(output.output_path),
+                output_path: output.output_path,
+                operation: "delete" as const,
+            }));
+    }
+
+    private getPlanItemKey(item: SyncPlanItem): string {
+        return `${item.target_id}:${item.asset_id}:${item.output_path}`;
+    }
+
+    private getHistoryOutputKey(output: SyncHistoryOutput): string {
+        return `${output.target_id}:${output.asset_id}:${output.output_path}`;
+    }
+
+    private async removeSyncedOutput(
+        item: SyncPlanItem
+    ): Promise<{status: "ok"} | {status: "conflict"; reason: string}> {
+        if (item.asset_type === "skill") {
+            await this.fileSystem.remove(this.path.dirname(item.output_path));
+            return {status: "ok"};
+        }
+
+        if (item.asset_type === "agents-md") {
+            if (!(await this.fileSystem.exists(item.output_path))) {
+                return {status: "ok"};
+            }
+
+            const originalContent = await this.fileSystem.readText(item.output_path);
+            const removed = removeManagedBlock({
+                originalContent,
+                assetId: item.asset_id,
+            });
+
+            if (removed.status === "conflict") {
+                return {
+                    status: "conflict",
+                    reason: removed.reason,
+                };
+            }
+
+            await this.fileSystem.writeText(item.output_path, removed.content);
+            return {status: "ok"};
+        }
+
+        return {status: "ok"};
     }
 
     private readAssetContent(asset: AssetRecord): Promise<string> {

@@ -10,7 +10,13 @@ import type {
     ApplicationRecord,
 } from "../../../../../packages/core/src/types/application";
 import type {AssetDetail, RuleRecord, ScenarioRecord} from "../../../../../packages/core/src/types/asset";
-import type {SyncPreviewInput, SyncPreviewResult, SyncRunResult} from "../../../../../packages/core/src/types/sync";
+import type {
+    SyncCleanupInput,
+    SyncCleanupResult,
+    SyncPreviewInput,
+    SyncPreviewResult,
+    SyncRunResult,
+} from "../../../../../packages/core/src/types/sync";
 import type {TargetRecord} from "../../../../../packages/core/src/types/target";
 
 function getApi(): AgentdockApi | null {
@@ -108,16 +114,33 @@ function buildMockSyncPreview(input: SyncPreviewInput): SyncPreviewResult {
 
         return [...skillItems, ...agentsMdItems];
     });
+    const currentKeys = new Set(
+        items.map((item) => `${item.target_id}:${item.asset_id}:${item.output_path}`)
+    );
+    const deleteItems = (input.tracked_outputs ?? [])
+        .filter((output) => !currentKeys.has(`${output.target_id}:${output.asset_id}:${output.output_path}`))
+        .map((output) => ({
+            asset_id: output.asset_id,
+            asset_name: output.asset_name,
+            asset_type: output.asset_type,
+            target_id: output.target_id,
+            target_name: output.target_name,
+            target_root: output.output_path,
+            output_path: output.output_path,
+            operation: "delete" as const,
+        }));
+    const allItems = [...items, ...deleteItems];
 
     return {
         scenario_id: scenario.id,
         target_count: resolvedTargets.length,
-        operation_count: items.length,
-        create_count: items.filter((item) => item.operation === "create").length,
+        operation_count: allItems.length,
+        create_count: allItems.filter((item) => item.operation === "create").length,
         update_count: 0,
-        merge_count: items.filter((item) => item.operation === "merge").length,
+        merge_count: allItems.filter((item) => item.operation === "merge").length,
+        delete_count: allItems.filter((item) => item.operation === "delete").length,
         warnings,
-        items,
+        items: allItems,
     };
 }
 
@@ -438,6 +461,13 @@ const mockApi: AgentdockApi = {
             conflicts: [],
             synced_at: nowIso(),
         }),
+        cleanup: async (input: SyncCleanupInput): Promise<SyncCleanupResult> => ({
+            cleaned_count: input.tracked_outputs.length,
+            conflict_count: 0,
+            warnings: input.tracked_outputs.length === 0 ? ["No tracked outputs were available to clean."] : [],
+            conflicts: [],
+            cleaned_at: nowIso(),
+        }),
     },
 };
 
@@ -453,7 +483,7 @@ export const agentdockClient: AgentdockApi = MOCK_MODE ? mockApi : new Proxy({} 
                 targets: {list: notReady, get: notReady, create: notReady, update: notReady, delete: notReady},
                 scenarios: {list: notReady, get: notReady, create: notReady, update: notReady, delete: notReady, addAsset: notReady, removeAsset: notReady},
                 applications: {list: notReady, get: notReady, update: notReady, refreshLocations: notReady, updateLocation: notReady, runSync: notReady},
-                sync: {preview: notReady, run: notReady},
+                sync: {preview: notReady, run: notReady, cleanup: notReady},
             }[prop];
         }
         return api[prop];
