@@ -452,6 +452,77 @@ const mockApi: AgentdockApi = {
             conflicts: [],
             synced_at: nowIso(),
         }),
+        previewScenarioSync: async (id, scenarioId) => {
+            const scenario = mockScenarios.find((candidate) => candidate.id === scenarioId);
+            if (!scenario) {
+                throw new Error(`Scenario not found: ${scenarioId}`);
+            }
+            const locations = mockLocations.filter(
+                (location) => location.application_id === id && location.enabled
+            );
+            const activeSkillAssets = mockAssets.filter(
+                (asset) => asset.type === "skill" && asset.status === "active" && scenario.skillIds.includes(asset.id)
+            );
+            const activeAgentsMdAssets = mockAssets.filter(
+                (asset) => asset.type === "agents-md" && asset.status === "active" && scenario.agentFileIds.includes(asset.id)
+            );
+            const warnings: string[] = [];
+
+            if (locations.length === 0) {
+                warnings.push(`No enabled managed locations are configured for ${id}.`);
+            }
+
+            if (activeSkillAssets.length === 0 && activeAgentsMdAssets.length === 0) {
+                warnings.push(`Scenario "${scenario.title || scenario.name}" has no active Skill or AGENTS.md assets to sync to Agent locations.`);
+            }
+
+            const items = locations.flatMap((location) => {
+                if (location.kind === "skills") {
+                    return activeSkillAssets.map((asset) => ({
+                        asset_id: asset.id,
+                        asset_name: asset.title || asset.name,
+                        asset_type: asset.type,
+                        target_id: location.id,
+                        target_name: location.name,
+                        target_root: location.path,
+                        output_path: `${location.path}\\skills\\${asset.name}\\SKILL.md`,
+                        operation: "create" as const,
+                    }));
+                }
+
+                return activeAgentsMdAssets.map((asset) => ({
+                    asset_id: asset.id,
+                    asset_name: asset.title || asset.name,
+                    asset_type: asset.type,
+                    target_id: location.id,
+                    target_name: location.name,
+                    target_root: location.path,
+                    output_path: `${location.path}\\AGENTS.md`,
+                    operation: "merge" as const,
+                }));
+            });
+
+            return {
+                scenario_id: scenarioId,
+                target_count: locations.length,
+                operation_count: items.length,
+                create_count: items.filter((item) => item.operation === "create").length,
+                update_count: 0,
+                merge_count: items.filter((item) => item.operation === "merge").length,
+                delete_count: 0,
+                warnings,
+                items,
+            };
+        },
+        runScenarioSync: async (id, scenarioId) => {
+            const preview = await mockApi.applications.previewScenarioSync(id, scenarioId);
+            return {
+                ...preview,
+                written_count: preview.operation_count,
+                conflicts: [],
+                synced_at: nowIso(),
+            };
+        },
     },
     sync: {
         preview: async (input) => buildMockSyncPreview(input),
@@ -482,7 +553,16 @@ export const agentdockClient: AgentdockApi = MOCK_MODE ? mockApi : new Proxy({} 
                 snapshots: {list: notReady, restore: notReady},
                 targets: {list: notReady, get: notReady, create: notReady, update: notReady, delete: notReady},
                 scenarios: {list: notReady, get: notReady, create: notReady, update: notReady, delete: notReady, addAsset: notReady, removeAsset: notReady},
-                applications: {list: notReady, get: notReady, update: notReady, refreshLocations: notReady, updateLocation: notReady, runSync: notReady},
+                applications: {
+                    list: notReady,
+                    get: notReady,
+                    update: notReady,
+                    refreshLocations: notReady,
+                    updateLocation: notReady,
+                    runSync: notReady,
+                    previewScenarioSync: notReady,
+                    runScenarioSync: notReady,
+                },
                 sync: {preview: notReady, run: notReady, cleanup: notReady},
             }[prop];
         }

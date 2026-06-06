@@ -36,8 +36,12 @@ export function DetailPanel(): JSX.Element {
     const editorDescription = useAppStore((s) => s.editorDescription);
     const editorContent = useAppStore((s) => s.editorContent);
     const snapshots = useAppStore((s) => s.snapshots);
+    const assetDetailLoading = useAppStore((s) => s.assetDetailLoading);
+    const snapshotsLoading = useAppStore((s) => s.snapshotsLoading);
+    const snapshotsLoadedAssetId = useAppStore((s) => s.snapshotsLoadedAssetId);
     const closeDetailPanel = useAppStore((s) => s.closeDetailPanel);
     const setDetailPanelTab = useAppStore((s) => s.setDetailPanelTab);
+    const loadAssetSnapshots = useAppStore((s) => s.loadAssetSnapshots);
     const setEditorTitle = useAppStore((s) => s.setEditorTitle);
     const setEditorDescription = useAppStore((s) => s.setEditorDescription);
     const setEditorContent = useAppStore((s) => s.setEditorContent);
@@ -62,6 +66,18 @@ export function DetailPanel(): JSX.Element {
         window.addEventListener("keydown", handleKey);
         return () => window.removeEventListener("keydown", handleKey);
     }, [open, handleClose]);
+
+    useEffect(() => {
+        if (
+            open &&
+            tab === "history" &&
+            selectedAsset &&
+            !snapshotsLoading &&
+            snapshotsLoadedAssetId !== selectedAsset.id
+        ) {
+            void loadAssetSnapshots(selectedAsset.id);
+        }
+    }, [loadAssetSnapshots, open, selectedAsset, snapshotsLoadedAssetId, snapshotsLoading, tab]);
 
     const assetType = selectedAsset?.type ?? "skill";
     const assetTypeBadgeClass =
@@ -138,6 +154,13 @@ export function DetailPanel(): JSX.Element {
                 aria-hidden={!open}
                 tabIndex={-1}
             >
+                {assetDetailLoading && !selectedAsset && (
+                    <div className="detail-panel-loading" aria-live="polite">
+                        <div className="detail-panel-loading-spinner" aria-hidden="true" />
+                        <div className="detail-panel-loading-copy">{t("panelLoadingAsset")}</div>
+                    </div>
+                )}
+
                 {selectedAsset && (
                     <>
                         <header className="detail-panel-header">
@@ -263,7 +286,12 @@ export function DetailPanel(): JSX.Element {
                             {tab === "history" && (
                                 <div className="panel-pane" role="tabpanel">
                                     <p className="panel-history-desc">{t("panelHistoryDesc")}</p>
-                                    {snapshots.length === 0 ? (
+                                    {snapshotsLoading ? (
+                                        <div className="detail-panel-loading detail-panel-loading-inline" aria-live="polite">
+                                            <div className="detail-panel-loading-spinner" aria-hidden="true" />
+                                            <div className="detail-panel-loading-copy">{t("panelLoadingHistory")}</div>
+                                        </div>
+                                    ) : snapshots.length === 0 ? (
                                         <p className="text-zinc-500 text-sm">{t("noSnapshotsYet")}</p>
                                     ) : (
                                         <ul className="snapshot-list">

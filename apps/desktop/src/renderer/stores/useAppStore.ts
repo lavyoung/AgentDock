@@ -96,6 +96,27 @@ export type Toast = {
 export type AssetFilter = "all" | "enabled" | "disabled";
 export type AssetTypeFilter = "all" | AssetType;
 
+function sortAssetsForDisplay(assets: AssetRecord[]): AssetRecord[] {
+    return [...assets].sort((left, right) => {
+        const createdAtDelta = Date.parse(right.created_at) - Date.parse(left.created_at);
+        if (createdAtDelta !== 0) {
+            return createdAtDelta;
+        }
+
+        const updatedAtDelta = Date.parse(right.updated_at) - Date.parse(left.updated_at);
+        if (updatedAtDelta !== 0) {
+            return updatedAtDelta;
+        }
+
+        const nameDelta = left.name.localeCompare(right.name, "zh-CN");
+        if (nameDelta !== 0) {
+            return nameDelta;
+        }
+
+        return left.id.localeCompare(right.id, "zh-CN");
+    });
+}
+
 function createProjectId(name: string): string {
     const base = name
         .toLowerCase()
@@ -375,6 +396,10 @@ type State = {
     assets: AssetRecord[];
     selectedAsset: AssetDetail | null;
     snapshots: SnapshotRecord[];
+    assetDetailLoading: boolean;
+    snapshotsLoading: boolean;
+    snapshotsLoadedAssetId: string | null;
+    assetDetailRequestKey: number;
     editorTitle: string;
     editorDescription: string;
     editorContent: string;
@@ -458,6 +483,7 @@ type Actions = {
 
     refreshAssets(): Promise<void>;
     openAsset(id: string): Promise<void>;
+    loadAssetSnapshots(assetId?: string): Promise<void>;
     saveAsset(): Promise<void>;
     createAsset(input: CreateAssetInput): Promise<AssetRecord>;
     deleteAsset(): Promise<void>;
@@ -558,6 +584,10 @@ const initialState: State = {
     assets: [],
     selectedAsset: null,
     snapshots: [],
+    assetDetailLoading: false,
+    snapshotsLoading: false,
+    snapshotsLoadedAssetId: null,
+    assetDetailRequestKey: 0,
     editorTitle: "",
     editorDescription: "",
     editorContent: "",
@@ -662,18 +692,77 @@ export const useAppStore = create<AppStore>((set, get) => ({
 
     // ---------- assets ----------
     async refreshAssets() {
-        set({assets: await agentdockClient.assets.list()});
+        set({assets: sortAssetsForDisplay(await agentdockClient.assets.list())});
     },
 
     async openAsset(id) {
-        const detail = await agentdockClient.assets.get(id);
-        if (!detail) {
-            set({selectedAsset: null, editorTitle: "", editorDescription: "", editorContent: "", snapshots: []});
+        const requestKey = Date.now();
+        set({
+            selectedAsset: null,
+            snapshots: [],
+            snapshotsLoadedAssetId: null,
+            assetDetailLoading: true,
+            snapshotsLoading: false,
+            assetDetailRequestKey: requestKey,
+            editorTitle: "",
+            editorDescription: "",
+            editorContent: "",
+        });
+        try {
+            const detail = await agentdockClient.assets.get(id);
+            if (get().assetDetailRequestKey !== requestKey) {
+                return;
+            }
+            if (!detail) {
+                set({
+                    selectedAsset: null,
+                    editorTitle: "",
+                    editorDescription: "",
+                    editorContent: "",
+                    snapshots: [],
+                    assetDetailLoading: false,
+                    snapshotsLoading: false,
+                    snapshotsLoadedAssetId: null,
+                });
+                return;
+            }
+            set({
+                selectedAsset: detail,
+                editorTitle: detail.title,
+                editorDescription: detail.description,
+                editorContent: detail.content,
+                assetDetailLoading: false,
+            });
+        } catch (error) {
+            if (get().assetDetailRequestKey === requestKey) {
+                set({assetDetailLoading: false});
+            }
+            throw error;
+        }
+    },
+
+    async loadAssetSnapshots(assetId) {
+        const targetAssetId = assetId ?? get().selectedAsset?.id;
+        if (!targetAssetId) {
+            set({snapshots: [], snapshotsLoading: false, snapshotsLoadedAssetId: null});
             return;
         }
-        set({selectedAsset: detail, editorTitle: detail.title, editorDescription: detail.description, editorContent: detail.content});
-        const snapshots = await agentdockClient.snapshots.list(id);
-        set({snapshots});
+
+        if (get().snapshotsLoading && get().snapshotsLoadedAssetId === targetAssetId) {
+            return;
+        }
+
+        set({snapshotsLoading: true});
+        const snapshots = await agentdockClient.snapshots.list(targetAssetId);
+        if (get().selectedAsset?.id !== targetAssetId) {
+            return;
+        }
+
+        set({
+            snapshots,
+            snapshotsLoading: false,
+            snapshotsLoadedAssetId: targetAssetId,
+        });
     },
 
     async saveAsset() {
@@ -686,8 +775,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
         });
         if (updated) set({selectedAsset: updated});
         await get().refreshAssets();
-        const snapshots = await agentdockClient.snapshots.list(selectedAsset.id);
-        set({snapshots});
+        await get().loadAssetSnapshots(selectedAsset.id);
     },
 
     async createAsset(input) {
@@ -709,6 +797,9 @@ export const useAppStore = create<AppStore>((set, get) => ({
             editorDescription: "",
             editorContent: "",
             snapshots: [],
+            assetDetailLoading: false,
+            snapshotsLoading: false,
+            snapshotsLoadedAssetId: null,
             detailPanelOpen: false,
             detailPanelTab: "overview",
         });
@@ -745,6 +836,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
         if (!selectedAsset) return;
         await agentdockClient.snapshots.restore(snapshotId);
         await get().openAsset(selectedAsset.id);
+        await get().loadAssetSnapshots(selectedAsset.id);
         await get().refreshAssets();
     },
 
@@ -757,11 +849,16 @@ export const useAppStore = create<AppStore>((set, get) => ({
     setAssetSearch(value) { set({assetSearch: value}); },
 
     async openDetailPanel(assetId) {
+        set({
+            detailPanelOpen: true,
+            detailPanelTab: "overview",
+        });
         try {
             await get().openAsset(assetId);
         } catch (err) {
             // eslint-disable-next-line no-console
             console.error("[AgentDock] openDetailPanel.openAsset failed:", err);
+            set({detailPanelOpen: false});
             get().pushToast(
                 "error",
                 get()
@@ -770,7 +867,6 @@ export const useAppStore = create<AppStore>((set, get) => ({
             );
             return;
         }
-        set({detailPanelOpen: true, detailPanelTab: "overview"});
     },
 
     closeDetailPanel() { set({detailPanelOpen: false}); },
@@ -781,8 +877,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
         if (!current) return;
         const nextStatus: "active" | "disabled" = current.status === "active" ? "disabled" : "active";
         await agentdockClient.assets.setStatus(assetId, nextStatus);
-        const updated = await agentdockClient.assets.list();
-        set({assets: updated});
+        set({assets: sortAssetsForDisplay(await agentdockClient.assets.list())});
         if (get().selectedAsset?.id === assetId) {
             await get().openAsset(assetId);
         }

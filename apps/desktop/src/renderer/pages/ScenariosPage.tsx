@@ -1,7 +1,9 @@
 import {type JSX, useEffect, useState} from "react";
 
 import {listSupportedApplications} from "../../../../../packages/core/src/application/applicationCatalog";
+import type {ApplicationDetail} from "../../../../../packages/core/src/types/application";
 import type {SyncPreviewResult, SyncRunResult} from "../../../../../packages/core/src/types/sync";
+import {agentdockClient} from "../client/agentdockClient";
 import {Modal} from "../components/Modal";
 import {useI18n} from "../i18n/useI18n";
 import {useAppStore} from "../stores/useAppStore";
@@ -103,6 +105,10 @@ function getProjectDefaultSkillsPath(projectPath: string): string {
 
 function getProjectDefaultAgentsPath(projectPath: string): string {
     return `${projectPath}${projectPath.endsWith("\\") ? "" : "\\"}AGENTS.md`;
+}
+
+function getEnabledAgentLocations(detail: ApplicationDetail | null): ApplicationDetail["locations"] {
+    return detail?.locations.filter((location) => location.enabled) ?? [];
 }
 
 type AvailableAgent = {
@@ -737,18 +743,26 @@ function ScenarioDetail(): JSX.Element {
     const [showAgentPicker, setShowAgentPicker] = useState(false);
     const [showProjectPicker, setShowProjectPicker] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
+    const [applicationDetailsById, setApplicationDetailsById] = useState<Record<string, ApplicationDetail | null>>({});
     const [syncPreviewByProjectId, setSyncPreviewByProjectId] = useState<Record<string, SyncPreviewResult | SyncRunResult>>({});
+    const [syncPreviewByAgentId, setSyncPreviewByAgentId] = useState<Record<string, SyncPreviewResult | SyncRunResult>>({});
     const [previewingProjectId, setPreviewingProjectId] = useState<string | null>(null);
     const [runningProjectId, setRunningProjectId] = useState<string | null>(null);
+    const [previewingAgentId, setPreviewingAgentId] = useState<string | null>(null);
+    const [runningAgentId, setRunningAgentId] = useState<string | null>(null);
 
     useEffect(() => {
         void refreshApplications();
     }, [refreshApplications]);
 
     useEffect(() => {
+        setApplicationDetailsById({});
         setSyncPreviewByProjectId({});
+        setSyncPreviewByAgentId({});
         setPreviewingProjectId(null);
         setRunningProjectId(null);
+        setPreviewingAgentId(null);
+        setRunningAgentId(null);
     }, [selectedScenario?.id]);
 
     if (!selectedScenario) return <div className="page-body"><p>{t("scenarioNotFound")}</p></div>;
@@ -758,6 +772,35 @@ function ScenarioDetail(): JSX.Element {
     const agentFileAssets = assets.filter((a) => a.type === "agents-md" && selectedScenario.agentFileIds.includes(a.id));
     const linkedProjects = projects.filter((project) => selectedScenario.projectIds.includes(project.id));
     const linkedAgents = availableAgents.filter((agent) => selectedScenario.agentAppIds.includes(agent.id));
+
+    useEffect(() => {
+        let cancelled = false;
+
+        async function loadLinkedAgentDetails(): Promise<void> {
+            if (!selectedScenario || linkedAgents.length === 0) {
+                if (!cancelled) {
+                    setApplicationDetailsById({});
+                }
+                return;
+            }
+
+            const entries = await Promise.all(
+                linkedAgents.map(async (agent) => [agent.id, await agentdockClient.applications.get(agent.id)] as const)
+            );
+
+            if (cancelled) {
+                return;
+            }
+
+            setApplicationDetailsById(Object.fromEntries(entries));
+        }
+
+        void loadLinkedAgentDetails();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [linkedAgents, selectedScenario]);
 
     function resetScenarioDraft(): void {
         setScenarioName(selectedScenario.name);
@@ -832,6 +875,72 @@ function ScenarioDetail(): JSX.Element {
             pushToast("error", String(error));
         } finally {
             setRunningProjectId((current) => (current === projectId ? null : current));
+        }
+    }
+
+    async function handlePreviewAgentSync(agentId: string): Promise<void> {
+        if (!selectedScenario) {
+            return;
+        }
+
+        try {
+            setPreviewingAgentId(agentId);
+            const preview = await agentdockClient.applications.previewScenarioSync(agentId, selectedScenario.id);
+            setSyncPreviewByAgentId((current) => ({
+                ...current,
+                [agentId]: preview,
+            }));
+            if (preview.operation_count === 0 && preview.warnings.length > 0) {
+                pushToast("error", preview.warnings[0] ?? t("projectSyncPreviewReady"));
+            } else {
+                pushToast("success", t("projectSyncPreviewReady"));
+            }
+        } catch (error) {
+            pushToast("error", String(error));
+        } finally {
+            setPreviewingAgentId((current) => (current === agentId ? null : current));
+        }
+    }
+
+    async function handleRunAgentSync(agentId: string): Promise<void> {
+        if (!selectedScenario) {
+            return;
+        }
+
+        try {
+            setRunningAgentId(agentId);
+            const result = await agentdockClient.applications.runScenarioSync(agentId, selectedScenario.id);
+            setSyncPreviewByAgentId((current) => ({
+                ...current,
+                [agentId]: result,
+            }));
+
+            const successMessage = t("projectSyncRunSuccess").replace(
+                "{written}",
+                String(result.written_count)
+            );
+
+            if (result.operation_count === 0 && result.warnings.length > 0) {
+                pushToast("error", result.warnings[0]);
+                return;
+            }
+
+            if (result.conflicts.length > 0) {
+                pushToast(
+                    "error",
+                    `${successMessage} ${t("projectSyncRunConflict").replace(
+                        "{count}",
+                        String(result.conflicts.length)
+                    )}`
+                );
+                return;
+            }
+
+            pushToast("success", successMessage);
+        } catch (error) {
+            pushToast("error", String(error));
+        } finally {
+            setRunningAgentId((current) => (current === agentId ? null : current));
         }
     }
 
@@ -1182,14 +1291,14 @@ function ScenarioDetail(): JSX.Element {
                             <span className="scenario-section-title">{t("scenarioRunSyncTitle")}</span>
                         </h3>
                         <div className="scenario-section-meta scenario-section-meta--static">
-                            <span className="scenario-section-count">{linkedProjects.length}</span>
+                            <span className="scenario-section-count">{linkedProjects.length + linkedAgents.length}</span>
                         </div>
                     </header>
                     <div className="left-card-body">
                         <div className="scenario-binding-intro">
                             {t("scenarioRunSyncDesc")}
                         </div>
-                        {linkedProjects.length === 0 ? (
+                        {linkedProjects.length === 0 && linkedAgents.length === 0 ? (
                             <div className="projects-note-card project-sync-empty">
                                 <p>{t("scenarioRunSyncEmpty")}</p>
                             </div>
@@ -1332,6 +1441,134 @@ function ScenarioDetail(): JSX.Element {
                                                             {preview.items.slice(0, 4).map((item) => (
                                                                 <article
                                                                     key={`${project.id}-${item.target_id}-${item.asset_id}-${item.output_path}`}
+                                                                    className="project-sync-item"
+                                                                >
+                                                                    <div className="project-sync-item-header">
+                                                                        <div>
+                                                                            <div className="project-sync-item-title">{item.asset_name}</div>
+                                                                            <div className="project-sync-item-meta">
+                                                                                {item.target_name} · {item.asset_type}
+                                                                            </div>
+                                                                        </div>
+                                                                        <span className={getOperationBadgeClass(item.operation)}>
+                                                                            {getOperationLabel(t, item.operation)}
+                                                                        </span>
+                                                                    </div>
+                                                                    <div className="project-sync-item-path">{item.output_path}</div>
+                                                                </article>
+                                                            ))}
+                                                        </div>
+                                                    ) : (
+                                                        <div className="projects-note-card project-sync-empty">
+                                                            <p>{t("projectSyncPreviewEmpty")}</p>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ) : null}
+                                        </article>
+                                    );
+                                })}
+                                {linkedAgents.map((agent) => {
+                                    const detail = applicationDetailsById[agent.id] ?? null;
+                                    const preview = syncPreviewByAgentId[agent.id] ?? null;
+                                    const syncConflicts = isSyncRunResult(preview) ? preview.conflicts : [];
+                                    const enabledLocations = getEnabledAgentLocations(detail);
+
+                                    return (
+                                        <article key={agent.id} className="scenario-sync-project-card">
+                                            <div className="scenario-sync-project-header">
+                                                <div>
+                                                    <div className="scenario-sync-project-title">{agent.name}</div>
+                                                    <div className="scenario-sync-project-meta">{agent.description}</div>
+                                                </div>
+                                                <div className="scenario-sync-project-badges">
+                                                    <span className="badge badge-green">
+                                                        {enabledLocations.length} {t("settingsAgentLocations")}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div className="scenario-sync-project-toolbar">
+                                                <div className="scenario-sync-project-toolbar-note">
+                                                    {enabledLocations.length > 0
+                                                        ? enabledLocations.slice(0, 2).map((location) => location.path).join(" · ")
+                                                        : t("settingsAgentNoLocations")}
+                                                </div>
+                                                <div className="projects-workflow-actions">
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-secondary btn-sm"
+                                                        onClick={() => void handlePreviewAgentSync(agent.id)}
+                                                        disabled={previewingAgentId === agent.id || runningAgentId === agent.id}
+                                                    >
+                                                        {previewingAgentId === agent.id
+                                                            ? `${t("projectSyncPreviewAction")}...`
+                                                            : t("projectSyncPreviewAction")}
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-primary btn-sm"
+                                                        onClick={() => void handleRunAgentSync(agent.id)}
+                                                        disabled={runningAgentId === agent.id || previewingAgentId === agent.id}
+                                                    >
+                                                        {runningAgentId === agent.id
+                                                            ? `${t("projectSyncRunAction")}...`
+                                                            : t("projectSyncRunAction")}
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            {preview ? (
+                                                <div className="project-sync-preview scenario-sync-preview">
+                                                    <div className="projects-scenario-stats">
+                                                        <article className="scenario-stat-card">
+                                                            <div className="scenario-stat-label">{t("projectSyncTargets")}</div>
+                                                            <div className="scenario-stat-value">{preview.target_count}</div>
+                                                        </article>
+                                                        <article className="scenario-stat-card">
+                                                            <div className="scenario-stat-label">{t("projectSyncOperations")}</div>
+                                                            <div className="scenario-stat-value">{preview.operation_count}</div>
+                                                        </article>
+                                                        <article className="scenario-stat-card">
+                                                            <div className="scenario-stat-label">{t("projectSyncWarnings")}</div>
+                                                            <div className="scenario-stat-value">{preview.warnings.length}</div>
+                                                        </article>
+                                                        <article className="scenario-stat-card">
+                                                            <div className="scenario-stat-label">{t("projectSyncWritten")}</div>
+                                                            <div className="scenario-stat-value">
+                                                                {isSyncRunResult(preview) ? preview.written_count : 0}
+                                                            </div>
+                                                        </article>
+                                                    </div>
+
+                                                    {preview.warnings.length > 0 ? (
+                                                        <div className="project-sync-warning-list">
+                                                            {preview.warnings.slice(0, 3).map((warning) => (
+                                                                <div key={warning} className="project-sync-warning-item">
+                                                                    {warning}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    ) : null}
+
+                                                    {syncConflicts.length > 0 ? (
+                                                        <div className="project-sync-conflict-list" aria-live="polite">
+                                                            <div className="project-sync-conflict-summary">
+                                                                <span className="badge badge-red">
+                                                                    {t("projectSyncConflicts")} {syncConflicts.length}
+                                                                </span>
+                                                                <span className="project-sync-conflict-summary-text">
+                                                                    {t("projectSyncRunConflict").replace("{count}", String(syncConflicts.length))}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    ) : null}
+
+                                                    {preview.items.length > 0 ? (
+                                                        <div className="project-sync-item-list">
+                                                            {preview.items.slice(0, 4).map((item) => (
+                                                                <article
+                                                                    key={`${agent.id}-${item.target_id}-${item.asset_id}-${item.output_path}`}
                                                                     className="project-sync-item"
                                                                 >
                                                                     <div className="project-sync-item-header">

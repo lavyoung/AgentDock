@@ -317,6 +317,8 @@ type MessageCatalog = {
     assetContent: string;
     panelContentStats: string;
     panelHistoryDesc: string;
+    panelLoadingAsset: string;
+    panelLoadingHistory: string;
     noSnapshotsYet: string;
     snapshotMessageBeforeAssetUpdate: string;
     snapshotRestored: string;
@@ -599,8 +601,8 @@ export const messages: Record<Locale, Catalog> = {
         scenarioProjectPickerHint: "\u9009\u62e9\u4e00\u4e2a\u5de5\u4f5c\u533a\u5173\u8054\u5230\u5f53\u524d\u573a\u666f\u3002\u5982\u679c\u8be5\u9879\u76ee\u5df2\u7ed1\u5b9a\u5230\u5176\u4ed6\u573a\u666f\uff0c\u4f1a\u81ea\u52a8\u5207\u6362\u8fc7\u6765\u3002",
         scenarioProjectPickerEmpty: "\u6682\u65e0\u53ef\u5173\u8054\u9879\u76ee",
         scenarioRunSyncTitle: "\u573a\u666f\u540c\u6b65",
-        scenarioRunSyncDesc: "\u5bf9\u5df2\u5173\u8054\u7684\u9879\u76ee\u5728\u8fd9\u91cc\u76f4\u63a5\u9884\u89c8\u6216\u6267\u884c\u540c\u6b65\uff0c\u7531\u573a\u666f\u7edf\u4e00\u7ba1\u7406\u8d44\u4ea7\u5206\u53d1\u3002",
-        scenarioRunSyncEmpty: "\u8fd8\u6ca1\u6709\u53ef\u7528\u7684\u540c\u6b65\u9879\u76ee\u3002\u5148\u4e3a\u8fd9\u4e2a\u573a\u666f\u5173\u8054\u9879\u76ee\uff0c\u518d\u5728\u8fd9\u91cc\u53d1\u8d77\u540c\u6b65\u3002",
+        scenarioRunSyncDesc: "\u5bf9\u5df2\u5173\u8054\u7684\u9879\u76ee\u548c Agent \u5728\u8fd9\u91cc\u76f4\u63a5\u9884\u89c8\u6216\u6267\u884c\u540c\u6b65\uff0c\u7531\u573a\u666f\u7edf\u4e00\u7ba1\u7406\u8d44\u4ea7\u5206\u53d1\u3002",
+        scenarioRunSyncEmpty: "\u8fd8\u6ca1\u6709\u53ef\u7528\u7684\u540c\u6b65\u76ee\u6807\u3002\u5148\u4e3a\u8fd9\u4e2a\u573a\u666f\u5173\u8054\u9879\u76ee\u6216 Agent\uff0c\u518d\u5728\u8fd9\u91cc\u53d1\u8d77\u540c\u6b65\u3002",
         scenarioRunSyncLastSynced: "\u4e0a\u6b21\u540c\u6b65\uff1a{time}",
         scenarioRunSyncNever: "\u8fd8\u6ca1\u6709\u540c\u6b65\u8bb0\u5f55",
         scenarioRunSyncUsesProjectRoot: "\u672a\u989d\u5916\u914d\u7f6e\u76ee\u5f55\u65f6\uff0c\u9ed8\u8ba4\u5199\u5165\u9879\u76ee\u6839\u76ee\u5f55",
@@ -667,6 +669,8 @@ export const messages: Record<Locale, Catalog> = {
         assetContent: "\u5185\u5bb9",
         panelContentStats: "{fileName} \u00b7 {lines} \u884c \u00b7 {characters} \u5b57\u7b26",
         panelHistoryDesc: "\u6bcf\u6b21\u4fdd\u5b58\u90fd\u4f1a\u81ea\u52a8\u521b\u5efa\u672c\u5730\u5feb\u7167\uff0c\u53ef\u67e5\u770b\u4e0e\u56de\u6eda",
+        panelLoadingAsset: "\u6b63\u5728\u8f7d\u5165\u8d44\u4ea7\u8be6\u60c5...",
+        panelLoadingHistory: "\u6b63\u5728\u8f7d\u5165\u5feb\u7167\u5386\u53f2...",
         noSnapshotsYet: "\u8fd8\u6ca1\u6709\u5feb\u7167",
         snapshotMessageBeforeAssetUpdate: "\u6bcf\u6b21\u4fdd\u5b58\u90fd\u4f1a\u81ea\u52a8\u521b\u5efa\u672c\u5730\u5feb\u7167",
         snapshotRestored: "\u5feb\u7167\u6062\u590d\u6210\u529f",
@@ -945,8 +949,8 @@ export const messages: Record<Locale, Catalog> = {
         scenarioProjectPickerHint: "Choose a workspace to associate with this scenario. If the project is already linked to another scenario, it will be moved here.",
         scenarioProjectPickerEmpty: "No projects available to link",
         scenarioRunSyncTitle: "Scenario sync",
-        scenarioRunSyncDesc: "Preview or run sync for linked projects directly here so the scenario remains the single place that orchestrates asset delivery.",
-        scenarioRunSyncEmpty: "No syncable projects are linked yet. Link a project to this scenario first, then run sync from here.",
+        scenarioRunSyncDesc: "Preview or run sync for linked projects and Agents directly here so the scenario remains the single place that orchestrates asset delivery.",
+        scenarioRunSyncEmpty: "No syncable destinations are linked yet. Link a project or Agent to this scenario first, then run sync from here.",
         scenarioRunSyncLastSynced: "Last synced: {time}",
         scenarioRunSyncNever: "No sync history yet",
         scenarioRunSyncUsesProjectRoot: "If no extra directories are configured, the project root is used by default",
@@ -1013,6 +1017,8 @@ export const messages: Record<Locale, Catalog> = {
         assetContent: "Content",
         panelContentStats: "{fileName} · {lines} lines · {characters} characters",
         panelHistoryDesc: "Each save creates a local snapshot automatically for review and rollback.",
+        panelLoadingAsset: "Loading asset details...",
+        panelLoadingHistory: "Loading snapshot history...",
         noSnapshotsYet: "No snapshots yet",
         snapshotMessageBeforeAssetUpdate: "Each save creates a local snapshot automatically.",
         snapshotRestored: "Snapshot restored successfully",
