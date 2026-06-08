@@ -250,9 +250,9 @@
     color: var(--fg-secondary);
     cursor: pointer;
     position: relative;
-    transition: color 0.15s, background 0.15s;
-    background: var(--bg-elevated);
-    border: 1px solid var(--bd);
+    transition: color 0.15s, background 0.15s, box-shadow 0.15s;
+    background: transparent;
+    border: none;
     width: 100%;
     text-align: left;
     font-family: inherit;
@@ -266,6 +266,7 @@
 .nav-sub-item.active {
     background: var(--accent-bg);
     color: var(--fg-primary);
+    box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.12);
 }
 
 .nav-sub-item.active::before {

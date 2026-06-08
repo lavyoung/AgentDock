@@ -643,15 +643,13 @@ function AssetCard({
             className={cardClass}
             data-enabled={isEnabled}
             data-asset-type={asset.type}
-            onClick={() => void openDetailPanel(asset.id)}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                    void openDetailPanel(asset.id);
-                }
-            }}
         >
+            <button
+                type="button"
+                className="skill-card-hitarea"
+                onClick={() => void openDetailPanel(asset.id)}
+                aria-label={asset.title || asset.name}
+            />
             <div className="skill-card-top">
                 <div className={iconBg}>
                     <AssetPreviewIcon type={isAgentsMd ? "agents-md" : "skill"} />

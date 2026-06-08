@@ -200,19 +200,22 @@ function SkillMini({
     name,
     meta,
     tone,
+    onClick,
     onRemove,
     showRemove,
 }: {
     name: string;
     meta: string;
     tone: "skill" | "agent-file";
+    onClick?: () => void;
     onRemove?: () => void;
     showRemove?: boolean;
 }): JSX.Element {
     const {t} = useI18n();
+    const interactive = Boolean(onClick);
 
-    return (
-        <div className="skill-mini">
+    const content = (
+        <>
             <div className={`skill-mini-icon ${tone === "skill" ? "skill-mini-icon-skill" : "skill-mini-icon-agent-file"}`}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
@@ -229,6 +232,20 @@ function SkillMini({
                     </svg>
                 </button>
             )}
+        </>
+    );
+
+    if (interactive && !showRemove) {
+        return (
+            <button type="button" className="skill-mini skill-mini--interactive" onClick={onClick}>
+                {content}
+            </button>
+        );
+    }
+
+    return (
+        <div className="skill-mini">
+            {content}
         </div>
     );
 }
@@ -732,6 +749,7 @@ function ScenarioDetail(): JSX.Element {
     const refreshApplications = useAppStore((s) => s.refreshApplications);
     const setView = useAppStore((s) => s.setView);
     const openAssetPicker = useAppStore((s) => s.openAssetPicker);
+    const openDetailPanel = useAppStore((s) => s.openDetailPanel);
     const saveScenario = useAppStore((s) => s.saveScenario);
     const deleteScenario = useAppStore((s) => s.deleteScenario);
     const removeAgentAppFromScenario = useAppStore((s) => s.removeAgentAppFromScenario);
@@ -948,6 +966,13 @@ function ScenarioDetail(): JSX.Element {
         }
     }
 
+    function handleOpenAssetDetail(assetId: string): void {
+        setView("assets");
+        window.setTimeout(() => {
+            void openDetailPanel(assetId);
+        }, 0);
+    }
+
     async function handleSaveScenario(): Promise<void> {
         if (!scenarioName.trim()) {
             await saveScenario();
@@ -1082,6 +1107,7 @@ function ScenarioDetail(): JSX.Element {
                                         name={asset.title || asset.name}
                                         meta={asset.name}
                                         tone="skill"
+                                        onClick={() => handleOpenAssetDetail(asset.id)}
                                         showRemove={false}
                                     />
                                 ))}
@@ -1151,6 +1177,7 @@ function ScenarioDetail(): JSX.Element {
                                         name={asset.title || asset.name}
                                         meta={asset.name}
                                         tone="agent-file"
+                                        onClick={() => handleOpenAssetDetail(asset.id)}
                                         showRemove={false}
                                     />
                                 ))}
