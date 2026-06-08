@@ -489,6 +489,7 @@ function AssetPicker({
     const addAssetToScenario = useAppStore((s) => s.addAssetToScenario);
 
     const fieldLabel = field === "skillIds" ? t("scenarioUsedSkills") : field === "ruleIds" ? t("scenarioAppliedRules") : t("scenarioAgentFiles");
+    const isSingleAgentFileField = field === "agentFileIds";
 
     const availableAssets = field === "skillIds"
         ? assets.filter((a) => a.type === "skill")
@@ -511,6 +512,9 @@ function AssetPicker({
                     </button>
                 </div>
                 <div className="asset-picker-body">
+                    {isSingleAgentFileField && (
+                        <p className="form-hint form-hint-spaced">{t("scenarioAgentFileSingleHint")}</p>
+                    )}
                     {availableAssets.length === 0 ? (
                         <div className="asset-picker-empty">{t("assetPickerEmpty")}</div>
                     ) : (

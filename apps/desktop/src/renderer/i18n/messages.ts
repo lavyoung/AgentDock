@@ -74,6 +74,7 @@ type MessageCatalog = {
     settingsAgentScopeProject: string;
     settingsAgentExists: string;
     settingsAgentMissing: string;
+    settingsAgentInstallRequired: string;
     settingsAgentOpen: string;
     settingsData: string;
     settingsDataPath: string;
@@ -262,6 +263,8 @@ type MessageCatalog = {
     scenarioAddSkill: string;
     scenarioAddRule: string;
     scenarioAddAgentFile: string;
+    scenarioAgentFileSingleHint: string;
+    scenarioAgentFileLimitedToOne: string;
     scenarioAddAgent: string;
     scenarioEditScenario: string;
     scenarioDeleteScenario: string;
@@ -426,6 +429,7 @@ export const messages: Record<Locale, Catalog> = {
         settingsAgentScopeProject: "\u9879\u76ee",
         settingsAgentExists: "\u5df2\u5b58\u5728",
         settingsAgentMissing: "\u5f85\u521b\u5efa",
+        settingsAgentInstallRequired: "\u672a\u68c0\u6d4b\u5230\u5b89\u88c5\u8def\u5f84\uff0c\u4e0d\u53ef\u542f\u7528\u8be5 Agent",
         settingsAgentOpen: "\u6253\u5f00",
         settingsData: "\u6570\u636e\u4e0e\u66f4\u65b0",
         settingsDataPath: "\u6570\u636e\u5b58\u50a8\u8def\u5f84",
@@ -614,6 +618,8 @@ export const messages: Record<Locale, Catalog> = {
         scenarioAddSkill: "\u6dfb\u52a0\u6280\u80fd",
         scenarioAddRule: "\u6dfb\u52a0\u89c4\u5219",
         scenarioAddAgentFile: "\u6dfb\u52a0 Agent \u6587\u4ef6",
+        scenarioAgentFileSingleHint: "\u6bcf\u4e2a\u573a\u666f\u53ea\u80fd\u5173\u8054 1 \u4e2a AGENTS.md \u8d44\u4ea7\uff0c\u91cd\u65b0\u9009\u62e9\u65f6\u4f1a\u81ea\u52a8\u66ff\u6362\u5f53\u524d\u7ed1\u5b9a\u3002",
+        scenarioAgentFileLimitedToOne: "\u573a\u666f\u7684 AGENTS.md \u8d44\u4ea7\u5df2\u66ff\u6362\uff0c\u6bcf\u4e2a\u573a\u666f\u6700\u591a\u53ea\u4fdd\u7559 1 \u4e2a\u3002",
         scenarioAddAgent: "\u6dfb\u52a0 Agent",
         scenarioEditScenario: "\u7f16\u8f91\u573a\u666f",
         scenarioDeleteScenario: "\u5220\u9664\u573a\u666f",
@@ -774,6 +780,7 @@ export const messages: Record<Locale, Catalog> = {
         settingsAgentScopeProject: "Project",
         settingsAgentExists: "Exists",
         settingsAgentMissing: "Missing",
+        settingsAgentInstallRequired: "This Agent cannot be enabled until an installed location is detected.",
         settingsAgentOpen: "Open",
         settingsData: "Data & updates",
         settingsDataPath: "Data path",
@@ -962,6 +969,8 @@ export const messages: Record<Locale, Catalog> = {
         scenarioAddSkill: "Add skill",
         scenarioAddRule: "Add rule",
         scenarioAddAgentFile: "Add agent file",
+        scenarioAgentFileSingleHint: "Each scenario can link only one AGENTS.md asset. Choosing another one replaces the current binding automatically.",
+        scenarioAgentFileLimitedToOne: "The scenario AGENTS.md asset was replaced. Only one AGENTS.md can be linked per scenario.",
         scenarioAddAgent: "Add agent",
         scenarioEditScenario: "Edit scenario",
         scenarioDeleteScenario: "Delete scenario",

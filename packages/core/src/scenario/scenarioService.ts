@@ -133,6 +133,15 @@ export class ScenarioService {
             throw new Error(`Scenario not found: ${scenarioId}`);
         }
 
+        if (field === "agentFileIds") {
+            this.scenarioRepository.update({
+                ...current,
+                agentFileIds: [assetId],
+                updated_at: new Date().toISOString(),
+            });
+            return this.scenarioRepository.findById(scenarioId)!;
+        }
+
         this.scenarioRepository.addAssetId(scenarioId, field, assetId);
         const next = this.scenarioRepository.findById(scenarioId);
         this.scenarioRepository.update({...next!, updated_at: new Date().toISOString()});

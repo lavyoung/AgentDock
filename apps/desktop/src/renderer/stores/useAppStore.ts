@@ -999,9 +999,16 @@ export const useAppStore = create<AppStore>((set, get) => ({
     async addAssetToScenario(field, assetId) {
         const {selectedScenario} = get();
         if (!selectedScenario) return;
+        const willReplaceAgentFile =
+            field === "agentFileIds" &&
+            selectedScenario.agentFileIds.length > 0 &&
+            !selectedScenario.agentFileIds.includes(assetId);
         await agentdockClient.scenarios.addAsset(selectedScenario.id, field, assetId);
         await get().openScenario(selectedScenario.id);
         await get().refreshScenarios();
+        if (willReplaceAgentFile) {
+            get().pushToast("success", get()._t("scenarioAgentFileLimitedToOne"));
+        }
     },
 
     async removeAssetFromScenario(field, assetId) {

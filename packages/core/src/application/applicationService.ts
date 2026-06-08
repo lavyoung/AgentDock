@@ -70,6 +70,12 @@ export class ApplicationService {
         input: UpdateApplicationInput
     ): ApplicationRecord {
         const current = this.ensureApplication(id);
+        const currentWithStats = this.withLocationStats(current);
+
+        if (input.enabled === true && currentWithStats.existing_locations === 0) {
+            throw new Error("Application is not installed and cannot be enabled.");
+        }
+
         const next: ApplicationRecord = {
             ...current,
             enabled: input.enabled ?? current.enabled,

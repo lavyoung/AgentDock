@@ -356,6 +356,11 @@ const mockApi: AgentdockApi = {
             initMockData();
             const idx = mockScenarios.findIndex((s) => s.id === scenarioId);
             if (idx < 0) return;
+            if (field === "agentFileIds") {
+                mockScenarios[idx][field] = [assetId];
+                mockScenarios[idx].updated_at = nowIso();
+                return;
+            }
             if (!mockScenarios[idx][field].includes(assetId)) {
                 mockScenarios[idx][field].push(assetId);
                 mockScenarios[idx].updated_at = nowIso();
@@ -410,6 +415,14 @@ const mockApi: AgentdockApi = {
             return detail;
         },
         update: async (id, input) => {
+            const existingLocations = mockLocations.filter(
+                (location) => location.application_id === id && location.exists
+            );
+
+            if (input.enabled === true && existingLocations.length === 0) {
+                throw new Error("Application is not installed and cannot be enabled.");
+            }
+
             if (input.enabled !== undefined) {
                 mockApplications.set(id, input.enabled);
             }
