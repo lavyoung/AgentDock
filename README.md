@@ -5,6 +5,11 @@
 </p>
 
 <p align="center">
+  <a href="./README.md"><img src="https://img.shields.io/badge/lang-中文-red" /></a>
+  <a href="./README.en.md"><img src="https://img.shields.io/badge/lang-English-blue" /></a>
+</p>
+
+<p align="center">
   <img src="https://img.shields.io/badge/status-prototype-blue" />
   <img src="https://img.shields.io/github/actions/workflow/status/agentdock/AgentDock/ci.yml?style=flat-square&label=CI" />
   <img src="https://img.shields.io/github/v/release/agentdock/AgentDock?style=flat-square&label=release" />
