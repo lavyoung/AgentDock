@@ -34,7 +34,7 @@ asarUnpack:
   - "**/node_modules/better-sqlite3/**"
 
 extraResources:
-  - from: "resources/**"
+  - from: "resources"
     to: "resources"
     filter: ["**/*"]
 
@@ -47,7 +47,6 @@ win:
       arch: [x64]
     - target: msi
       arch: [x64]
-  icon: build/icon.ico
   artifactName: ${productName}-windows-${arch}-${version}.${ext}
 
 nsis:
