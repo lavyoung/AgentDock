@@ -1,0 +1,136 @@
+# electron-builder configuration for AgentDock Desktop.
+#
+# Notes:
+# - All signing credentials are read from environment variables injected by
+#   GitHub Actions. NEVER commit real certificates or passwords to the repo.
+# - `publish` is set to `never` here so that `electron-builder` only writes
+#   `latest*.yml` (auto-updater metadata) but does NOT create the GitHub
+#   Release. The Release is created later by `softprops/action-gh-release`
+#   so we control the body (changelog) ourselves.
+# - Keep this file in sync with the variables documented in
+#   `docs/release/README.md`.
+
+appId: com.agentdock.desktop
+productName: AgentDock
+copyright: Copyright (c) 2026 AgentDock Contributors
+artifactName: ${productName}-${version}-${arch}.${ext}
+
+directories:
+  output: release/${version}
+  buildResources: build
+
+files:
+  - dist/**
+  - dist-electron/**
+  - package.json
+  - "!**/.git"
+  - "!**/.DS_Store"
+  - "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}"
+  - "!**/node_modules/.cache"
+  - "!**/{.editorconfig,.eslintrc*,.prettierrc*,.gitignore}"
+
+asar: true
+asarUnpack:
+  - "**/node_modules/better-sqlite3/**"
+
+extraResources:
+  - from: "resources/**"
+    to: "resources"
+    filter: ["**/*"]
+
+# ---------------------------------------------------------------------------
+# Windows: NSIS installer + MSI. Code signing via signtool.
+# ---------------------------------------------------------------------------
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+    - target: msi
+      arch: [x64]
+  artifactName: ${productName}-windows-${arch}-${version}.${ext}
+  signingHashAlgorithms: [sha256]
+  # Set WINDOWS_CERT_FILE (base64 of .pfx) and WINDOWS_CERT_PASSWORD
+  # in repository secrets to enable signing.
+  certificateFile: ${env.WINDOWS_CERT_FILE}
+  certificatePassword: ${env.WINDOWS_CERT_PASSWORD}
+publisherName: AgentDock Contributors
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  allowElevationToInstall: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: AgentDock
+  artifactName: ${productName}-windows-${arch}-${version}-Setup.${ext}
+
+msi:
+  artifactName: ${productName}-windows-${arch}-${version}.${ext}
+
+# ---------------------------------------------------------------------------
+# macOS: DMG + zip, both x64 and arm64. Code signing + notarization.
+# ---------------------------------------------------------------------------
+mac:
+  target:
+    - target: dmg
+      arch: [x64, arm64]
+    - target: zip
+      arch: [x64, arm64]
+  category: public.app-category.developer-tools
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  # Developer ID Application certificate (exported as .p12) encoded as base64.
+  identity: ${env.MACOS_CERT_IDENTITY}
+  # entitlements for hardened runtime
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+  # Notarization via notarytool (XCRUN). Requires Apple ID + app-specific
+  # password + team ID. The CI workflow exports these as env vars.
+  notarize: true
+  extendInfo:
+    NSHumanReadableCopyright: Copyright (c) 2026 AgentDock Contributors
+    LSApplicationCategoryType: public.app-category.developer-tools
+  artifactName: ${productName}-macos-${arch}-${version}.${ext}
+
+# ---------------------------------------------------------------------------
+# Linux: AppImage + deb + rpm (x64 only for Phase 1).
+# ---------------------------------------------------------------------------
+linux:
+  target:
+    - target: AppImage
+      arch: [x64]
+    - target: deb
+      arch: [x64]
+    - target: rpm
+      arch: [x64]
+  category: Development
+  synopsis: Local-first agent asset registry
+  description: |
+    AgentDock is a local-first tool for managing and syncing AI agent
+    assets (skills, AGENTS.md, rules, prompts) across multiple project
+    targets.
+  desktop:
+    entry:
+      Name: AgentDock
+      Comment: Local-first agent asset registry
+      Categories: Development;Utility;
+      Keywords: agent;skill;agents-md;sync;registry;
+      StartupWMClass: AgentDock
+  artifactName: ${productName}-linux-${arch}-${version}.${ext}
+  # GPG signing for .deb / .rpm. Optional but recommended.
+  # Set LINUX_GPG_KEY + LINUX_GPG_PASSPHRASE in secrets to enable.
+  # deb:
+  #   fpm:
+  #     options:
+  #       - --deb-no-default-config-files
+
+# ---------------------------------------------------------------------------
+# Auto-update: write `latest*.yml` metadata next to the installers so
+# `electron-updater` can detect and apply new versions at runtime.
+# ---------------------------------------------------------------------------
+publish:
+  provider: generic
+  url: https://github.com/${env.CI_REPO_OWNER}/${env.CI_REPO_NAME}/releases/download/v${version}
+  channel: latest
+  useMultipleRangeRequest: false

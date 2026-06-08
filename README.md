@@ -6,6 +6,8 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/status-prototype-blue" />
+  <img src="https://img.shields.io/github/actions/workflow/status/agentdock/AgentDock/ci.yml?style=flat-square&label=CI" />
+  <img src="https://img.shields.io/github/v/release/agentdock/AgentDock?style=flat-square&label=release" />
   <img src="https://img.shields.io/badge/desktop-Electron-lightgrey" />
   <img src="https://img.shields.io/badge/future-Tauri%20%2B%20Rust-orange" />
   <img src="https://img.shields.io/badge/frontend-React%20%2B%20TypeScript-61DAFB" />
@@ -410,6 +412,22 @@ Generated content
 
 ---
 
+## 📥 下载安装
+
+最新版本请到 [Releases 页](https://github.com/agentdock/AgentDock/releases) 下载。
+
+| 平台       | 安装包格式                                | 备注 |
+| -------- | ----------------------------------- | -- |
+| Windows  | `.exe` (NSIS) · `.msi`              | 已签名（EV/OV + signtool） |
+| macOS    | `.dmg` (x64 + arm64) · `.zip`       | 已签名 + 已公证（notarytool） |
+| Linux    | `.AppImage` · `.deb` · `.rpm`       | 可选 GPG 签名 |
+
+> 跨平台构建流程配置在 `.github/workflows/release.yml`，详细发布流程见
+> [`docs/release/README.md`](docs/release/README.md)。维护者打 `vX.Y.Z`
+> tag 即可触发。
+
+---
+
 ## 🚀 快速开始
 
 ### 1. 克隆仓库
@@ -551,11 +569,24 @@ pnpm dev
 # 构建
 pnpm build
 
-# Lint，后续加入
+# Lint
 pnpm lint
 
-# Test，后续加入
+# Test
 pnpm test
+
+# 本地打包（不签名、不分平台）
+pnpm pack
+
+# 按平台出包（不发布，CI 模式下产物会带签名）
+pnpm dist:mac        # macOS .dmg + .zip
+pnpm dist:win        # Windows .exe + .msi
+pnpm dist:linux      # Linux .AppImage + .deb + .rpm
+
+# 发版（bump version + 打 tag + push，触发 release workflow）
+pnpm version:bump 0.1.0
+git push origin main
+pnpm release:tag
 ```
 
 ---

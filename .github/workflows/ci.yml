@@ -1,0 +1,83 @@
+# GitHub Actions workflow: PR / main validation.
+#
+# Runs on every push to main and every PR. Keeps validation light
+# (lint + typecheck + tests) — no installer build happens here.
+# Use `.github/workflows/release.yml` for the actual release pipeline.
+
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: "20"
+
+jobs:
+  lint-typecheck-test:
+    name: lint · typecheck · test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm --filter @agentdock/desktop lint
+
+      - name: Type check
+        run: pnpm --filter @agentdock/desktop exec tsc -p tsconfig.electron.json --noEmit
+
+      - name: Test
+        run: pnpm --filter @agentdock/desktop test
+
+  # Lightweight cross-platform smoke build — catches platform-specific
+  # bundling issues without paying for the full installer pipeline.
+  # Cached and fast (~5 min on warm cache).
+  build-smoke:
+    name: build smoke · ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Rebuild native modules for Electron
+        run: pnpm --filter @agentdock/desktop rebuild
+
+      - name: Build renderer + main
+        run: pnpm --filter @agentdock/desktop build
+
+      - name: Package smoke build (no publish)
+        run: pnpm --filter @agentdock/desktop exec electron-builder --dir

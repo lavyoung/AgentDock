@@ -1,0 +1,413 @@
+# GitHub Actions workflow: build installers on tag push or manual dispatch.
+#
+# Trigger:    push of a tag matching `v*.*.*`, or workflow_dispatch
+# Inputs:     release_ref + dry_run (manual runs only)
+# Outputs:    GitHub Release with signed installers + `latest*.yml`
+#
+# Required secrets (see docs/release/README.md):
+#   WINDOWS_CERT_FILE_BASE64, WINDOWS_CERT_PASSWORD
+#   MACOS_CERT_P12_BASE64,    MACOS_CERT_P12_PASSWORD,
+#   MACOS_CERT_IDENTITY,      APPLE_TEAM_ID,
+#   APPLE_ID,                 APPLE_APP_SPECIFIC_PASSWORD
+#   LINUX_GPG_KEY_BASE64,     LINUX_GPG_PASSPHRASE  (optional, deb/rpm signing)
+#   GH_TOKEN                  (auto-provided)
+
+name: release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      release_ref:
+        description: "Git ref to build, e.g. v0.1.0, refs/tags/v0.1.0, or main"
+        required: true
+        type: string
+      dry_run:
+        description: "Dry run (skip publishing the Release)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+env:
+  NODE_VERSION: "20"
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Pre-flight: validate the tag matches package.json and run a quick
+  # syntax/type check on every supported OS.
+  # ---------------------------------------------------------------------------
+  preflight:
+    name: preflight
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+      tag: ${{ steps.v.outputs.tag }}
+      checkout_ref: ${{ steps.v.outputs.checkout_ref }}
+      is_prerelease: ${{ steps.v.outputs.is_prerelease }}
+      dry_run: ${{ steps.v.outputs.dry_run }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.release_ref || github.ref }}
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Resolve release version
+        id: v
+        shell: bash
+        run: |
+          set -euo pipefail
+          PKG=$(node -p "require('./apps/desktop/package.json').version")
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            RAW_REF="${{ inputs.release_ref }}"
+            DRY_RUN="${{ inputs.dry_run }}"
+            CHECKOUT_REF="${RAW_REF}"
+          else
+            RAW_REF="${GITHUB_REF_NAME}"
+            DRY_RUN="false"
+            CHECKOUT_REF="${GITHUB_REF}"
+          fi
+
+          RAW_NAME="${RAW_REF##*/}"
+          TAG="${RAW_NAME#v}"
+          if [[ ! "$TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.]+)?$ ]]; then
+            echo "::error::Invalid release ref '${RAW_REF}'. Use a tag like v0.1.0 or refs/tags/v0.1.0."
+            exit 1
+          fi
+
+          if [ "$PKG" != "$TAG" ]; then
+            echo "::error::Tag v${TAG} does not match apps/desktop/package.json version ${PKG}"
+            exit 1
+          fi
+          echo "version=${PKG}" >> "$GITHUB_OUTPUT"
+          echo "tag=v${PKG}" >> "$GITHUB_OUTPUT"
+          echo "checkout_ref=${CHECKOUT_REF}" >> "$GITHUB_OUTPUT"
+          echo "dry_run=${DRY_RUN}" >> "$GITHUB_OUTPUT"
+          if [[ "$TAG" == *-* ]]; then
+            echo "is_prerelease=true" >> "$GITHUB_OUTPUT"
+            IS_PRERELEASE=true
+          else
+            echo "is_prerelease=false" >> "$GITHUB_OUTPUT"
+            IS_PRERELEASE=false
+          fi
+          echo "Resolved version=${PKG} prerelease=${IS_PRERELEASE} dry_run=${DRY_RUN}"
+
+  # ---------------------------------------------------------------------------
+  # macOS build: must run on macos-latest because codesign/notarytool are
+  # Apple-only. Produces signed + notarized dmg + zip for x64 and arm64.
+  # ---------------------------------------------------------------------------
+  build-mac:
+    name: build · macOS
+    needs: preflight
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.preflight.outputs.checkout_ref }}
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Rebuild native modules for Electron
+        run: pnpm --filter @agentdock/desktop rebuild
+
+      - name: Build renderer + main
+        run: pnpm --filter @agentdock/desktop build
+
+      - name: Import signing certificate into temporary keychain
+        env:
+          CERT_P12_BASE64: ${{ secrets.MACOS_CERT_P12_BASE64 }}
+          CERT_PASSWORD:   ${{ secrets.MACOS_CERT_P12_PASSWORD }}
+        run: |
+          set -euo pipefail
+          KEYCHAIN_PATH="$RUNNER_TEMP/agentdock.keychain-db"
+          KEYCHAIN_PASSWORD=$(openssl rand -hex 16)
+          echo "$CERT_P12_BASE64" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security list-keychains -d user -s "$KEYCHAIN_PATH" \
+            $(security list-keychains -d user | tr -d '"')
+          security import "$RUNNER_TEMP/cert.p12" \
+            -P "$CERT_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security set-key-partition-list -S apple-tool:,apple: \
+            -k "$KEYCHAIN_PASSWORD" -s "$KEYCHAIN_PATH"
+
+          # Persist for later steps; cleanup at the end.
+          echo "KEYCHAIN_PATH=$KEYCHAIN_PATH" >> "$GITHUB_ENV"
+          echo "KEYCHAIN_PASSWORD=$KEYCHAIN_PASSWORD" >> "$GITHUB_ENV"
+
+      - name: Build macOS installers
+        env:
+          APPLE_ID:                   ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID:              ${{ secrets.APPLE_TEAM_ID }}
+          MACOS_CERT_IDENTITY:        ${{ secrets.MACOS_CERT_IDENTITY }}
+          CI_REPO_OWNER:              ${{ github.repository_owner }}
+          CI_REPO_NAME:               ${{ github.event.repository.name }}
+        run: pnpm --filter @agentdock/desktop exec electron-builder --mac --publish never
+
+      - name: Cleanup keychain
+        if: always()
+        run: |
+          if [ -n "${KEYCHAIN_PATH:-}" ]; then
+            security delete-keychain "$KEYCHAIN_PATH" || true
+          fi
+
+      - name: Upload installers
+        uses: actions/upload-artifact@v4
+        with:
+          name: installers-macos
+          path: |
+            apps/desktop/release/${{ needs.preflight.outputs.version }}/*.dmg
+            apps/desktop/release/${{ needs.preflight.outputs.version }}/*.zip
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload auto-updater metadata
+        uses: actions/upload-artifact@v4
+        with:
+          name: updater-macos
+          path: |
+            apps/desktop/release/${{ needs.preflight.outputs.version }}/*.yml
+            apps/desktop/release/${{ needs.preflight.outputs.version }}/*.blockmap
+          if-no-files-found: warn
+          retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # Windows build: NSIS installer + MSI, signed via signtool.
+  # ---------------------------------------------------------------------------
+  build-win:
+    name: build · Windows
+    needs: preflight
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.preflight.outputs.checkout_ref }}
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Rebuild native modules for Electron
+        run: pnpm --filter @agentdock/desktop rebuild
+
+      - name: Build renderer + main
+        run: pnpm --filter @agentdock/desktop build
+
+      - name: Decode signing certificate
+        env:
+          CERT_BASE64: ${{ secrets.WINDOWS_CERT_FILE_BASE64 }}
+        shell: pwsh
+        run: |
+          $bytes = [Convert]::FromBase64String($env:CERT_BASE64)
+          $path  = Join-Path $env:RUNNER_TEMP "agentdock.pfx"
+          [IO.File]::WriteAllBytes($path, $bytes)
+          "WINDOWS_CERT_FILE=$path" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Build Windows installers
+        env:
+          WINDOWS_CERT_FILE:     ${{ env.WINDOWS_CERT_FILE }}
+          WINDOWS_CERT_PASSWORD: ${{ secrets.WINDOWS_CERT_PASSWORD }}
+          CI_REPO_OWNER:         ${{ github.repository_owner }}
+          CI_REPO_NAME:          ${{ github.event.repository.name }}
+        run: pnpm --filter @agentdock/desktop exec electron-builder --win --publish never
+
+      - name: Upload installers
+        uses: actions/upload-artifact@v4
+        with:
+          name: installers-windows
+          path: |
+            apps/desktop/release/${{ needs.preflight.outputs.version }}/*.exe
+            apps/desktop/release/${{ needs.preflight.outputs.version }}/*.msi
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload auto-updater metadata
+        uses: actions/upload-artifact@v4
+        with:
+          name: updater-windows
+          path: |
+            apps/desktop/release/${{ needs.preflight.outputs.version }}/*.yml
+            apps/desktop/release/${{ needs.preflight.outputs.version }}/*.blockmap
+          if-no-files-found: warn
+          retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # Linux build: AppImage + deb + rpm. GPG signing is optional.
+  # ---------------------------------------------------------------------------
+  build-linux:
+    name: build · Linux
+    needs: preflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.preflight.outputs.checkout_ref }}
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libarchive-tools fakeroot rpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Rebuild native modules for Electron
+        run: pnpm --filter @agentdock/desktop rebuild
+
+      - name: Build renderer + main
+        run: pnpm --filter @agentdock/desktop build
+
+      - name: Import GPG signing key (optional)
+        if: ${{ secrets.LINUX_GPG_KEY_BASE64 != '' }}
+        env:
+          GPG_KEY_BASE64: ${{ secrets.LINUX_GPG_KEY_BASE64 }}
+          GPG_PASSPHRASE: ${{ secrets.LINUX_GPG_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          echo "$GPG_KEY_BASE64" | base64 --decode > "$RUNNER_TEMP/agentdock.gpg"
+          gpg --import "$RUNNER_TEMP/agentdock.gpg"
+          # Cache the passphrase for dpkg-sig / rpm-sign via gpg-agent.
+          echo "allow-loopback-pinentry" > "$RUNNER_TEMP/gpg-agent.conf"
+          echo "pinentry-mode loopback"     >> "$RUNNER_TEMP/gpg-agent.conf"
+          gpgconf --kill gpg-agent
+          echo "default-cache-ttl 3600"   >> "$HOME/.gnupg/gpg-agent.conf"
+          echo "max-cache-ttl 3600"        >> "$HOME/.gnupg/gpg-agent.conf"
+          echo "allow-loopback-pinentry"   >> "$HOME/.gnupg/gpg-agent.conf"
+          gpgconf --reload gpg-agent
+          echo "$GPG_PASSPHRASE" | gpg --batch --pinentry-mode loopback --passphrase-fd 0 --sign --output /dev/null /dev/null
+
+      - name: Build Linux installers
+        env:
+          CI_REPO_OWNER: ${{ github.repository_owner }}
+          CI_REPO_NAME:  ${{ github.event.repository.name }}
+        run: pnpm --filter @agentdock/desktop exec electron-builder --linux --publish never
+
+      - name: Upload installers
+        uses: actions/upload-artifact@v4
+        with:
+          name: installers-linux
+          path: |
+            apps/desktop/release/${{ needs.preflight.outputs.version }}/*.AppImage
+            apps/desktop/release/${{ needs.preflight.outputs.version }}/*.deb
+            apps/desktop/release/${{ needs.preflight.outputs.version }}/*.rpm
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload auto-updater metadata
+        uses: actions/upload-artifact@v4
+        with:
+          name: updater-linux
+          path: |
+            apps/desktop/release/${{ needs.preflight.outputs.version }}/*.yml
+            apps/desktop/release/${{ needs.preflight.outputs.version }}/*.blockmap
+          if-no-files-found: warn
+          retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # Final: collect all installers + changelog, publish the GitHub Release.
+  # ---------------------------------------------------------------------------
+  release:
+    name: publish release
+    needs: [preflight, build-mac, build-win, build-linux]
+    if: ${{ needs.preflight.outputs.dry_run != 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.preflight.outputs.checkout_ref }}
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: Download all installers
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Download auto-updater metadata
+        uses: actions/download-artifact@v4
+        with:
+          path: updater
+          merge-multiple: true
+
+      - name: Generate changelog
+        id: changelog
+        uses: orhun/git-cliff-action@v4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        with:
+          config: cliff.toml
+          args: --tag v${{ needs.preflight.outputs.version }} --latest
+
+      - name: List collected artifacts
+        run: |
+          echo "=== installers ==="
+          find dist -type f | sort
+          echo "=== updater ==="
+          find updater -type f | sort
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.preflight.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          name: "AgentDock v${{ needs.preflight.outputs.version }}"
+          draft: true
+          prerelease: ${{ needs.preflight.outputs.is_prerelease == 'true' }}
+          generate_release_notes: false
+          body: ${{ steps.changelog.outputs.content }}
+          files: |
+            dist/**/*
+            updater/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}

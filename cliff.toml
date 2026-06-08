@@ -1,0 +1,87 @@
+# git-cliff configuration for AgentDock.
+# Generates concise GitHub Release notes in the form:
+# [0.25.4] - 2026-06-08
+# Added / Changed / Fixed
+
+[changelog]
+header = ""
+body = """
+{% if version -%}
+## [{{ version }}] - {{ timestamp | date(format="%Y-%m-%d") }}
+{% else -%}
+## [unreleased]
+{% endif %}
+{% for group, commits in commits | filter(attribute="merge_commit", value=false) | group_by(attribute="group") %}
+### {{ group }}
+{% for commit in commits | sort(attribute="message") %}
+- {% if commit.scope %}**{{ commit.scope }}:** {% endif %}{{ commit.message | upper_first }}{% if commit.breaking %} **BREAKING**{% endif %}
+{% endfor %}
+
+{% endfor -%}
+"""
+trim = true
+
+[git]
+conventional_commits = true
+filter_unconventional = true
+split_commits = false
+
+[[git.commit_parsers]]
+message = "^Merge"
+skip = true
+
+[[git.commit_parsers]]
+message = "^chore\\(release\\)"
+skip = true
+
+[[git.commit_parsers]]
+message = "^feat"
+group = "Added"
+
+[[git.commit_parsers]]
+message = "^fix"
+group = "Fixed"
+
+[[git.commit_parsers]]
+message = "^perf"
+group = "Changed"
+
+[[git.commit_parsers]]
+message = "^refactor"
+group = "Changed"
+
+[[git.commit_parsers]]
+message = "^build"
+group = "Changed"
+
+[[git.commit_parsers]]
+message = "^ci"
+group = "Changed"
+
+[[git.commit_parsers]]
+message = "^docs"
+group = "Changed"
+
+[[git.commit_parsers]]
+message = "^style"
+group = "Changed"
+
+[[git.commit_parsers]]
+message = "^test"
+group = "Changed"
+
+[[git.commit_parsers]]
+message = "^chore"
+group = "Changed"
+
+[[git.commit_parsers]]
+message = "^revert"
+group = "Changed"
+
+[bump]
+features_always_bump_minor = true
+breaking_always_bump_major = true
+
+[remote]
+owner = "agentdock"
+repo = "AgentDock"

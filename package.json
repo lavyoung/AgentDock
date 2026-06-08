@@ -5,7 +5,17 @@
   "main": "index.js",
   "scripts": {
     "dev": "pnpm --filter @agentdock/desktop dev",
-    "build": "pnpm --filter @agentdock/desktop build"
+    "build": "pnpm --filter @agentdock/desktop build",
+    "lint": "pnpm --filter @agentdock/desktop lint",
+    "test": "pnpm --filter @agentdock/desktop test",
+    "typecheck": "pnpm --filter @agentdock/desktop typecheck",
+    "pack": "pnpm --filter @agentdock/desktop pack",
+    "dist": "pnpm --filter @agentdock/desktop dist",
+    "dist:mac": "pnpm --filter @agentdock/desktop dist:mac",
+    "dist:win": "pnpm --filter @agentdock/desktop dist:win",
+    "dist:linux": "pnpm --filter @agentdock/desktop dist:linux",
+    "version:bump": "pnpm --filter @agentdock/desktop version",
+    "release:tag": "bash -c 'set -euo pipefail; VER=$(node -p \"require(\\\"./apps/desktop/package.json\\\").version\"); git tag \"v${VER}\" && git push origin \"v${VER}\"'"
   },
   "keywords": [],
   "author": "",

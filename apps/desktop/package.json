@@ -2,13 +2,27 @@
   "name": "@agentdock/desktop",
   "private": true,
   "version": "0.0.0",
+  "description": "Local-first agent asset registry for managing and syncing skills and AGENTS.md assets.",
+  "author": {
+    "name": "AgentDock Contributors",
+    "email": "[email protected]"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/agentdock/AgentDock#readme",
   "main": "dist-electron/apps/desktop/src/main/main.js",
   "scripts": {
     "dev": "concurrently -k \"vite\" \"tsc -p tsconfig.electron.json --watch\" \"wait-on http://localhost:5173 dist-electron/apps/desktop/src/main/main.js dist-electron/apps/desktop/src/preload/preload.js && cross-env NODE_ENV=development electron .\"",
     "build": "tsc -p tsconfig.electron.json && vite build",
     "rebuild": "electron-rebuild -f -w better-sqlite3",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "echo \"(no tests yet — add vitest/jest here)\" && exit 0",
+    "typecheck": "tsc -p tsconfig.electron.json --noEmit",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder --publish never",
+    "dist:mac": "electron-builder --mac --publish never",
+    "dist:win": "electron-builder --win --publish never",
+    "dist:linux": "electron-builder --linux --publish never"
   },
   "dependencies": {
     "@codemirror/lang-markdown": "^6.5.0",
