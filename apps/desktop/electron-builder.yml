@@ -49,18 +49,12 @@ win:
       arch: [x64]
   icon: build/icon.ico
   artifactName: ${productName}-windows-${arch}-${version}.${ext}
-  signingHashAlgorithms: [sha256]
-  # Set WINDOWS_CERT_FILE (base64 of .pfx) and WINDOWS_CERT_PASSWORD
-  # in repository secrets to enable signing.
-  certificateFile: ${env.WINDOWS_CERT_FILE}
-  certificatePassword: ${env.WINDOWS_CERT_PASSWORD}
-publisherName: AgentDock Contributors
 
 nsis:
   oneClick: false
   perMachine: false
   allowToChangeInstallationDirectory: true
-  allowElevationToInstall: true
+  allowElevation: true
   createDesktopShortcut: true
   createStartMenuShortcut: true
   shortcutName: AgentDock

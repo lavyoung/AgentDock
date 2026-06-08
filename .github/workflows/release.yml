@@ -155,12 +155,11 @@ jobs:
           $bytes = [Convert]::FromBase64String($env:CERT_BASE64)
           $path  = Join-Path $env:RUNNER_TEMP "agentdock.pfx"
           [IO.File]::WriteAllBytes($path, $bytes)
-          "WINDOWS_CERT_FILE=$path" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "CSC_LINK=$path" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "CSC_KEY_PASSWORD=${{ secrets.WINDOWS_CERT_PASSWORD }}" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: Build Windows installers
         env:
-          WINDOWS_CERT_FILE: ${{ env.WINDOWS_CERT_FILE }}
-          WINDOWS_CERT_PASSWORD: ${{ secrets.WINDOWS_CERT_PASSWORD }}
           CI_REPO_OWNER: ${{ github.repository_owner }}
           CI_REPO_NAME: ${{ github.event.repository.name }}
         run: pnpm --filter @agentdock/desktop exec electron-builder --win --publish never
