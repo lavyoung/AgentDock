@@ -1,7 +1,7 @@
 {
   "name": "@agentdock/desktop",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Local-first agent asset registry for managing and syncing skills and AGENTS.md assets.",
   "author": {
     "name": "AgentDock Contributors",
