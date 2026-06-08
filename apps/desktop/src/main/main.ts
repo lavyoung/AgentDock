@@ -7,6 +7,15 @@ import {ensureAgentDockDirs} from "../platform/electron/paths";
 
 const isDev = process.env.NODE_ENV === "development";
 const DARK_WINDOW_CHROME = "#0a0a0b";
+const APP_TITLE = "AgentDock";
+
+function resolveWindowIconPath(): string {
+    if (app.isPackaged) {
+        return path.join(process.resourcesPath, "resources", "branding", "icon.png");
+    }
+
+    return path.join(app.getAppPath(), "resources", "branding", "icon.png");
+}
 
 function createWindow() {
     const win = new BrowserWindow({
@@ -14,6 +23,7 @@ function createWindow() {
         height: 800,
         minWidth: 800,
         minHeight: 560,
+        title: APP_TITLE,
         titleBarStyle: "hidden",
         titleBarOverlay: {
             color: DARK_WINDOW_CHROME,
@@ -22,6 +32,7 @@ function createWindow() {
         },
         backgroundColor: DARK_WINDOW_CHROME,
         frame: false,
+        icon: resolveWindowIconPath(),
         show: false,
         webPreferences: {
             preload: path.join(__dirname, "../preload/preload.js"),
@@ -59,6 +70,7 @@ function createWindow() {
 }
 
 app.whenReady().then(async () => {
+    app.setName(APP_TITLE);
     await ensureAgentDockDirs();
     migrateDatabase();
     registerIpc();
