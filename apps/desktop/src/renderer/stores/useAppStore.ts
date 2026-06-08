@@ -117,6 +117,20 @@ function sortAssetsForDisplay(assets: AssetRecord[]): AssetRecord[] {
     });
 }
 
+function buildAssetDetailPreview(
+    asset: AssetRecord,
+    currentSelection: AssetDetail | null
+): AssetDetail {
+    if (currentSelection?.id === asset.id) {
+        return currentSelection;
+    }
+
+    return {
+        ...asset,
+        content: "",
+    };
+}
+
 function createProjectId(name: string): string {
     const base = name
         .toLowerCase()
@@ -396,6 +410,7 @@ type State = {
     assets: AssetRecord[];
     selectedAsset: AssetDetail | null;
     snapshots: SnapshotRecord[];
+    assetDetailCache: Record<string, AssetDetail>;
     assetDetailLoading: boolean;
     snapshotsLoading: boolean;
     snapshotsLoadedAssetId: string | null;
@@ -483,6 +498,7 @@ type Actions = {
 
     refreshAssets(): Promise<void>;
     openAsset(id: string): Promise<void>;
+    prefetchAssetDetails(assetIds?: string[]): Promise<void>;
     loadAssetSnapshots(assetId?: string): Promise<void>;
     saveAsset(): Promise<void>;
     createAsset(input: CreateAssetInput): Promise<AssetRecord>;
@@ -584,6 +600,7 @@ const initialState: State = {
     assets: [],
     selectedAsset: null,
     snapshots: [],
+    assetDetailCache: {},
     assetDetailLoading: false,
     snapshotsLoading: false,
     snapshotsLoadedAssetId: null,
@@ -692,22 +709,48 @@ export const useAppStore = create<AppStore>((set, get) => ({
 
     // ---------- assets ----------
     async refreshAssets() {
-        set({assets: sortAssetsForDisplay(await agentdockClient.assets.list())});
+        const assets = sortAssetsForDisplay(await agentdockClient.assets.list());
+        const nextCache = {...get().assetDetailCache};
+
+        for (const asset of assets) {
+            if (!nextCache[asset.id]) {
+                continue;
+            }
+
+            nextCache[asset.id] = {
+                ...nextCache[asset.id],
+                ...asset,
+            };
+        }
+
+        set({assets, assetDetailCache: nextCache});
+        void get().prefetchAssetDetails(assets.map((asset) => asset.id));
     },
 
     async openAsset(id) {
         const requestKey = Date.now();
+        const cachedAsset = get().assets.find((asset) => asset.id === id) ?? null;
+        const cachedDetail = get().assetDetailCache[id] ?? null;
+        const currentSelection = get().selectedAsset;
         set({
-            selectedAsset: null,
+            selectedAsset: cachedDetail ?? (cachedAsset
+                ? buildAssetDetailPreview(cachedAsset, currentSelection)
+                : null),
             snapshots: [],
             snapshotsLoadedAssetId: null,
-            assetDetailLoading: true,
+            assetDetailLoading: !cachedDetail,
             snapshotsLoading: false,
             assetDetailRequestKey: requestKey,
-            editorTitle: "",
-            editorDescription: "",
-            editorContent: "",
+            editorTitle: cachedDetail?.title ?? cachedAsset?.title ?? "",
+            editorDescription: cachedDetail?.description ?? cachedAsset?.description ?? "",
+            editorContent:
+                cachedDetail?.content ??
+                (currentSelection?.id === id ? currentSelection.content : ""),
         });
+
+        if (cachedDetail) {
+            return;
+        }
         try {
             const detail = await agentdockClient.assets.get(id);
             if (get().assetDetailRequestKey !== requestKey) {
@@ -728,6 +771,10 @@ export const useAppStore = create<AppStore>((set, get) => ({
             }
             set({
                 selectedAsset: detail,
+                assetDetailCache: {
+                    ...get().assetDetailCache,
+                    [id]: detail,
+                },
                 editorTitle: detail.title,
                 editorDescription: detail.description,
                 editorContent: detail.content,
@@ -739,6 +786,38 @@ export const useAppStore = create<AppStore>((set, get) => ({
             }
             throw error;
         }
+    },
+
+    async prefetchAssetDetails(assetIds) {
+        const ids = assetIds ?? get().assets.map((asset) => asset.id);
+        const missingIds = ids.filter((id) => !get().assetDetailCache[id]);
+
+        if (missingIds.length === 0) {
+            return;
+        }
+
+        const entries = await Promise.all(
+            missingIds.map(async (id) => {
+                try {
+                    const detail = await agentdockClient.assets.get(id);
+                    return detail ? ([id, detail] as const) : null;
+                } catch {
+                    return null;
+                }
+            })
+        );
+
+        const nextEntries = Object.fromEntries(entries.filter(Boolean) as Array<readonly [string, AssetDetail]>);
+        if (Object.keys(nextEntries).length === 0) {
+            return;
+        }
+
+        set({
+            assetDetailCache: {
+                ...get().assetDetailCache,
+                ...nextEntries,
+            },
+        });
     },
 
     async loadAssetSnapshots(assetId) {
@@ -773,7 +852,15 @@ export const useAppStore = create<AppStore>((set, get) => ({
             description: editorDescription,
             content: editorContent,
         });
-        if (updated) set({selectedAsset: updated});
+        if (updated) {
+            set({
+                selectedAsset: updated,
+                assetDetailCache: {
+                    ...get().assetDetailCache,
+                    [updated.id]: updated,
+                },
+            });
+        }
         await get().refreshAssets();
         await get().loadAssetSnapshots(selectedAsset.id);
     },
@@ -791,12 +878,15 @@ export const useAppStore = create<AppStore>((set, get) => ({
         if (!selectedAsset) return;
         await agentdockClient.assets.delete(selectedAsset.id);
         await get().refreshAssets();
+        const nextCache = {...get().assetDetailCache};
+        delete nextCache[selectedAsset.id];
         set({
             selectedAsset: null,
             editorTitle: "",
             editorDescription: "",
             editorContent: "",
             snapshots: [],
+            assetDetailCache: nextCache,
             assetDetailLoading: false,
             snapshotsLoading: false,
             snapshotsLoadedAssetId: null,
@@ -835,6 +925,9 @@ export const useAppStore = create<AppStore>((set, get) => ({
         const {selectedAsset} = get();
         if (!selectedAsset) return;
         await agentdockClient.snapshots.restore(snapshotId);
+        const nextCache = {...get().assetDetailCache};
+        delete nextCache[selectedAsset.id];
+        set({assetDetailCache: nextCache});
         await get().openAsset(selectedAsset.id);
         await get().loadAssetSnapshots(selectedAsset.id);
         await get().refreshAssets();
