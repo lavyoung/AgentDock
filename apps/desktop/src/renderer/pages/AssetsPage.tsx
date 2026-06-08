@@ -178,6 +178,11 @@ export function AssetsPage(): JSX.Element {
         }));
     }
 
+    function handleAssetIdChange(value: string): void {
+        setAssetIdTouched(true);
+        updateDraft("name", value);
+    }
+
     async function handleCreateAsset(): Promise<void> {
         const title = newAssetDraft.title.trim();
         const name = newAssetDraft.name.trim();
@@ -506,10 +511,8 @@ export function AssetsPage(): JSX.Element {
                                     id="new-asset-name"
                                     type="text"
                                     value={newAssetDraft.name}
-                                    onChange={(event) => {
-                                        setAssetIdTouched(true);
-                                        updateDraft("name", event.target.value);
-                                    }}
+                                    onFocus={() => setAssetIdTouched(true)}
+                                    onChange={(event) => handleAssetIdChange(event.target.value)}
                                 />
                             </div>
                         </div>

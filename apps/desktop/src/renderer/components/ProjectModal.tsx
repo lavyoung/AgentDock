@@ -1,4 +1,4 @@
-import {type JSX, useMemo, useState} from "react";
+import {type JSX, useState} from "react";
 
 import {Button} from "./Button";
 import {Modal} from "./Modal";
@@ -24,24 +24,16 @@ function createPreviewId(name: string): string {
 
 export function ProjectModal({open, onClose}: ProjectModalProps): JSX.Element {
     const {t} = useI18n();
-    const scenarios = useAppStore((s) => s.scenarios);
     const projectName = useAppStore((s) => s.projectName);
     const projectPath = useAppStore((s) => s.projectPath);
-    const projectDefaultScenarioId = useAppStore((s) => s.projectDefaultScenarioId);
     const projectSyncMode = useAppStore((s) => s.projectSyncMode);
     const setProjectName = useAppStore((s) => s.setProjectName);
     const setProjectPath = useAppStore((s) => s.setProjectPath);
-    const setProjectDefaultScenarioId = useAppStore((s) => s.setProjectDefaultScenarioId);
     const setProjectSyncMode = useAppStore((s) => s.setProjectSyncMode);
     const createProject = useAppStore((s) => s.createProject);
     const resetProjectForm = useAppStore((s) => s.resetProjectForm);
     const pushToast = useAppStore((s) => s.pushToast);
     const [isSubmitting, setIsSubmitting] = useState(false);
-
-    const selectedScenario = useMemo(
-        () => scenarios.find((scenario) => scenario.id === projectDefaultScenarioId) ?? null,
-        [projectDefaultScenarioId, scenarios]
-    );
 
     function handleClose(): void {
         if (isSubmitting) {
@@ -157,23 +149,6 @@ export function ProjectModal({open, onClose}: ProjectModalProps): JSX.Element {
                     </div>
                     <div className="field-row">
                         <div className="field">
-                            <label htmlFor="project-scenario">{t("projectScenarioLabel")}</label>
-                            <select
-                                id="project-scenario"
-                                value={projectDefaultScenarioId ?? ""}
-                                onChange={(event) =>
-                                    setProjectDefaultScenarioId(event.target.value || null)
-                                }
-                            >
-                                <option value="">{t("projectScenarioNone")}</option>
-                                {scenarios.map((scenario) => (
-                                    <option key={scenario.id} value={scenario.id}>
-                                        {scenario.title || scenario.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className="field">
                             <label htmlFor="project-sync-mode">{t("projectSyncModeLabel")}</label>
                             <select
                                 id="project-sync-mode"
@@ -201,10 +176,6 @@ export function ProjectModal({open, onClose}: ProjectModalProps): JSX.Element {
                             <div className="new-project-preview-item">
                                 <span>{t("panelFieldId")}</span>
                                 <strong>{createPreviewId(projectName) || "-"}</strong>
-                            </div>
-                            <div className="new-project-preview-item">
-                                <span>{t("projectScenarioLabel")}</span>
-                                <strong>{selectedScenario ? selectedScenario.title || selectedScenario.name : t("projectScenarioNone")}</strong>
                             </div>
                             <div className="new-project-preview-item">
                                 <span>{t("projectSyncModeLabel")}</span>
