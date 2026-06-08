@@ -1,8 +1,12 @@
 import fs from "fs-extra";
 import path from "node:path";
+import {execFile} from "node:child_process";
+import {promisify} from "node:util";
 
 import type {FileSystemPort} from "../../../../../packages/core/src/ports/fileSystemPort";
 import type {PathPort} from "../../../../../packages/core/src/ports/pathPort";
+
+const execFileAsync = promisify(execFile);
 
 export const nodeFileSystemPort: FileSystemPort = {
     exists(targetPath) {
@@ -28,6 +32,14 @@ export const nodeFileSystemPort: FileSystemPort = {
     },
     remove(targetPath) {
         return fs.remove(targetPath);
+    },
+    async commandExists(command) {
+        try {
+            await execFileAsync("where.exe", [command], {windowsHide: true});
+            return true;
+        } catch {
+            return false;
+        }
     },
 };
 

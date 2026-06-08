@@ -7,6 +7,8 @@ export type ApplicationDefinition = {
     globalSkillSegments: string[];
     projectSkillSegments: string[];
     projectSupports: ApplicationLocationKind[];
+    installCheckSegments: string[][];
+    installCheckCommands?: string[];
 };
 
 export const APPLICATION_CATALOG: Record<ApplicationId, ApplicationDefinition> = {
@@ -17,6 +19,14 @@ export const APPLICATION_CATALOG: Record<ApplicationId, ApplicationDefinition> =
         globalSkillSegments: [".codex", "skills"],
         projectSkillSegments: [".codex", "skills"],
         projectSupports: ["skills", "agents-md"],
+        installCheckSegments: [
+            ["AppData", "Roaming", "npm", "codex.cmd"],
+            ["AppData", "Roaming", "npm", "codex"],
+            [".local", "bin", "codex"],
+            [".local", "bin", "codex.exe"],
+            [".codex"],
+        ],
+        installCheckCommands: ["codex"],
     },
     "claude-code": {
         id: "claude-code",
@@ -25,6 +35,16 @@ export const APPLICATION_CATALOG: Record<ApplicationId, ApplicationDefinition> =
         globalSkillSegments: [".claude", "skills"],
         projectSkillSegments: [".claude", "skills"],
         projectSupports: ["skills", "agents-md"],
+        installCheckSegments: [
+            ["AppData", "Roaming", "npm", "claude.cmd"],
+            ["AppData", "Roaming", "npm", "claude"],
+            ["AppData", "Roaming", "npm", "node_modules", "@anthropic-ai", "claude-code"],
+            [".local", "bin", "claude"],
+            [".local", "bin", "claude.exe"],
+            [".claude"],
+            [".claude.json"],
+        ],
+        installCheckCommands: ["claude"],
     },
     cursor: {
         id: "cursor",
@@ -33,6 +53,11 @@ export const APPLICATION_CATALOG: Record<ApplicationId, ApplicationDefinition> =
         globalSkillSegments: [".cursor", "skills"],
         projectSkillSegments: [".cursor", "skills"],
         projectSupports: ["skills", "agents-md"],
+        installCheckSegments: [
+            ["AppData", "Local", "Programs", "Cursor", "Cursor.exe"],
+            ["AppData", "Local", "cursor", "Cursor.exe"],
+            [".cursor"],
+        ],
     },
     "gemini-cli": {
         id: "gemini-cli",
@@ -41,6 +66,14 @@ export const APPLICATION_CATALOG: Record<ApplicationId, ApplicationDefinition> =
         globalSkillSegments: [".gemini", "skills"],
         projectSkillSegments: [".gemini", "skills"],
         projectSupports: ["skills", "agents-md"],
+        installCheckSegments: [
+            ["AppData", "Roaming", "npm", "gemini.cmd"],
+            ["AppData", "Roaming", "npm", "gemini"],
+            [".local", "bin", "gemini"],
+            [".local", "bin", "gemini.exe"],
+            [".gemini"],
+        ],
+        installCheckCommands: ["gemini"],
     },
     "copilot-cli": {
         id: "copilot-cli",
@@ -49,6 +82,15 @@ export const APPLICATION_CATALOG: Record<ApplicationId, ApplicationDefinition> =
         globalSkillSegments: [".copilot", "skills"],
         projectSkillSegments: [".copilot", "skills"],
         projectSupports: ["skills", "agents-md"],
+        installCheckSegments: [
+            ["AppData", "Roaming", "npm", "github-copilot-cli.cmd"],
+            ["AppData", "Roaming", "npm", "github-copilot-cli"],
+            ["AppData", "Roaming", "npm", "node_modules", "@githubnext", "github-copilot-cli"],
+            [".local", "bin", "github-copilot-cli"],
+            [".local", "bin", "github-copilot-cli.exe"],
+            [".copilot"],
+        ],
+        installCheckCommands: ["github-copilot-cli"],
     },
     windsurf: {
         id: "windsurf",
@@ -57,6 +99,12 @@ export const APPLICATION_CATALOG: Record<ApplicationId, ApplicationDefinition> =
         globalSkillSegments: [".windsurf", "skills"],
         projectSkillSegments: [".windsurf", "skills"],
         projectSupports: ["skills", "agents-md"],
+        installCheckSegments: [
+            ["AppData", "Local", "Programs", "Windsurf", "Windsurf.exe"],
+            ["AppData", "Roaming", "npm", "windsurf.cmd"],
+            ["AppData", "Roaming", "npm", "windsurf"],
+        ],
+        installCheckCommands: ["windsurf"],
     },
 };
 

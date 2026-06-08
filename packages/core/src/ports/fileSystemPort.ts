@@ -6,4 +6,5 @@ export interface FileSystemPort {
     copyDir(from: string, to: string): Promise<void>;
     emptyDir(path: string): Promise<void>;
     remove(path: string): Promise<void>;
+    commandExists?(command: string): Promise<boolean>;
 }

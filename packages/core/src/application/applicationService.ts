@@ -70,21 +70,16 @@ export class ApplicationService {
         input: UpdateApplicationInput
     ): ApplicationRecord {
         const current = this.ensureApplication(id);
-        const currentWithStats = this.withLocationStats(current);
-
-        if (input.enabled === true && currentWithStats.existing_locations === 0) {
-            throw new Error("Application is not installed and cannot be enabled.");
-        }
-
+        const now = new Date().toISOString();
         const next: ApplicationRecord = {
             ...current,
             enabled: input.enabled ?? current.enabled,
-            updated_at: new Date().toISOString(),
+            updated_at: now,
         };
 
         this.applicationRepository.upsertApplication(next);
 
-        return next;
+        return this.withLocationStats(next);
     }
 
     private withLocationStats(application: ApplicationRecord): ApplicationRecord {
@@ -220,6 +215,7 @@ export class ApplicationService {
         const definition = getApplicationDefinition(applicationId);
         const now = new Date().toISOString();
         const locations: ApplicationLocationRecord[] = [];
+        const applicationInstalled = await this.isApplicationInstalled(applicationId);
         const globalSkillsPath = this.path.join(
             this.homeDir,
             ...definition.globalSkillSegments.slice(0, -1)
@@ -234,7 +230,7 @@ export class ApplicationService {
             kind: "skills",
             scope: "global",
             path: globalSkillsPath,
-            exists: await this.locationExists({
+            exists: applicationInstalled || await this.locationExists({
                 id: "detected-global",
                 application_id: applicationId,
                 location_key: `${applicationId}:global:skills`,
@@ -292,6 +288,10 @@ export class ApplicationService {
         }
 
         return locations;
+    }
+
+    async canEnableApplication(id: ApplicationId): Promise<boolean> {
+        return this.isApplicationInstalled(id);
     }
 
     private buildDetectedProjectLocation(input: {
@@ -446,5 +446,24 @@ export class ApplicationService {
                 this.normalizeBasePathForKind(location.kind, location.path)
             )
         );
+    }
+
+    private async isApplicationInstalled(applicationId: ApplicationId): Promise<boolean> {
+        const definition = getApplicationDefinition(applicationId);
+
+        for (const segments of definition.installCheckSegments) {
+            const candidatePath = this.path.join(this.homeDir, ...segments);
+            if (await this.fileSystem.exists(candidatePath)) {
+                return true;
+            }
+        }
+
+        for (const command of definition.installCheckCommands ?? []) {
+            if (await this.fileSystem.commandExists?.(command)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

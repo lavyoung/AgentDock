@@ -53,7 +53,6 @@ export function SettingsPage(): JSX.Element {
     const setSettingsAutoUpdate = useAppStore((s) => s.setSettingsAutoUpdate);
     const setSettingsNotifications = useAppStore((s) => s.setSettingsNotifications);
     const setSettingsSound = useAppStore((s) => s.setSettingsSound);
-    const runApplicationSync = useAppStore((s) => s.runApplicationSync);
     const pushToast = useAppStore((s) => s.pushToast);
 
     useEffect(() => {
@@ -83,12 +82,17 @@ export function SettingsPage(): JSX.Element {
             if (selectedApplicationId !== applicationId) {
                 await openApplication(applicationId);
             }
-            const currentApplication =
-                applications.find((application) => application.id === applicationId) ?? null;
 
-            if (nextEnabled && currentApplication && currentApplication.existing_locations === 0) {
-                pushToast("error", t("settingsAgentInstallRequired"));
-                return;
+            if (nextEnabled) {
+                const refreshedLocations = await agentdockClient.applications.refreshLocations(applicationId);
+                const hasInstalledLocation = refreshedLocations.some((location) => location.exists);
+
+                await openApplication(applicationId);
+
+                if (!hasInstalledLocation) {
+                    pushToast("error", t("settingsAgentInstallRequired"));
+                    return;
+                }
             }
 
             setApplicationEnabled(nextEnabled);
@@ -356,9 +360,6 @@ export function SettingsPage(): JSX.Element {
                                         <button type="button" className="btn btn-secondary" onClick={() => void handleRedetect()}>
                                             {t("settingsAgentRedetect")}
                                         </button>
-                                        <button type="button" className="btn btn-primary" onClick={() => void runApplicationSync()}>
-                                            {t("settingsAgentSync")}
-                                        </button>
                                     </div>
                                 </div>
 
@@ -368,7 +369,6 @@ export function SettingsPage(): JSX.Element {
                                         <div className="settings-agent-list">
                                             {applications.map((application) => {
                                                 const isActive = selectedApplicationId === application.id;
-                                                const canEnable = application.existing_locations > 0;
                                                 return (
                                                     <div
                                                         key={application.id}
@@ -398,8 +398,7 @@ export function SettingsPage(): JSX.Element {
                                                             role="switch"
                                                             aria-checked={application.enabled}
                                                             aria-label={application.name}
-                                                            disabled={!application.enabled && !canEnable}
-                                                            title={!application.enabled && !canEnable ? t("settingsAgentInstallRequired") : undefined}
+                                                            title={!application.enabled && application.existing_locations === 0 ? t("settingsAgentInstallRequired") : undefined}
                                                             onClick={(event) => {
                                                                 event.stopPropagation();
                                                                 void handleApplicationToggle(application.id, !application.enabled);
