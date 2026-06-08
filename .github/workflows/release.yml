@@ -2,9 +2,9 @@
 #
 # Trigger:    push of a tag matching `v*.*.*`, or workflow_dispatch
 # Inputs:     release_ref + dry_run (manual runs only)
-# Outputs:    GitHub Release with signed Windows installers + `latest*.yml`
+# Outputs:    GitHub Release with Windows installers + `latest*.yml`
 #
-# Required secrets:
+# Optional secrets for signed Windows builds:
 #   WINDOWS_CERT_FILE_BASE64, WINDOWS_CERT_PASSWORD
 #   GH_TOKEN                  (auto-provided)
 
@@ -128,7 +128,26 @@ jobs:
       - name: Build renderer + main
         run: pnpm --filter @agentdock/desktop build
 
+      - name: Resolve signing mode
+        id: signing
+        shell: pwsh
+        env:
+          CERT_BASE64: ${{ secrets.WINDOWS_CERT_FILE_BASE64 }}
+          CERT_PASSWORD: ${{ secrets.WINDOWS_CERT_PASSWORD }}
+        run: |
+          $hasCert = -not [string]::IsNullOrWhiteSpace($env:CERT_BASE64)
+          $hasPassword = -not [string]::IsNullOrWhiteSpace($env:CERT_PASSWORD)
+          if ($hasCert -and $hasPassword) {
+            "enabled=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+            Write-Host "Windows signing is enabled."
+          }
+          else {
+            "enabled=false" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+            Write-Host "Windows signing is disabled. Building unsigned installers."
+          }
+
       - name: Decode signing certificate
+        if: ${{ steps.signing.outputs.enabled == 'true' }}
         env:
           CERT_BASE64: ${{ secrets.WINDOWS_CERT_FILE_BASE64 }}
         shell: pwsh
