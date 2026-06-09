@@ -198,12 +198,14 @@ jobs:
       - name: Download all installers
         uses: actions/download-artifact@v4
         with:
+          name: installers-windows
           path: dist
           merge-multiple: true
 
       - name: Download auto-updater metadata
         uses: actions/download-artifact@v4
         with:
+          name: updater-windows
           path: updater
           merge-multiple: true
 
