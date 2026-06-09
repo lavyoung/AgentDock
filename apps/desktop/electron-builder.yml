@@ -45,8 +45,6 @@ win:
   target:
     - target: nsis
       arch: [x64]
-    - target: msi
-      arch: [x64]
   artifactName: ${productName}-windows-${arch}-${version}.${ext}
 
 nsis:
@@ -58,9 +56,6 @@ nsis:
   createStartMenuShortcut: true
   shortcutName: AgentDock
   artifactName: ${productName}-windows-${arch}-${version}-Setup.${ext}
-
-msi:
-  artifactName: ${productName}-windows-${arch}-${version}.${ext}
 
 # ---------------------------------------------------------------------------
 # macOS: DMG + zip, both x64 and arm64. Code signing + notarization.
