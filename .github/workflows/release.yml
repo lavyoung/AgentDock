@@ -6,7 +6,7 @@
 #
 # Optional secrets for signed Windows builds:
 #   WINDOWS_CERT_FILE_BASE64, WINDOWS_CERT_PASSWORD
-#   GH_TOKEN                  (auto-provided)
+#   No extra GitHub token secret is required; the workflow uses the auto-provided `github.token`
 
 name: release
 
@@ -193,7 +193,7 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ needs.preflight.outputs.checkout_ref }}
-          token: ${{ secrets.GH_TOKEN }}
+          token: ${{ github.token }}
 
       - name: Download all installers
         uses: actions/download-artifact@v4
@@ -211,7 +211,7 @@ jobs:
         id: changelog
         uses: orhun/git-cliff-action@v4
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
         with:
           config: cliff.toml
           args: --tag v${{ needs.preflight.outputs.version }} --latest
@@ -237,4 +237,4 @@ jobs:
             dist/**/*
             updater/**/*
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
