@@ -1,6 +1,6 @@
 {
   "name": "AgentDock",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Local-first agent asset registry prototype for managing skills and AGENTS.md assets.",
   "main": "index.js",
   "scripts": {
