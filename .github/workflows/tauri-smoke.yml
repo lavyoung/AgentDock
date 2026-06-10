@@ -1,0 +1,140 @@
+# GitHub Actions workflow: Tauri 2.x build (smoke).
+#
+# Trigger:    push to main, and PRs touching the Tauri surface.
+# Purpose:    verify the Tauri shell builds on all three OSes during the
+#             dual-track migration. It does NOT publish a release — the
+#             existing `release.yml` keeps doing that for Electron until
+#             the Tauri migration is feature-complete.
+#
+# Once the Tauri port is complete, swap `release.yml` to invoke
+# `tauri-action` and retire this file.
+#
+# Required secrets (optional for unsigned smoke builds):
+#   WINDOWS_CERT_FILE_BASE64, WINDOWS_CERT_PASSWORD
+#   MACOS_CERT_P12_BASE64,    MACOS_CERT_P12_PASSWORD,
+#   MACOS_CERT_IDENTITY,      APPLE_TEAM_ID,
+#   APPLE_ID,                 APPLE_APP_SPECIFIC_PASSWORD
+
+name: tauri-smoke
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: "22"
+  RUST_VERSION: "stable"
+
+jobs:
+  tauri-windows:
+    name: Tauri build · Windows
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with: { version: 11.5.0 }
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: ./apps/desktop/src-tauri -> target
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build renderer (Vite)
+        run: pnpm --filter @agentdock/desktop build
+
+      - name: Tauri build (smoke, unsigned)
+        env:
+          # Mirror env so cargo can fetch crates from China-friendly CDN.
+          CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+        run: pnpm --filter @agentdock/desktop exec tauri build --no-bundle
+
+  tauri-linux:
+    name: Tauri build · Linux
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with: { version: 11.5.0 }
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - uses: dtolnay/rust-toolchain@stable
+        with: { toolchain: ${{ env.RUST_VERSION }} }
+
+      - name: Install Linux build deps (WebKit2GTK)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev \
+            librsvg2-dev patchelf
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: ./apps/desktop/src-tauri -> target
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build renderer (Vite)
+        run: pnpm --filter @agentdock/desktop build
+
+      - name: Tauri build (smoke, unsigned)
+        run: pnpm --filter @agentdock/desktop exec tauri build --no-bundle
+
+  tauri-macos:
+    name: Tauri build · macOS
+    runs-on: macos-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with: { version: 11.5.0 }
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - uses: dtolnay/rust-toolchain@stable
+        with: { toolchain: ${{ env.RUST_VERSION }} }
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: ./apps/desktop/src-tauri -> target
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build renderer (Vite)
+        run: pnpm --filter @agentdock/desktop build
+
+      - name: Tauri build (smoke, unsigned)
+        run: pnpm --filter @agentdock/desktop exec tauri build --no-bundle

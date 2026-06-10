@@ -1,0 +1,4 @@
+{
+  "$schema": "https://json.schemastore.org/cargo-target.json",
+  "rust-analyzer.linkedProjects": ["./Cargo.toml"]
+}

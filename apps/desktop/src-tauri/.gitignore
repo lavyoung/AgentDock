@@ -1,0 +1,7 @@
+# Tauri build artifacts
+src-tauri/target/
+src-tauri/Cargo.lock
+src-tauri/gen/schemas/
+
+# Tauri devtools and logs
+src-tauri/.tauri/
