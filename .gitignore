@@ -42,3 +42,9 @@ out
 
 apps/desktop/dist
 apps/desktop/dist-electron
+apps/desktop/release
+apps/desktop/build/cache
+
+# Source PNG used to regenerate app icons; commit only the curated ones
+# under apps/desktop/build/.
+apps/desktop/resources/branding/icon-source.png

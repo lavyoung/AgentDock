@@ -10,10 +10,10 @@
     "test": "pnpm --filter @agentdock/desktop test",
     "typecheck": "pnpm --filter @agentdock/desktop typecheck",
     "pack": "pnpm --filter @agentdock/desktop pack",
-    "dist": "pnpm --filter @agentdock/desktop dist",
     "dist:mac": "pnpm --filter @agentdock/desktop dist:mac",
     "dist:win": "pnpm --filter @agentdock/desktop dist:win",
     "dist:linux": "pnpm --filter @agentdock/desktop dist:linux",
+    "dist:all": "pnpm --filter @agentdock/desktop exec electron-builder -mwl --publish never",
     "version:bump": "pnpm --filter @agentdock/desktop version",
     "release:tag": "bash -c 'set -euo pipefail; VER=$(node -p \"require(\\\"./apps/desktop/package.json\\\").version\"); git tag \"v${VER}\" && git push origin \"v${VER}\"'"
   },

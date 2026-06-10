@@ -19,6 +19,11 @@ directories:
   output: release/${version}
   buildResources: build
 
+# electron-builder auto-picks build/icon.{png,ico,icns} per platform when
+# `buildResources` is set. Drop icon.{ico,icns,png} (>= 512x512) into
+# apps/desktop/build/ and you are done.
+icon: build/icon.ico
+
 files:
   - dist/**
   - dist-electron/**
@@ -66,7 +71,6 @@ mac:
       arch: [x64, arm64]
     - target: zip
       arch: [x64, arm64]
-  icon: resources/branding/icon.png
   category: public.app-category.developer-tools
   hardenedRuntime: true
   gatekeeperAssess: false
@@ -94,7 +98,6 @@ linux:
       arch: [x64]
     - target: rpm
       arch: [x64]
-  icon: resources/branding/icon.png
   category: Development
   synopsis: Local-first agent asset registry
   description: |
@@ -119,9 +122,14 @@ linux:
 # ---------------------------------------------------------------------------
 # Auto-update: write `latest*.yml` metadata next to the installers so
 # `electron-updater` can detect and apply new versions at runtime.
+#
+# The URL is rebuilt at CI time by the release workflow (see
+# `.github/workflows/release.yml`) which sets `CI_REPO_OWNER` /
+# `CI_REPO_NAME` before invoking `electron-builder`. Locally we ship
+# a placeholder so the build does not fail on unexpanded env vars.
 # ---------------------------------------------------------------------------
 publish:
   provider: generic
-  url: https://github.com/${env.CI_REPO_OWNER}/${env.CI_REPO_NAME}/releases/download/v${version}
+  url: https://github.com/agentdock/AgentDock/releases/download/v${version}
   channel: latest
   useMultipleRangeRequest: false

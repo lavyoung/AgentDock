@@ -43,14 +43,22 @@ function createWindow() {
 
     setMainWindow(win);
 
-    // Safety net: show window after 2s even if the renderer never reports ready.
+    // Show the window as soon as the renderer signals ready (avoids the
+    // brief white-flash and the "ready-to-show" timeout below).
+    win.once("ready-to-show", () => {
+        win.show();
+    });
+
+    // Safety net: if the renderer never reports ready (e.g. it throws
+    // during init), surface the window anyway so the user sees a frame
+    // instead of a stuck blank taskbar entry.
     setTimeout(() => {
         if (!win.isDestroyed() && !win.isVisible()) {
             // eslint-disable-next-line no-console
             console.warn("[AgentDock] ready-to-show timeout — forcing window show");
             win.show();
         }
-    }, 2000);
+    }, 5000);
 
     win.webContents.on("did-fail-load", (_e, errorCode, errorDescription) => {
         // eslint-disable-next-line no-console
@@ -64,8 +72,15 @@ function createWindow() {
 
     if (isDev) {
         win.loadURL("http://localhost:5173");
+    } else if (app.isPackaged) {
+        // In a packaged build the renderer is bundled under
+        // `resources/app.asar/dist/index.html`. `__dirname` here is
+        //   resources/app.asar/dist-electron/apps/desktop/src/main/
+        // 5 levels up reaches the asar root, then into `dist/`.
+        win.loadFile(path.join(__dirname, "..", "..", "..", "..", "..", "dist", "index.html"));
     } else {
-        win.loadFile(path.join(__dirname, "../../../../../apps/desktop/dist/index.html"));
+        // Plain `electron .` from a non-packaged checkout — same depth.
+        win.loadFile(path.join(__dirname, "..", "..", "..", "..", "..", "dist", "index.html"));
     }
 }
 
