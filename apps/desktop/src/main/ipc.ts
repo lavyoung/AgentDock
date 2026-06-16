@@ -23,7 +23,7 @@ import {
     createSnapshotRepository,
     createTargetRepository,
 } from "../platform/electron/database";
-import {nodeFileSystemPort, nodePathPort,} from "../platform/electron/fileSystemPort";
+import {nodeFileSystemPort, nodePathPort, nodeShellPort,} from "../platform/electron/fileSystemPort";
 import {getHomeDir, getRegistryAssetsDir} from "../platform/electron/paths";
 import type {PickPathInput} from "../../../../packages/shared/src/agentdockApi";
 
@@ -65,6 +65,7 @@ export function registerIpc() {
         fileSystem: nodeFileSystemPort,
         homeDir: getHomeDir(),
         path: nodePathPort,
+        shell: nodeShellPort,
         targetRepository,
     });
     const applicationSyncService = new ApplicationSyncService({

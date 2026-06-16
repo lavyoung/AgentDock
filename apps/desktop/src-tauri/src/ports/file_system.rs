@@ -1,8 +1,9 @@
 //! File system port — native Rust implementation.
 //!
 //! Phase 1: trait + stub methods so the binary links. Phase 2 fills the
-//! bodies with `tokio::fs` calls and a `sha2` checksum. The trait shape
-//! mirrors `packages/core/src/ports/fileSystemPort.ts` 1:1.
+//! bodies with `tokio::fs` calls. The trait shape mirrors
+//! `packages/core/src/ports/fileSystemPort.ts` 1:1 — any new method here
+//! must be added to the TypeScript contract first, and vice versa.
 
 use async_trait::async_trait;
 use thiserror::Error;
@@ -31,16 +32,13 @@ pub trait FileSystemPort: Send + Sync {
     async fn ensure_dir(&self, _path: &str) -> Result<(), FsError> {
         Err(FsError::NotImplemented)
     }
-    async fn copy_file(&self, _from: &str, _to: &str) -> Result<(), FsError> {
-        Err(FsError::NotImplemented)
-    }
     async fn copy_dir(&self, _from: &str, _to: &str) -> Result<(), FsError> {
         Err(FsError::NotImplemented)
     }
-    async fn remove(&self, _path: &str) -> Result<(), FsError> {
+    async fn empty_dir(&self, _path: &str) -> Result<(), FsError> {
         Err(FsError::NotImplemented)
     }
-    async fn checksum(&self, _path: &str) -> Result<String, FsError> {
+    async fn remove(&self, _path: &str) -> Result<(), FsError> {
         Err(FsError::NotImplemented)
     }
 }

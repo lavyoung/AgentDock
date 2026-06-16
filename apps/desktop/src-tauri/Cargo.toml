@@ -25,6 +25,7 @@ serde_json = "1"
 thiserror = "1"
 log = "0.4"
 tokio = { version = "1", features = ["fs", "sync", "rt"] }
+async-trait = "0.1"
 
 # Ports (Phase 2 will fill these with real impls; for now just the types
 # and trait declarations so the rest of the project can compile).

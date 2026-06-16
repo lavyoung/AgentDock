@@ -3,6 +3,7 @@ import {nanoid} from "nanoid";
 import {getApplicationDefinition, listSupportedApplications,} from "./applicationCatalog";
 import type {FileSystemPort} from "../ports/fileSystemPort";
 import type {PathPort} from "../ports/pathPort";
+import type {ShellPort} from "../ports/shellPort";
 import type {TargetRepository} from "../target/targetRepository";
 import type {
     ApplicationDetail,
@@ -20,6 +21,7 @@ type ApplicationServiceDependencies = {
     fileSystem: FileSystemPort;
     homeDir: string;
     path: PathPort;
+    shell: ShellPort;
     targetRepository: TargetRepository;
 };
 
@@ -28,6 +30,7 @@ export class ApplicationService {
     private readonly fileSystem: FileSystemPort;
     private readonly homeDir: string;
     private readonly path: PathPort;
+    private readonly shell: ShellPort;
     private readonly targetRepository: TargetRepository;
 
     constructor(dependencies: ApplicationServiceDependencies) {
@@ -35,6 +38,7 @@ export class ApplicationService {
         this.fileSystem = dependencies.fileSystem;
         this.homeDir = dependencies.homeDir;
         this.path = dependencies.path;
+        this.shell = dependencies.shell;
         this.targetRepository = dependencies.targetRepository;
     }
 
@@ -459,7 +463,7 @@ export class ApplicationService {
         }
 
         for (const command of definition.installCheckCommands ?? []) {
-            if (await this.fileSystem.commandExists?.(command)) {
+            if (await this.shell.commandExists(command)) {
                 return true;
             }
         }
