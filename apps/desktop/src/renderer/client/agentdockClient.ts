@@ -8,16 +8,16 @@ import type {
     ApplicationId,
     ApplicationLocationRecord,
     ApplicationRecord,
-} from "../../../../../packages/core/src/types/application";
-import type {AssetDetail, RuleRecord, ScenarioRecord} from "../../../../../packages/core/src/types/asset";
+} from "../../../../../packages/shared/src/contract/applications";
+import type {AssetDetail, RuleRecord, ScenarioRecord} from "../../../../../packages/shared/src/contract/assets";
 import type {
     SyncCleanupInput,
     SyncCleanupResult,
     SyncPreviewInput,
     SyncPreviewResult,
     SyncRunResult,
-} from "../../../../../packages/core/src/types/sync";
-import type {TargetRecord} from "../../../../../packages/core/src/types/target";
+} from "../../../../../packages/shared/src/contract/sync";
+import type {TargetRecord} from "../../../../../packages/shared/src/contract/targets";
 
 function getApi(): AgentdockApi | null {
     if (typeof window === "undefined") return null;

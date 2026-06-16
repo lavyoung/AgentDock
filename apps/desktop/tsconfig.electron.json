@@ -3,6 +3,12 @@
     "target": "ES2022",
     "module": "CommonJS",
     "moduleResolution": "Node",
+    "baseUrl": ".",
+    "paths": {
+      "@agentdock/shared/agentdockApi": ["../../packages/shared/src/agentdockApi.ts"],
+      "@agentdock/shared/contract": ["../../packages/shared/src/contract/index.ts"],
+      "@agentdock/shared/contract/*": ["../../packages/shared/src/contract/*"]
+    },
     "ignoreDeprecations": "6.0",  // 暂时忽略
     "outDir": "dist-electron",
     "rootDir": "../..",

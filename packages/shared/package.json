@@ -2,5 +2,11 @@
   "name": "@agentdock/shared",
   "private": true,
   "version": "0.0.0",
-  "type": "module"
+  "type": "module",
+  "exports": {
+    "./agentdockApi": "./src/agentdockApi.ts",
+    "./contract": "./src/contract/index.ts",
+    "./contract/*": "./src/contract/*.ts",
+    "./package.json": "./package.json"
+  }
 }

@@ -1,6 +1,6 @@
 import {type JSX, useEffect, useMemo, useState} from "react";
 
-import type {AssetType, CreateAssetInput} from "../../../../../packages/core/src/types/asset";
+import type {AssetType, CreateAssetInput} from "../../../../../packages/shared/src/contract/assets";
 import {Button} from "../components/Button";
 import {DetailPanel} from "../components/DetailPanel";
 import {Modal} from "../components/Modal";

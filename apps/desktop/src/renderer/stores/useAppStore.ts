@@ -5,7 +5,7 @@ import type {
     ApplicationId,
     ApplicationLocationRecord,
     ApplicationRecord,
-} from "../../../../../packages/core/src/types/application";
+} from "../../../../../packages/shared/src/contract/applications";
 import type {
     AssetDetail,
     AssetRecord,
@@ -15,15 +15,15 @@ import type {
     RuleRecord,
     RuleSeverity,
     ScenarioRecord,
-} from "../../../../../packages/core/src/types/asset";
-import type {SnapshotRecord} from "../../../../../packages/core/src/types/snapshot";
+} from "../../../../../packages/shared/src/contract/assets";
+import type {SnapshotRecord} from "../../../../../packages/shared/src/contract/snapshots";
 import type {
     SyncHistoryEntry,
     SyncInlineTarget,
     SyncPreviewResult,
     SyncRunResult
-} from "../../../../../packages/core/src/types/sync";
-import type {TargetDeployMode, TargetRecord} from "../../../../../packages/core/src/types/target";
+} from "../../../../../packages/shared/src/contract/sync";
+import type {TargetDeployMode, TargetRecord} from "../../../../../packages/shared/src/contract/targets";
 import {agentdockClient} from "../client/agentdockClient";
 
 function applyTheme(theme: "dark" | "light" | "system"): void {

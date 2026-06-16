@@ -1,6 +1,6 @@
 import {type JSX, useMemo, useState} from "react";
 
-import type {AssetType} from "../../../../../packages/core/src/types/asset";
+import type {AssetType} from "../../../../../packages/shared/src/contract/assets";
 import {useI18n} from "../i18n/useI18n";
 import {useAppStore} from "../stores/useAppStore";
 import "./Pages.css";

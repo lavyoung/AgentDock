@@ -6,6 +6,12 @@
     "module": "esnext",
     "types": ["vite/client"],
     "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@agentdock/shared/agentdockApi": ["../../packages/shared/src/agentdockApi.ts"],
+      "@agentdock/shared/contract": ["../../packages/shared/src/contract/index.ts"],
+      "@agentdock/shared/contract/*": ["../../packages/shared/src/contract/*"]
+    },
 
     /* Bundler mode */
     "moduleResolution": "bundler",

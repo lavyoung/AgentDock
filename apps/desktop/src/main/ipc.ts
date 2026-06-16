@@ -3,7 +3,7 @@ import path from "node:path";
 import {BrowserWindow, dialog, ipcMain, type OpenDialogOptions, type SaveDialogOptions} from "electron";
 import {ApplicationService} from "../../../../packages/core/src/application/applicationService";
 import {ApplicationSyncService} from "../../../../packages/core/src/application/applicationSyncService";
-import type {ApplicationId} from "../../../../packages/core/src/types/application";
+import type {ApplicationId} from "../../../../packages/shared/src/contract/applications";
 import {AssetService} from "../../../../packages/core/src/asset/assetService";
 import {type CreateRuleInput, RuleService, type UpdateRuleInput} from "../../../../packages/core/src/rules/ruleService";
 import {
@@ -13,7 +13,7 @@ import {
 } from "../../../../packages/core/src/scenario/scenarioService";
 import {SnapshotService} from "../../../../packages/core/src/snapshot/snapshotService";
 import {SyncService} from "../../../../packages/core/src/sync/syncService";
-import type {SyncCleanupInput, SyncPreviewInput} from "../../../../packages/core/src/types/sync";
+import type {SyncCleanupInput, SyncPreviewInput} from "../../../../packages/shared/src/contract/sync";
 import {TargetService} from "../../../../packages/core/src/target/targetService";
 import {
     createApplicationRepository,

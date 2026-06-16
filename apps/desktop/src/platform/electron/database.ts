@@ -10,10 +10,10 @@ import type {
     ApplicationId,
     ApplicationLocationRecord,
     ApplicationRecord,
-} from "../../../../../packages/core/src/types/application";
-import type {AssetRecord, RuleRecord, ScenarioRecord} from "../../../../../packages/core/src/types/asset";
-import type {SnapshotRecord} from "../../../../../packages/core/src/types/snapshot";
-import type {TargetRecord} from "../../../../../packages/core/src/types/target";
+} from "../../../../../packages/shared/src/contract/applications";
+import type {AssetRecord, RuleRecord, ScenarioRecord} from "../../../../../packages/shared/src/contract/assets";
+import type {SnapshotRecord} from "../../../../../packages/shared/src/contract/snapshots";
+import type {TargetRecord} from "../../../../../packages/shared/src/contract/targets";
 import {getDbPath} from "./paths";
 
 let db: Database.Database | null = null;

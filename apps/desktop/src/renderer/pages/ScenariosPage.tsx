@@ -1,8 +1,8 @@
 import {type JSX, useEffect, useState} from "react";
 
 import {listSupportedApplications} from "../../../../../packages/core/src/application/applicationCatalog";
-import type {ApplicationDetail} from "../../../../../packages/core/src/types/application";
-import type {SyncPreviewResult, SyncRunResult} from "../../../../../packages/core/src/types/sync";
+import type {ApplicationDetail} from "../../../../../packages/shared/src/contract/applications";
+import type {SyncPreviewResult, SyncRunResult} from "../../../../../packages/shared/src/contract/sync";
 import {agentdockClient} from "../client/agentdockClient";
 import {Modal} from "../components/Modal";
 import {useI18n} from "../i18n/useI18n";

@@ -1,6 +1,6 @@
 import {type JSX, useEffect} from "react";
 
-import type {ApplicationLocationRecord} from "../../../../../packages/core/src/types/application";
+import type {ApplicationLocationRecord} from "../../../../../packages/shared/src/contract/applications";
 import {agentdockClient} from "../client/agentdockClient";
 import {useI18n} from "../i18n/useI18n";
 import {useAppStore} from "../stores/useAppStore";

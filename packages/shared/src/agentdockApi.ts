@@ -6,7 +6,7 @@ import type {
     ApplicationSyncResult,
     UpdateApplicationInput,
     UpdateApplicationLocationInput,
-} from "../../core/src/types/application";
+} from "./contract/applications";
 import type {
     AssetDetail,
     AssetRecord,
@@ -15,16 +15,20 @@ import type {
     RuleRecord,
     ScenarioRecord,
     UpdateAssetInput,
-} from "../../core/src/types/asset";
-import type {SnapshotRecord} from "../../core/src/types/snapshot";
+} from "./contract/assets";
+import type {SnapshotRecord} from "./contract/snapshots";
 import type {
     SyncCleanupInput,
     SyncCleanupResult,
     SyncPreviewInput,
     SyncPreviewResult,
     SyncRunResult,
-} from "../../core/src/types/sync";
-import type {CreateTargetInput, TargetRecord, UpdateTargetInput,} from "../../core/src/types/target";
+} from "./contract/sync";
+import type {CreateTargetInput, TargetRecord, UpdateTargetInput,} from "./contract/targets";
+
+// Re-export the contract barrel so consumers can do
+// `import type { X } from "@agentdock/shared/contract"`.
+export * from "./contract";
 
 export type PickPathMode = "directory" | "agents-md-file";
 

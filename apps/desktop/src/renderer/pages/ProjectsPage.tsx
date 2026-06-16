@@ -1,6 +1,6 @@
 ﻿import {type JSX, useEffect, useMemo, useState} from "react";
 
-import type {SyncHistoryEntry} from "../../../../../packages/core/src/types/sync";
+import type {SyncHistoryEntry} from "../../../../../packages/shared/src/contract/sync";
 import {ProjectModal} from "../components/ProjectModal";
 import {useI18n} from "../i18n/useI18n";
 import {useAppStore} from "../stores/useAppStore";

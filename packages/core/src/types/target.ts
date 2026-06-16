@@ -1,24 +1,14 @@
-export type TargetDeployMode = "copy" | "merge";
+/**
+ * Domain types for targets.
+ *
+ * The transport-stable DTO definitions live in
+ * `@agentdock/shared/contract/targets`. This module re-exports them so internal
+ * core consumers can continue to import from `../types/target` without churn.
+ */
 
-export type TargetRecord = {
-    id: string;
-    name: string;
-    path: string;
-    enabled: boolean;
-    deployMode: TargetDeployMode;
-    created_at: string;
-    updated_at: string;
-};
-
-export type CreateTargetInput = {
-    name: string;
-    path: string;
-    deployMode: TargetDeployMode;
-};
-
-export type UpdateTargetInput = {
-    name?: string;
-    path?: string;
-    enabled?: boolean;
-    deployMode?: TargetDeployMode;
-};
+export type {
+    TargetDeployMode,
+    TargetRecord,
+    CreateTargetInput,
+    UpdateTargetInput,
+} from "@agentdock/shared/contract/targets";
