@@ -1,8 +1,6 @@
-import {type AssetRecord, getAssetMainFileName, type ScenarioRecord} from "../types/asset";
+import type {AssetRecord, ScenarioRecord} from "../types/asset";
 import type {FileSystemPort} from "../ports/fileSystemPort";
 import type {PathPort} from "../ports/pathPort";
-import {mergeManagedBlock} from "../managed-block/mergeManagedBlock";
-import {removeManagedBlock} from "../managed-block/removeManagedBlock";
 import type {ScenarioRepository} from "../scenario/scenarioRepository";
 import type {TargetRepository} from "../target/targetRepository";
 import type {TargetRecord} from "../types/target";
@@ -18,6 +16,19 @@ import type {
     SyncRunConflict,
     SyncRunResult,
 } from "../types/sync";
+import {
+    collectScenarioAssets,
+    diffTrackedOutputs,
+    resolveAgentsMdOutputPath,
+    resolveSkillOutputPath,
+} from "./syncPlannerHelpers";
+import {
+    removeAgentsMdBlock,
+    removeSkillOutput,
+    writeAgentsMdMerge,
+    writeSkillOutput,
+} from "./syncExecutorHelpers";
+import {buildPreviewResult, buildSyncRunConflict} from "./syncResultBuilders";
 
 type ResolvedSyncTarget = Pick<TargetRecord, "id" | "name" | "path" | "deployMode" | "enabled">;
 
@@ -91,24 +102,28 @@ export class SyncService {
             }
 
             if (asset.type === "skill") {
-                await this.writeSkillAsset(target, asset);
+                await writeSkillOutput(this.fileSystem, this.path, target.path, asset);
                 writtenCount += 1;
                 continue;
             }
 
             if (asset.type === "agents-md") {
-                const merged = await this.writeAgentsMdAsset(item.output_path, asset);
+                const merged = await writeAgentsMdMerge(
+                    this.fileSystem,
+                    this.path,
+                    item.output_path,
+                    asset
+                );
 
                 if (merged.status === "conflict") {
-                    conflicts.push({
-                        asset_id: asset.id,
-                        asset_name: asset.title || asset.name,
-                        asset_type: asset.type,
-                        target_id: target.id,
-                        target_name: target.name,
-                        output_path: item.output_path,
-                        reason: merged.reason,
-                    });
+                    conflicts.push(
+                        buildSyncRunConflict({
+                            item,
+                            target,
+                            reason: merged.reason,
+                            assetName: asset.title || asset.name,
+                        })
+                    );
                     continue;
                 }
 
@@ -187,38 +202,36 @@ export class SyncService {
             warnings.push("No sync destinations are available for this scenario.");
         }
 
-        const assets = this.assetRepository.list();
-        const assetsById = new Map<string, AssetRecord>();
-        const skillAssets = this.collectScenarioAssets(
-            scenario.skillIds,
-            "skill",
+        const allAssets = this.assetRepository.list();
+        const skillCollection = collectScenarioAssets({
             scenario,
-            assetsById,
-            warnings,
-            assets
-        );
-        const agentsMdAssets = this.collectScenarioAssets(
-            scenario.agentFileIds,
-            "agents-md",
+            allAssets,
+            expectedType: "skill",
+            assetIdList: scenario.skillIds,
+        });
+        const agentsCollection = collectScenarioAssets({
             scenario,
-            assetsById,
-            warnings,
-            assets
-        );
-        const items: SyncPlanItem[] = [];
+            allAssets,
+            expectedType: "agents-md",
+            assetIdList: scenario.agentFileIds,
+        });
+        const skillAssets = skillCollection.assets;
+        const agentsMdAssets = agentsCollection.assets;
+        const assetsById = new Map<string, AssetRecord>([
+            ...skillCollection.assetsById,
+            ...agentsCollection.assetsById,
+        ]);
+        warnings.push(...skillCollection.warnings, ...agentsCollection.warnings);
 
         if (skillAssets.length === 0 && agentsMdAssets.length === 0) {
             warnings.push(`Scenario "${scenario.title || scenario.name}" has no active Skill or AGENTS.md assets to sync.`);
         }
 
+        const items: SyncPlanItem[] = [];
+
         for (const target of targets) {
             for (const asset of skillAssets) {
-                const outputPath = this.path.join(
-                    target.path,
-                    "skills",
-                    asset.id,
-                    getAssetMainFileName(asset.type)
-                );
+                const outputPath = resolveSkillOutputPath(this.path, target.path, asset);
                 items.push({
                     asset_id: asset.id,
                     asset_name: asset.title || asset.name,
@@ -232,7 +245,7 @@ export class SyncService {
             }
 
             for (const asset of agentsMdAssets) {
-                const outputPath = this.path.join(target.path, "AGENTS.md");
+                const outputPath = resolveAgentsMdOutputPath(this.path, target.path);
                 const targetExists = await this.fileSystem.exists(outputPath);
                 items.push({
                     asset_id: asset.id,
@@ -248,7 +261,8 @@ export class SyncService {
         }
 
         const currentItemKeys = new Set(items.map((item) => this.getPlanItemKey(item)));
-        const deleteItems = this.buildDeleteItems(
+        const deleteItems = diffTrackedOutputs(
+            this.path,
             input.tracked_outputs ?? [],
             currentItemKeys
         );
@@ -263,41 +277,6 @@ export class SyncService {
         };
     }
 
-    private collectScenarioAssets(
-        assetIds: string[],
-        assetType: AssetRecord["type"],
-        scenario: ScenarioRecord,
-        assetsById: Map<string, AssetRecord>,
-        warnings: string[],
-        assets: AssetRecord[]
-    ): AssetRecord[] {
-        const collected: AssetRecord[] = [];
-
-        for (const assetId of assetIds) {
-            const asset = assets.find((candidate) => candidate.id === assetId);
-
-            if (!asset) {
-                warnings.push(`Scenario "${scenario.title}" references a missing asset: ${assetId}`);
-                continue;
-            }
-
-            if (asset.type !== assetType) {
-                warnings.push(`Asset "${asset.title || asset.name}" is not a ${assetType} asset and was skipped.`);
-                continue;
-            }
-
-            if (asset.status !== "active") {
-                warnings.push(`Disabled asset "${asset.title || asset.name}" was skipped during sync preview.`);
-                continue;
-            }
-
-            assetsById.set(asset.id, asset);
-            collected.push(asset);
-        }
-
-        return collected;
-    }
-
     private toResolvedTarget(target: SyncInlineTarget): ResolvedSyncTarget {
         return {
             id: target.id,
@@ -309,125 +288,39 @@ export class SyncService {
     }
 
     private toPreviewResult(prepared: PreparedPlan): SyncPreviewResult {
-        const createCount = prepared.items.filter((item) => item.operation === "create").length;
-        const updateCount = prepared.items.filter((item) => item.operation === "update").length;
-        const mergeCount = prepared.items.filter((item) => item.operation === "merge").length;
-        const deleteCount = prepared.items.filter((item) => item.operation === "delete").length;
-
-        return {
-            scenario_id: prepared.scenario.id,
-            target_count: prepared.targets.length,
-            operation_count: prepared.items.length,
-            create_count: createCount,
-            update_count: updateCount,
-            merge_count: mergeCount,
-            delete_count: deleteCount,
-            warnings: prepared.warnings,
+        return buildPreviewResult({
+            scenarioId: prepared.scenario.id,
+            targetCount: prepared.targets.length,
             items: prepared.items,
-        };
-    }
-
-    private async writeSkillAsset(target: ResolvedSyncTarget, asset: AssetRecord): Promise<void> {
-        const content = await this.readAssetContent(asset);
-        const assetDir = this.path.join(target.path, "skills", asset.id);
-        await this.fileSystem.ensureDir(assetDir);
-        await this.fileSystem.writeText(
-            this.path.join(assetDir, getAssetMainFileName(asset.type)),
-            content
-        );
-    }
-
-    private async writeAgentsMdAsset(
-        outputPath: string,
-        asset: AssetRecord
-    ): Promise<{status: "ok"; content: string} | {status: "conflict"; reason: string}> {
-        const originalContent = (await this.fileSystem.exists(outputPath))
-            ? await this.fileSystem.readText(outputPath)
-            : "";
-        const content = await this.readAssetContent(asset);
-        const merged = mergeManagedBlock({
-            originalContent,
-            assetId: asset.id,
-            version: asset.version,
-            generatedContent: content,
+            warnings: prepared.warnings,
         });
-
-        if (merged.status === "conflict") {
-            return {
-                status: "conflict",
-                reason: merged.reason,
-            };
-        }
-
-        await this.fileSystem.writeText(outputPath, merged.content);
-        return {
-            status: "ok",
-            content: merged.content,
-        };
-    }
-
-    private buildDeleteItems(
-        trackedOutputs: SyncHistoryOutput[],
-        currentItemKeys: Set<string>
-    ): SyncPlanItem[] {
-        return trackedOutputs
-            .filter((output) => !currentItemKeys.has(this.getHistoryOutputKey(output)))
-            .map((output) => ({
-                asset_id: output.asset_id,
-                asset_name: output.asset_name,
-                asset_type: output.asset_type,
-                target_id: output.target_id,
-                target_name: output.target_name,
-                target_root: this.path.dirname(output.output_path),
-                output_path: output.output_path,
-                operation: "delete" as const,
-            }));
-    }
-
-    private getPlanItemKey(item: SyncPlanItem): string {
-        return `${item.target_id}:${item.asset_id}:${item.output_path}`;
-    }
-
-    private getHistoryOutputKey(output: SyncHistoryOutput): string {
-        return `${output.target_id}:${output.asset_id}:${output.output_path}`;
     }
 
     private async removeSyncedOutput(
         item: SyncPlanItem
     ): Promise<{status: "ok"} | {status: "conflict"; reason: string}> {
         if (item.asset_type === "skill") {
-            await this.fileSystem.remove(this.path.dirname(item.output_path));
+            await removeSkillOutput(this.fileSystem, this.path, item.output_path);
             return {status: "ok"};
         }
 
         if (item.asset_type === "agents-md") {
-            if (!(await this.fileSystem.exists(item.output_path))) {
-                return {status: "ok"};
-            }
-
-            const originalContent = await this.fileSystem.readText(item.output_path);
-            const removed = removeManagedBlock({
-                originalContent,
-                assetId: item.asset_id,
-            });
-
-            if (removed.status === "conflict") {
-                return {
-                    status: "conflict",
-                    reason: removed.reason,
-                };
-            }
-
-            await this.fileSystem.writeText(item.output_path, removed.content);
-            return {status: "ok"};
+            return removeAgentsMdBlock(this.fileSystem, item.output_path, item.asset_id);
         }
 
         return {status: "ok"};
     }
 
-    private readAssetContent(asset: AssetRecord): Promise<string> {
-        return this.fileSystem.readText(
-            this.path.join(asset.path, "current", getAssetMainFileName(asset.type))
-        );
+    private getPlanItemKey(item: SyncPlanItem): string {
+        return `${item.target_id}:${item.asset_id}:${item.output_path}`;
+    }
+
+    /**
+     * Kept as a thin alias so the historical output key shape is preserved
+     * for any future direct comparison. The new shared `historyOutputKey`
+     * produces the same string and is what the planner uses.
+     */
+    private getHistoryOutputKey(output: SyncHistoryOutput): string {
+        return `${output.target_id}:${output.asset_id}:${output.output_path}`;
     }
 }

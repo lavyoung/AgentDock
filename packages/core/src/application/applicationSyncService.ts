@@ -1,5 +1,5 @@
 import type {AssetRepository} from "../asset/assetRepository";
-import {type AssetRecord, getAssetMainFileName} from "../types/asset";
+import type {AssetRecord} from "../types/asset";
 import type {ScenarioRepository} from "../scenario/scenarioRepository";
 import type {
     ApplicationId,
@@ -7,11 +7,25 @@ import type {
     ApplicationSyncConflict,
     ApplicationSyncResult,
 } from "../types/application";
-import {mergeManagedBlock} from "../managed-block/mergeManagedBlock";
 import type {ApplicationRepository} from "./applicationRepository";
 import type {FileSystemPort} from "../ports/fileSystemPort";
 import type {PathPort} from "../ports/pathPort";
-import type {SyncPreviewResult, SyncRunConflict, SyncRunResult} from "../types/sync";
+import type {SyncPlanItem, SyncPreviewResult, SyncRunConflict, SyncRunResult} from "../types/sync";
+import {
+    collectScenarioAssets,
+    resolveManagedPath,
+    resolveSkillOutputPath,
+} from "../sync/syncPlannerHelpers";
+import {
+    writeAgentsMdMerge,
+    writeAgentsMdMerges,
+    writeSkillOutput,
+} from "../sync/syncExecutorHelpers";
+import {
+    buildApplicationSyncConflict,
+    buildPreviewResult,
+    buildSyncRunConflict,
+} from "../sync/syncResultBuilders";
 
 type ApplicationSyncServiceDependencies = {
     applicationRepository: ApplicationRepository;
@@ -81,7 +95,12 @@ export class ApplicationSyncService {
         scenarioId: string
     ): Promise<SyncPreviewResult> {
         const prepared = await this.prepareScenarioPlan(applicationId, scenarioId);
-        return this.toScenarioPreviewResult(scenarioId, prepared.locations, prepared.warnings, prepared.items);
+        return buildPreviewResult({
+            scenarioId,
+            targetCount: prepared.locations.length,
+            items: prepared.items,
+            warnings: prepared.warnings,
+        });
     }
 
     async runScenarioSync(
@@ -101,24 +120,28 @@ export class ApplicationSyncService {
             }
 
             if (asset.type === "skill") {
-                await this.writeSkillToLocation(location, asset);
+                await writeSkillOutput(this.fileSystem, this.path, location.path, asset);
                 writtenCount += 1;
                 continue;
             }
 
             if (asset.type === "agents-md") {
-                const merged = await this.writeAgentsMdToLocation(location, asset);
+                const merged = await writeAgentsMdMerge(
+                    this.fileSystem,
+                    this.path,
+                    item.output_path,
+                    asset
+                );
 
                 if (merged.status === "conflict") {
-                    conflicts.push({
-                        asset_id: asset.id,
-                        asset_name: asset.title || asset.name,
-                        asset_type: asset.type,
-                        target_id: location.id,
-                        target_name: location.name,
-                        output_path: this.resolveManagedPath(location),
-                        reason: merged.reason,
-                    });
+                    conflicts.push(
+                        buildSyncRunConflict({
+                            item,
+                            target: {id: location.id, name: location.name},
+                            reason: merged.reason,
+                            assetName: asset.title || asset.name,
+                        })
+                    );
                     continue;
                 }
 
@@ -127,7 +150,12 @@ export class ApplicationSyncService {
         }
 
         return {
-            ...this.toScenarioPreviewResult(scenarioId, prepared.locations, prepared.warnings, prepared.items),
+            ...buildPreviewResult({
+                scenarioId,
+                targetCount: prepared.locations.length,
+                items: prepared.items,
+                warnings: prepared.warnings,
+            }),
             written_count: writtenCount,
             conflicts,
             synced_at: new Date().toISOString(),
@@ -140,7 +168,7 @@ export class ApplicationSyncService {
     ): Promise<{
         locations: ApplicationLocationRecord[];
         warnings: string[];
-        items: SyncPreviewResult["items"];
+        items: SyncPlanItem[];
         assetsById: Map<string, AssetRecord>;
     }> {
         const scenario = this.scenarioRepository.findById(scenarioId);
@@ -158,35 +186,37 @@ export class ApplicationSyncService {
             warnings.push(`No enabled managed locations are configured for ${applicationId}.`);
         }
 
-        const activeAssets = this.assetRepository
-            .list()
-            .filter((asset) => asset.status === "active");
-        const skillAssets = activeAssets.filter(
-            (asset) => asset.type === "skill" && scenario.skillIds.includes(asset.id)
-        );
-        const agentsMdAssets = activeAssets.filter(
-            (asset) => asset.type === "agents-md" && scenario.agentFileIds.includes(asset.id)
-        );
-        const assetsById = new Map<string, AssetRecord>();
-
-        for (const asset of [...skillAssets, ...agentsMdAssets]) {
-            assetsById.set(asset.id, asset);
-        }
+        const allAssets = this.assetRepository.list();
+        const skillCollection = collectScenarioAssets({
+            scenario,
+            allAssets,
+            expectedType: "skill",
+            assetIdList: scenario.skillIds,
+        });
+        const agentsCollection = collectScenarioAssets({
+            scenario,
+            allAssets,
+            expectedType: "agents-md",
+            assetIdList: scenario.agentFileIds,
+        });
+        const skillAssets = skillCollection.assets;
+        const agentsMdAssets = agentsCollection.assets;
+        const assetsById = new Map<string, AssetRecord>([
+            ...skillCollection.assetsById,
+            ...agentsCollection.assetsById,
+        ]);
+        warnings.push(...skillCollection.warnings, ...agentsCollection.warnings);
 
         if (skillAssets.length === 0 && agentsMdAssets.length === 0) {
             warnings.push(`Scenario "${scenario.title || scenario.name}" has no active Skill or AGENTS.md assets to sync to Agent locations.`);
         }
 
-        const items: SyncPreviewResult["items"] = [];
+        const items: SyncPlanItem[] = [];
 
         for (const location of locations) {
             if (location.kind === "skills") {
                 for (const asset of skillAssets) {
-                    const outputPath = this.path.join(
-                        this.resolveManagedPath(location),
-                        asset.name,
-                        getAssetMainFileName(asset.type)
-                    );
+                    const outputPath = resolveSkillOutputPath(this.path, location.path, asset);
                     items.push({
                         asset_id: asset.id,
                         asset_name: asset.title || asset.name,
@@ -201,7 +231,7 @@ export class ApplicationSyncService {
             }
 
             if (location.kind === "agents-md") {
-                const outputPath = this.resolveManagedPath(location);
+                const outputPath = resolveManagedPath(this.path, location);
                 const outputExists = await this.fileSystem.exists(outputPath);
                 for (const asset of agentsMdAssets) {
                     items.push({
@@ -226,67 +256,6 @@ export class ApplicationSyncService {
         };
     }
 
-    private toScenarioPreviewResult(
-        scenarioId: string,
-        locations: ApplicationLocationRecord[],
-        warnings: string[],
-        items: SyncPreviewResult["items"]
-    ): SyncPreviewResult {
-        return {
-            scenario_id: scenarioId,
-            target_count: locations.length,
-            operation_count: items.length,
-            create_count: items.filter((item) => item.operation === "create").length,
-            update_count: items.filter((item) => item.operation === "update").length,
-            merge_count: items.filter((item) => item.operation === "merge").length,
-            delete_count: 0,
-            warnings,
-            items,
-        };
-    }
-
-    private async writeSkillToLocation(
-        location: ApplicationLocationRecord,
-        asset: AssetRecord
-    ): Promise<void> {
-        const content = await this.readAssetContent(asset);
-        const skillsRoot = this.resolveManagedPath(location);
-        const assetDir = this.path.join(skillsRoot, asset.name);
-        await this.fileSystem.ensureDir(assetDir);
-        await this.fileSystem.writeText(
-            this.path.join(assetDir, getAssetMainFileName(asset.type)),
-            content
-        );
-    }
-
-    private async writeAgentsMdToLocation(
-        location: ApplicationLocationRecord,
-        asset: AssetRecord
-    ): Promise<{status: "ok"} | {status: "conflict"; reason: string}> {
-        const agentsMdPath = this.resolveManagedPath(location);
-        await this.fileSystem.ensureDir(location.path);
-        const originalContent = await this.fileSystem.exists(agentsMdPath)
-            ? await this.fileSystem.readText(agentsMdPath)
-            : "";
-        const content = await this.readAssetContent(asset);
-        const merged = mergeManagedBlock({
-            originalContent,
-            assetId: asset.id,
-            version: asset.version,
-            generatedContent: content,
-        });
-
-        if (merged.status === "conflict") {
-            return {
-                status: "conflict",
-                reason: merged.reason,
-            };
-        }
-
-        await this.fileSystem.writeText(agentsMdPath, merged.content);
-        return {status: "ok"};
-    }
-
     private async syncSkillLocation(
         location: ApplicationLocationRecord,
         assets: AssetRecord[]
@@ -295,17 +264,11 @@ export class ApplicationSyncService {
             return false;
         }
 
-        const skillsRoot = this.resolveManagedPath(location);
+        const skillsRoot = resolveManagedPath(this.path, location);
         await this.fileSystem.ensureDir(skillsRoot);
 
         for (const asset of assets) {
-            const content = await this.readAssetContent(asset);
-            const assetDir = this.path.join(skillsRoot, asset.name);
-            await this.fileSystem.ensureDir(assetDir);
-            await this.fileSystem.writeText(
-                this.path.join(assetDir, getAssetMainFileName(asset.type)),
-                content
-            );
+            await writeSkillOutput(this.fileSystem, this.path, location.path, asset);
         }
 
         return true;
@@ -320,49 +283,26 @@ export class ApplicationSyncService {
             return false;
         }
 
-        const agentsMdPath = this.resolveManagedPath(location);
+        const agentsMdPath = resolveManagedPath(this.path, location);
         await this.fileSystem.ensureDir(location.path);
-        let originalContent = "";
-        if (await this.fileSystem.exists(agentsMdPath)) {
-            originalContent = await this.fileSystem.readText(agentsMdPath);
-        }
-
-        let nextContent = originalContent;
-
-        for (const asset of assets) {
-            const content = await this.readAssetContent(asset);
-            const merged = mergeManagedBlock({
-                originalContent: nextContent,
-                assetId: asset.id,
-                version: asset.version,
-                generatedContent: content,
-            });
-
-            if (merged.status === "conflict") {
-                conflicts.push({
-                    asset_id: asset.id,
-                    location_id: location.id,
-                    reason: merged.reason,
-                });
-                return false;
-            }
-
-            nextContent = merged.content;
-        }
-
-        await this.fileSystem.writeText(agentsMdPath, nextContent);
-        return true;
-    }
-
-    private readAssetContent(asset: AssetRecord): Promise<string> {
-        return this.fileSystem.readText(
-            this.path.join(asset.path, "current", getAssetMainFileName(asset.type))
+        const merged = await writeAgentsMdMerges(
+            this.fileSystem,
+            this.path,
+            agentsMdPath,
+            assets
         );
-    }
 
-    private resolveManagedPath(location: ApplicationLocationRecord): string {
-        return location.kind === "skills"
-            ? this.path.join(location.path, "skills")
-            : this.path.join(location.path, "AGENTS.md");
+        if (merged.status === "conflict") {
+            conflicts.push(
+                buildApplicationSyncConflict({
+                    asset: {id: merged.assetId},
+                    location: {id: location.id, name: location.name},
+                    reason: merged.reason,
+                })
+            );
+            return false;
+        }
+
+        return true;
     }
 }
