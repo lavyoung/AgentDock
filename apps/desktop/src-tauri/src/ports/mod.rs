@@ -9,9 +9,9 @@
 //! `packages/core/src/ports/`. The contract is the IPC schema in
 //! `packages/shared/src/agentdockApi.ts`.
 
+pub mod database;
 pub mod file_system;
 pub mod shell_port;
-pub mod database;
 
 pub use database::DatabasePort;
 pub use file_system::FileSystemPort;
