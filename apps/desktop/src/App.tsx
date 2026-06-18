@@ -2,6 +2,7 @@ import {type JSX, useEffect} from "react";
 
 import {Sidebar} from "./renderer/components/Sidebar";
 import {ToastContainer} from "./renderer/components/Toast";
+import {shellClient} from "./renderer/client/shellClient";
 import {AssetsPage} from "./renderer/pages/AssetsPage";
 import {InstallPage} from "./renderer/pages/InstallPage";
 import {OverviewPage} from "./renderer/pages/OverviewPage";
@@ -17,11 +18,10 @@ function App(): JSX.Element {
     const view = useAppStore((s) => s.view);
 
     useEffect(() => {
-        try {
-            window.electron?.windowReady();
-        } catch {
-            /* ignore in mock/dev fallback */
-        }
+        // Tell the host shell that the renderer is mounted. The shell
+        // client is a no-op when no real shell is present (mock / dev /
+        // Tauri phase 2), so this is safe to call unconditionally.
+        shellClient.windowReady();
     }, []);
 
     return (

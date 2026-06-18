@@ -18,11 +18,7 @@ import type {
     SyncRunResult,
 } from "../../../../../packages/shared/src/contract/sync";
 import type {TargetRecord} from "../../../../../packages/shared/src/contract/targets";
-
-function getApi(): AgentdockApi | null {
-    if (typeof window === "undefined") return null;
-    return window.agentdock ?? null;
-}
+import {runtime} from "./runtime";
 
 function notReady(): Promise<never> {
     return Promise.reject(
@@ -32,7 +28,12 @@ function notReady(): Promise<never> {
     );
 }
 
-const MOCK_MODE = import.meta.env.MODE === "mock" || !getApi();
+/**
+ * Force mock data when (a) Vite is running in `mock` mode, or (b) no
+ * real `window.agentdock` bridge is present. Mirrors the legacy check
+ * the previous implementation inlined.
+ */
+const MOCK_MODE = runtime.isMock || runtime.getBusinessApi() === null;
 
 let mockAssetCounter = 0;
 const mockAssets: AssetDetail[] = [];
@@ -557,7 +558,7 @@ const mockApi: AgentdockApi = {
 
 export const agentdockClient: AgentdockApi = MOCK_MODE ? mockApi : new Proxy({} as AgentdockApi, {
     get(_target, prop: keyof AgentdockApi) {
-        const api = getApi();
+        const api = runtime.getBusinessApi();
         if (!api) {
             return {
                 app: {name: "AgentDock", pickPath: notReady},

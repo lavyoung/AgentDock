@@ -25,6 +25,7 @@ import type {
 } from "../../../../../packages/shared/src/contract/sync";
 import type {TargetDeployMode, TargetRecord} from "../../../../../packages/shared/src/contract/targets";
 import {agentdockClient} from "../client/agentdockClient";
+import {shellClient} from "../client/shellClient";
 
 function applyTheme(theme: "dark" | "light" | "system"): void {
     if (typeof document === "undefined") return;
@@ -40,12 +41,9 @@ function applyTheme(theme: "dark" | "light" | "system"): void {
     } else {
         root.classList.remove("theme-light");
     }
-    // Sync window title-bar overlay color with theme
-    try {
-        (window as unknown as Record<string, unknown>).electron?.setOverlay(effective);
-    } catch {
-        /* ignore in mock/dev mode */
-    }
+    // Sync window title-bar overlay color with theme. The shell client
+    // is a no-op when no real shell is present (mock / dev / Tauri).
+    void shellClient.setOverlay(effective);
 }
 
 export type ViewKey = "overview" | "assets" | "install" | "scenarios" | "targets" | "projects" | "settings";
